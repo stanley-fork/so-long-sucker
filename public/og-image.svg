@@ -1,0 +1,38 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Decorative circles (representing chips) -->
+  <circle cx="150" cy="100" r="40" fill="#e74c3c" opacity="0.8"/>
+  <circle cx="1050" cy="530" r="40" fill="#3498db" opacity="0.8"/>
+  <circle cx="1100" cy="100" r="30" fill="#2ecc71" opacity="0.6"/>
+  <circle cx="100" cy="530" r="30" fill="#f1c40f" opacity="0.6"/>
+
+  <!-- Small decorative chips -->
+  <circle cx="300" cy="80" r="15" fill="#e74c3c" opacity="0.4"/>
+  <circle cx="900" cy="550" r="15" fill="#3498db" opacity="0.4"/>
+  <circle cx="950" cy="80" r="12" fill="#2ecc71" opacity="0.3"/>
+  <circle cx="250" cy="550" r="12" fill="#f1c40f" opacity="0.3"/>
+
+  <!-- Title -->
+  <text x="600" y="250" font-family="Georgia, serif" font-size="72" fill="#ffffff" text-anchor="middle" font-weight="bold">So Long Sucker</text>
+
+  <!-- Subtitle -->
+  <text x="600" y="320" font-family="Arial, sans-serif" font-size="32" fill="#a0a0a0" text-anchor="middle">The Game of Negotiation &amp; Betrayal</text>
+
+  <!-- Tagline -->
+  <text x="600" y="400" font-family="Arial, sans-serif" font-size="24" fill="#666666" text-anchor="middle">A 4-player strategy game by John Nash (1950)</text>
+
+  <!-- Features -->
+  <text x="600" y="480" font-family="Arial, sans-serif" font-size="20" fill="#888888" text-anchor="middle">Play against AI opponents powered by LLMs</text>
+
+  <!-- Dice emoji representation -->
+  <text x="600" y="560" font-size="48" text-anchor="middle">🎲</text>
+</svg>
