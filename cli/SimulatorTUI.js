@@ -1,0 +1,476 @@
+// Simulator TUI - Terminal User Interface for mass simulation
+// Displays game progress and allows focusing on individual games
+
+import { HeadlessGame } from './HeadlessGame.js';
+import { createProvider } from './providers.js';
+import { DataCollector } from './DataCollector.js';
+import { colorize, colorChip, formatDuration, truncate, clearScreen, hideCursor, showCursor, enterAltScreen, exitAltScreen } from './utils.js';
+import * as readline from 'readline';
+import * as fs from 'fs';
+
+const COLORS = ['red', 'blue', 'green', 'yellow'];
+
+export class SimulatorTUI {
+  constructor(config) {
+    this.totalGames = config.totalGames;
+    this.parallel = Math.min(config.parallel, config.totalGames);
+    this.providerType = config.provider;
+    this.chips = config.chips;
+    this.outputDir = config.outputDir;
+    this.delay = config.delay;
+    this.headless = config.headless;
+
+    this.provider = null;
+    this.games = [];        // All game instances
+    this.activeGames = [];  // Currently running
+    this.completedGames = [];
+    this.queue = [];        // Games waiting to run
+    this.isRunning = false;
+    this.isPaused = false;
+    this.focusedGame = null; // Game slot being viewed in detail
+
+    this.startTime = null;
+    this.collector = new DataCollector();
+
+    // Terminal interface
+    this.rl = null;
+    this.logs = []; // Capture logs instead of printing to console
+    this.maxLogs = 5;
+  }
+
+  async start() {
+    // Initialize provider
+    this.provider = createProvider(this.providerType);
+    this.startTime = Date.now();
+    this.isRunning = true;
+
+    // Ensure output directory exists
+    if (!fs.existsSync(this.outputDir)) {
+      fs.mkdirSync(this.outputDir, { recursive: true });
+    }
+
+    // Capture console output to prevent it from breaking the TUI
+    if (!this.headless) {
+      this.captureConsole();
+    }
+
+    // Initialize all games
+    for (let i = 0; i < this.totalGames; i++) {
+      const game = new HeadlessGame(i, {
+        chips: this.chips,
+        provider: this.provider,
+        delay: this.delay
+      });
+
+      // Set up event listeners
+      game.on('start', () => this.onGameStart(i));
+      game.on('complete', (result) => this.onGameComplete(i, result));
+      game.on('turn', (data) => this.onGameTurn(i, data));
+      game.on('chat', (data) => this.onGameChat(i, data));
+      game.on('think', (data) => this.onGameThink(i, data));
+
+      this.games.push(game);
+      this.queue.push(game);
+    }
+
+    // Set up keyboard input and enter alternate screen
+    if (!this.headless) {
+      enterAltScreen();
+      this.setupKeyboard();
+    }
+
+    // Start initial batch
+    this.startNextBatch();
+
+    // Render loop
+    if (!this.headless) {
+      this.renderLoop();
+    }
+
+    // Wait for all games to complete
+    return new Promise((resolve) => {
+      const checkComplete = setInterval(() => {
+        if (this.completedGames.length >= this.totalGames) {
+          clearInterval(checkComplete);
+          this.finish();
+          resolve(this.collector.getStats());
+        }
+      }, 500);
+    });
+  }
+
+  captureConsole() {
+    // Store original console methods
+    this.originalConsole = {
+      log: console.log,
+      error: console.error,
+      warn: console.warn
+    };
+
+    // Replace with capture functions
+    const capture = (type) => (...args) => {
+      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+      this.logs.push({ type, msg, time: Date.now() });
+      if (this.logs.length > this.maxLogs) {
+        this.logs.shift();
+      }
+    };
+
+    console.log = capture('log');
+    console.error = capture('error');
+    console.warn = capture('warn');
+  }
+
+  restoreConsole() {
+    if (this.originalConsole) {
+      console.log = this.originalConsole.log;
+      console.error = this.originalConsole.error;
+      console.warn = this.originalConsole.warn;
+    }
+  }
+
+  setupKeyboard() {
+    readline.emitKeypressEvents(process.stdin);
+    if (process.stdin.isTTY) {
+      process.stdin.setRawMode(true);
+    }
+
+    process.stdin.on('keypress', (str, key) => {
+      if (key.ctrl && key.name === 'c') {
+        this.gracefulShutdown();
+        return;
+      }
+
+      if (this.focusedGame !== null) {
+        // In focus mode
+        if (key.name === 'escape' || key.name === 'backspace') {
+          this.focusedGame = null;
+        }
+      } else {
+        // In overview mode
+        const num = parseInt(str);
+        if (!isNaN(num) && num >= 1 && num <= Math.min(9, this.parallel)) {
+          const gameIdx = num - 1;
+          if (this.activeGames[gameIdx]) {
+            this.focusedGame = this.activeGames[gameIdx].slot;
+          }
+        }
+
+        switch (key.name) {
+          case 'q':
+            this.gracefulShutdown();
+            break;
+          case 's':
+            this.saveAndExit();
+            break;
+          case 'p':
+            this.isPaused = true;
+            break;
+          case 'r':
+            this.isPaused = false;
+            break;
+        }
+      }
+    });
+
+    process.stdin.resume();
+  }
+
+  startNextBatch() {
+    while (this.activeGames.length < this.parallel && this.queue.length > 0 && !this.isPaused) {
+      const game = this.queue.shift();
+      this.activeGames.push(game);
+      game.start();
+    }
+  }
+
+  onGameStart(slot) {
+    // Game started
+  }
+
+  onGameComplete(slot, result) {
+    // Remove from active
+    this.activeGames = this.activeGames.filter(g => g.slot !== slot);
+    this.completedGames.push(result);
+    this.collector.addGame(result);
+
+    // If focused on this game, unfocus
+    if (this.focusedGame === slot) {
+      this.focusedGame = null;
+    }
+
+    // Start next game
+    this.startNextBatch();
+  }
+
+  onGameTurn(slot, data) {
+    // Turn completed
+  }
+
+  onGameChat(slot, data) {
+    // Chat message
+  }
+
+  onGameThink(slot, data) {
+    // Thought recorded
+  }
+
+  renderLoop() {
+    const render = () => {
+      if (!this.isRunning) return;
+
+      if (this.focusedGame !== null) {
+        this.renderFocusView();
+      } else {
+        this.renderOverview();
+      }
+
+      setTimeout(render, 200);
+    };
+    render();
+  }
+
+  renderOverview() {
+    // Move cursor to top-left and clear screen
+    process.stdout.write('\x1b[H\x1b[J');
+
+    const elapsed = formatDuration(Date.now() - this.startTime);
+    const completed = this.completedGames.length;
+    const stats = this.collector.getStats();
+
+    let output = `
+${colorize('╔═══════════════════════════════════════════════════════════════════╗', 'cyan')}
+${colorize('║', 'cyan')}  🎮 ${colorize('So Long Sucker - Mass Simulation', 'bold')}                           ${colorize('║', 'cyan')}
+${colorize('╚═══════════════════════════════════════════════════════════════════╝', 'cyan')}
+
+  Provider: ${colorize(this.providerType, 'yellow')} | Games: ${colorize(`${completed}/${this.totalGames}`, 'green')} | Time: ${elapsed}
+  ${this.isPaused ? colorize('⏸  PAUSED', 'yellow') : colorize('▶  Running', 'green')}
+
+${colorize('─────────────────────────────────────────────────────────────────────', 'gray')}
+`;
+
+    // Active games
+    for (let i = 0; i < this.parallel; i++) {
+      const game = this.activeGames[i];
+      if (game) {
+        const state = game.getState();
+        const currentColor = COLORS[state.currentPlayer];
+        const lastChat = game.chatMessages[game.chatMessages.length - 1];
+        const lastThought = game.thoughts[game.thoughts.length - 1];
+
+        let statusLine = `  [${colorize(String(i + 1), 'cyan')}] Game ${game.slot + 1}`.padEnd(25);
+        statusLine += `Turn ${String(game.turnCount).padStart(3)} `;
+        statusLine += colorize(`${currentColor.substring(0, 3).toUpperCase()}▶`, currentColor);
+        statusLine += ` ${state.phase.padEnd(15)}`;
+
+        if (lastChat) {
+          statusLine += ` 💬 "${truncate(lastChat.text, 25)}"`;
+        } else if (lastThought) {
+          statusLine += ` 💭 ${truncate(lastThought.text, 25)}`;
+        }
+
+        output += statusLine + '\n';
+      } else if (this.queue.length > 0) {
+        output += `  [${colorize(String(i + 1), 'gray')}] ${colorize('⏳ Queued', 'gray')}\n`;
+      } else {
+        output += `  [${colorize(String(i + 1), 'gray')}] ${colorize('─', 'gray')}\n`;
+      }
+    }
+
+    // Stats section
+    if (stats && stats.gameCount > 0) {
+      output += `
+${colorize('─────────────────────────────────────────────────────────────────────', 'gray')}
+  ${colorize('📊 Win Rates:', 'bold')}
+    ${colorize('●', 'red')} Red: ${stats.winRates.red}%  ${colorize('●', 'blue')} Blue: ${stats.winRates.blue}%  ${colorize('●', 'green')} Green: ${stats.winRates.green}%  ${colorize('●', 'yellow')} Yellow: ${stats.winRates.yellow}%
+
+  Avg Turns: ${stats.avgTurns} | Avg Duration: ${Math.round(stats.avgDuration / 1000)}s | Chats/Game: ${stats.avgChats}
+`;
+    }
+
+    // Show recent logs/errors
+    if (this.logs.length > 0) {
+      output += `
+${colorize('─────────────────────────────────────────────────────────────────────', 'gray')}
+  ${colorize('Recent:', 'dim')}
+`;
+      for (const log of this.logs.slice(-3)) {
+        const color = log.type === 'error' ? 'red' : 'gray';
+        output += `  ${colorize(truncate(log.msg, 65), color)}\n`;
+      }
+    }
+
+    output += `
+${colorize('─────────────────────────────────────────────────────────────────────', 'gray')}
+  ${colorize('[1-9]', 'cyan')} Focus game | ${colorize('[p]', 'cyan')} Pause | ${colorize('[r]', 'cyan')} Resume | ${colorize('[s]', 'cyan')} Save | ${colorize('[q]', 'cyan')} Quit
+`;
+
+    process.stdout.write(output);
+  }
+
+  renderFocusView() {
+    // Move cursor to top-left and clear screen
+    process.stdout.write('\x1b[H\x1b[J');
+
+    const game = this.games[this.focusedGame];
+    if (!game) {
+      this.focusedGame = null;
+      return;
+    }
+
+    const state = game.getState();
+    const currentColor = COLORS[state.currentPlayer];
+
+    let output = `
+${colorize('╔═══════════════════════════════════════════════════════════════════╗', 'magenta')}
+${colorize('║', 'magenta')}  🎮 Game ${game.slot + 1} - Turn ${game.turnCount} - ${colorize(currentColor.toUpperCase(), currentColor)}'s Turn               ${colorize('[ESC] Back', 'gray')} ${colorize('║', 'magenta')}
+${colorize('╚═══════════════════════════════════════════════════════════════════╝', 'magenta')}
+
+`;
+
+    // Players section
+    output += `  ${colorize('PLAYERS', 'bold')}\n`;
+    for (const p of state.players) {
+      const isCurrent = p.id === state.currentPlayer;
+      const prefix = isCurrent ? colorize('▶ ', p.color) : '  ';
+      const status = !p.isAlive ? colorize(' [ELIMINATED]', 'red') : '';
+
+      const supplyChips = '●'.repeat(p.supply);
+      const prisonerCount = p.prisoners.length > 0 ? ` +${p.prisoners.length}P` : '';
+
+      output += `  ${prefix}${colorize(p.color.toUpperCase().padEnd(7), p.color)} ${colorize(supplyChips, p.color)}${prisonerCount}${status}\n`;
+    }
+
+    // Piles section
+    output += `\n  ${colorize('PILES', 'bold')}\n`;
+    if (state.piles.length === 0) {
+      output += `  ${colorize('No piles yet', 'gray')}\n`;
+    } else {
+      for (const pile of state.piles) {
+        const chips = pile.chips.map(c => colorize('●', c)).join(' ');
+        output += `  P${pile.id}: [${chips}]\n`;
+      }
+    }
+
+    // Dead box
+    output += `\n  ${colorize('DEAD BOX', 'bold')}: `;
+    if (state.deadBox.length === 0) {
+      output += colorize('empty', 'gray');
+    } else {
+      output += state.deadBox.map(c => colorize('●', c)).join(' ');
+    }
+
+    // Chat section
+    output += `\n\n  ${colorize('💬 CHAT', 'bold')}\n`;
+    const recentChats = game.chatMessages.slice(-8);
+    if (recentChats.length === 0) {
+      output += `  ${colorize('No messages yet', 'gray')}\n`;
+    } else {
+      for (const msg of recentChats) {
+        output += `  [T${msg.turn}] ${colorize(msg.color.toUpperCase(), msg.color)}: ${truncate(msg.text, 50)}\n`;
+      }
+    }
+
+    // Thoughts section
+    const lastThought = game.thoughts[game.thoughts.length - 1];
+    if (lastThought) {
+      output += `\n  ${colorize('💭 LAST THOUGHT', 'bold')} (${colorize(lastThought.color, lastThought.color)})\n`;
+      output += `  ${truncate(lastThought.text, 65)}\n`;
+    }
+
+    // Last action
+    output += `\n  ${colorize('▶', 'green')} ${game.lastAction || 'Starting...'}\n`;
+
+    output += `
+${colorize('─────────────────────────────────────────────────────────────────────', 'gray')}
+  ${colorize('[ESC]', 'cyan')} Back to overview
+`;
+
+    process.stdout.write(output);
+  }
+
+  async gracefulShutdown() {
+    // Stop all active games
+    for (const game of this.activeGames) {
+      game.stop();
+    }
+
+    this.isRunning = false;
+
+    // Exit alternate screen and restore console before printing
+    if (!this.headless) {
+      exitAltScreen();
+      this.restoreConsole();
+    }
+
+    console.log('\n⏳ Shutting down gracefully...');
+    await this.saveResults();
+
+    process.exit(0);
+  }
+
+  async saveAndExit() {
+    await this.saveResults();
+    this.gracefulShutdown();
+  }
+
+  async finish() {
+    this.isRunning = false;
+    await this.saveResults();
+
+    // Exit alternate screen and restore console
+    if (!this.headless) {
+      exitAltScreen();
+      this.restoreConsole();
+    }
+
+    const stats = this.collector.getStats();
+    const elapsed = formatDuration(Date.now() - this.startTime);
+
+    console.log(`
+${colorize('╔═══════════════════════════════════════════════════════════════════╗', 'green')}
+${colorize('║', 'green')}  ✅ ${colorize('Simulation Complete!', 'bold')}                                      ${colorize('║', 'green')}
+${colorize('╚═══════════════════════════════════════════════════════════════════╝', 'green')}
+
+  📊 ${colorize('Results:', 'bold')}
+     Games Played: ${stats.gameCount}
+     Total Time:   ${elapsed}
+
+  🏆 ${colorize('Win Rates:', 'bold')}
+     ${colorize('●', 'red')} Red:    ${stats.winRates.red}%
+     ${colorize('●', 'blue')} Blue:   ${stats.winRates.blue}%
+     ${colorize('●', 'green')} Green:  ${stats.winRates.green}%
+     ${colorize('●', 'yellow')} Yellow: ${stats.winRates.yellow}%
+
+  📈 ${colorize('Averages:', 'bold')}
+     Turns/Game:    ${stats.avgTurns}
+     Duration/Game: ${Math.round(stats.avgDuration / 1000)}s
+     Chats/Game:    ${stats.avgChats}
+     Thoughts/Game: ${stats.avgThoughts}
+
+  💾 Data saved to: ${colorize(this.outputDir, 'cyan')}
+`);
+  }
+
+  async saveResults() {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `${this.outputDir}/session-${timestamp}.json`;
+
+    const data = {
+      sessionId: `session-${Date.now()}`,
+      config: {
+        totalGames: this.totalGames,
+        parallel: this.parallel,
+        provider: this.providerType,
+        chips: this.chips
+      },
+      startTime: this.startTime,
+      endTime: Date.now(),
+      stats: this.collector.getStats(),
+      games: this.completedGames
+    };
+
+    fs.writeFileSync(filename, JSON.stringify(data, null, 2));
+    console.log(`\n💾 Saved: ${filename}`);
+  }
+}

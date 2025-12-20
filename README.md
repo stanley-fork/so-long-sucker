@@ -221,6 +221,11 @@ MIT License — feel free to use, modify, and distribute.
 
 ---
 
+
+  npm run simulate -- --games 1 --provider groq --chips 3
+
+---
+
 ## Links
 
 - [Full Game Rules](./RULES.md)
