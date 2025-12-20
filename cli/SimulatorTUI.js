@@ -3,7 +3,6 @@
 
 import { HeadlessGame } from './HeadlessGame.js';
 import { createProvider } from './providers.js';
-import { DataCollector } from './DataCollector.js';
 import { colorize, colorChip, formatDuration, truncate, clearScreen, hideCursor, showCursor, enterAltScreen, exitAltScreen } from './utils.js';
 import * as readline from 'readline';
 import * as fs from 'fs';
@@ -30,7 +29,6 @@ export class SimulatorTUI {
     this.focusedGame = null; // Game slot being viewed in detail
 
     this.startTime = null;
-    this.collector = new DataCollector();
 
     // Terminal interface
     this.rl = null;
@@ -93,7 +91,7 @@ export class SimulatorTUI {
         if (this.completedGames.length >= this.totalGames) {
           clearInterval(checkComplete);
           this.finish();
-          resolve(this.collector.getStats());
+          resolve({ gameCount: this.completedGames.length });
         }
       }, 500);
     });
@@ -192,7 +190,6 @@ export class SimulatorTUI {
     // Remove from active
     this.activeGames = this.activeGames.filter(g => g.slot !== slot);
     this.completedGames.push(result);
-    this.collector.addGame(result);
 
     // If focused on this game, unfocus
     if (this.focusedGame === slot) {
@@ -236,7 +233,6 @@ export class SimulatorTUI {
 
     const elapsed = formatDuration(Date.now() - this.startTime);
     const completed = this.completedGames.length;
-    const stats = this.collector.getStats();
 
     let output = `
 ${colorize('╔═══════════════════════════════════════════════════════════════════╗', 'cyan')}
@@ -255,8 +251,8 @@ ${colorize('──────────────────────�
       if (game) {
         const state = game.getState();
         const currentColor = COLORS[state.currentPlayer];
-        const lastChat = game.chatMessages[game.chatMessages.length - 1];
-        const lastThought = game.thoughts[game.thoughts.length - 1];
+        const chatHistory = game.getChatHistory?.() || [];
+        const lastChat = chatHistory[chatHistory.length - 1];
 
         let statusLine = `  [${colorize(String(i + 1), 'cyan')}] Game ${game.slot + 1}`.padEnd(25);
         statusLine += `Turn ${String(game.turnCount).padStart(3)} `;
@@ -264,9 +260,7 @@ ${colorize('──────────────────────�
         statusLine += ` ${state.phase.padEnd(15)}`;
 
         if (lastChat) {
-          statusLine += ` 💬 "${truncate(lastChat.text, 25)}"`;
-        } else if (lastThought) {
-          statusLine += ` 💭 ${truncate(lastThought.text, 25)}`;
+          statusLine += ` 💬 "${truncate(lastChat.message, 25)}"`;
         }
 
         output += statusLine + '\n';
@@ -277,14 +271,24 @@ ${colorize('──────────────────────�
       }
     }
 
-    // Stats section
-    if (stats && stats.gameCount > 0) {
+    // Stats section - calculate from completed games
+    if (completed > 0) {
+      const wins = { red: 0, blue: 0, green: 0, yellow: 0 };
+      let totalTurns = 0;
+      for (const game of this.completedGames) {
+        if (game.winner && wins[game.winner] !== undefined) wins[game.winner]++;
+        totalTurns += game.turns || 0;
+      }
+      const winRates = {};
+      for (const c of COLORS) winRates[c] = Math.round((wins[c] / completed) * 100);
+      const avgTurns = Math.round(totalTurns / completed);
+
       output += `
 ${colorize('─────────────────────────────────────────────────────────────────────', 'gray')}
   ${colorize('📊 Win Rates:', 'bold')}
-    ${colorize('●', 'red')} Red: ${stats.winRates.red}%  ${colorize('●', 'blue')} Blue: ${stats.winRates.blue}%  ${colorize('●', 'green')} Green: ${stats.winRates.green}%  ${colorize('●', 'yellow')} Yellow: ${stats.winRates.yellow}%
+    ${colorize('●', 'red')} Red: ${winRates.red}%  ${colorize('●', 'blue')} Blue: ${winRates.blue}%  ${colorize('●', 'green')} Green: ${winRates.green}%  ${colorize('●', 'yellow')} Yellow: ${winRates.yellow}%
 
-  Avg Turns: ${stats.avgTurns} | Avg Duration: ${Math.round(stats.avgDuration / 1000)}s | Chats/Game: ${stats.avgChats}
+  Avg Turns: ${avgTurns}
 `;
     }
 
@@ -362,20 +366,14 @@ ${colorize('╚═════════════════════�
 
     // Chat section
     output += `\n\n  ${colorize('💬 CHAT', 'bold')}\n`;
-    const recentChats = game.chatMessages.slice(-8);
+    const chatHistory = game.getChatHistory?.() || [];
+    const recentChats = chatHistory.slice(-8);
     if (recentChats.length === 0) {
       output += `  ${colorize('No messages yet', 'gray')}\n`;
     } else {
       for (const msg of recentChats) {
-        output += `  [T${msg.turn}] ${colorize(msg.color.toUpperCase(), msg.color)}: ${truncate(msg.text, 50)}\n`;
+        output += `  ${colorize(msg.player.toUpperCase(), msg.player)}: ${truncate(msg.message, 55)}\n`;
       }
-    }
-
-    // Thoughts section
-    const lastThought = game.thoughts[game.thoughts.length - 1];
-    if (lastThought) {
-      output += `\n  ${colorize('💭 LAST THOUGHT', 'bold')} (${colorize(lastThought.color, lastThought.color)})\n`;
-      output += `  ${truncate(lastThought.text, 65)}\n`;
     }
 
     // Last action
@@ -424,8 +422,30 @@ ${colorize('──────────────────────�
       this.restoreConsole();
     }
 
-    const stats = this.collector.getStats();
+    // Calculate basic stats from completed games
+    const gameCount = this.completedGames.length;
     const elapsed = formatDuration(Date.now() - this.startTime);
+
+    // Count wins by color
+    const wins = { red: 0, blue: 0, green: 0, yellow: 0 };
+    let totalTurns = 0;
+    let totalDuration = 0;
+
+    for (const game of this.completedGames) {
+      if (game.winner && wins[game.winner] !== undefined) {
+        wins[game.winner]++;
+      }
+      totalTurns += game.turns || 0;
+      totalDuration += game.duration || 0;
+    }
+
+    const winRates = {};
+    for (const color of COLORS) {
+      winRates[color] = gameCount > 0 ? Math.round((wins[color] / gameCount) * 100) : 0;
+    }
+
+    const avgTurns = gameCount > 0 ? Math.round(totalTurns / gameCount) : 0;
+    const avgDuration = gameCount > 0 ? Math.round(totalDuration / gameCount / 1000) : 0;
 
     console.log(`
 ${colorize('╔═══════════════════════════════════════════════════════════════════╗', 'green')}
@@ -433,20 +453,18 @@ ${colorize('║', 'green')}  ✅ ${colorize('Simulation Complete!', 'bold')}    
 ${colorize('╚═══════════════════════════════════════════════════════════════════╝', 'green')}
 
   📊 ${colorize('Results:', 'bold')}
-     Games Played: ${stats.gameCount}
+     Games Played: ${gameCount}
      Total Time:   ${elapsed}
 
   🏆 ${colorize('Win Rates:', 'bold')}
-     ${colorize('●', 'red')} Red:    ${stats.winRates.red}%
-     ${colorize('●', 'blue')} Blue:   ${stats.winRates.blue}%
-     ${colorize('●', 'green')} Green:  ${stats.winRates.green}%
-     ${colorize('●', 'yellow')} Yellow: ${stats.winRates.yellow}%
+     ${colorize('●', 'red')} Red:    ${winRates.red}%
+     ${colorize('●', 'blue')} Blue:   ${winRates.blue}%
+     ${colorize('●', 'green')} Green:  ${winRates.green}%
+     ${colorize('●', 'yellow')} Yellow: ${winRates.yellow}%
 
   📈 ${colorize('Averages:', 'bold')}
-     Turns/Game:    ${stats.avgTurns}
-     Duration/Game: ${Math.round(stats.avgDuration / 1000)}s
-     Chats/Game:    ${stats.avgChats}
-     Thoughts/Game: ${stats.avgThoughts}
+     Turns/Game:    ${avgTurns}
+     Duration/Game: ${avgDuration}s
 
   💾 Data saved to: ${colorize(this.outputDir, 'cyan')}
 `);
@@ -456,18 +474,26 @@ ${colorize('╚═════════════════════�
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `${this.outputDir}/session-${timestamp}.json`;
 
+    // Collect all snapshots from all games
+    const allSnapshots = [];
+    for (const result of this.completedGames) {
+      if (result.snapshots) {
+        allSnapshots.push(...result.snapshots);
+      }
+    }
+
+    // Simplified output format
     const data = {
-      sessionId: `session-${Date.now()}`,
-      config: {
-        totalGames: this.totalGames,
-        parallel: this.parallel,
+      session: {
+        id: `session-${Date.now()}`,
         provider: this.providerType,
+        model: this.provider?.getModelName?.() || this.provider?.model || 'unknown',
+        startTime: this.startTime,
+        endTime: Date.now(),
+        totalGames: this.totalGames,
         chips: this.chips
       },
-      startTime: this.startTime,
-      endTime: Date.now(),
-      stats: this.collector.getStats(),
-      games: this.completedGames
+      snapshots: allSnapshots
     };
 
     fs.writeFileSync(filename, JSON.stringify(data, null, 2));

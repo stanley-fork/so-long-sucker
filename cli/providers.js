@@ -5,10 +5,15 @@
 class BaseProvider {
   constructor(apiKey) {
     this.apiKey = apiKey;
+    this.model = 'unknown';
   }
 
   async call(systemPrompt, userPrompt, tools) {
     throw new Error('Not implemented');
+  }
+
+  getModelName() {
+    return this.model;
   }
 }
 
@@ -21,6 +26,8 @@ class OpenAIProvider extends BaseProvider {
   }
 
   async call(systemPrompt, userPrompt, tools) {
+    const startTime = Date.now();
+
     const response = await fetch(`${this.baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
@@ -37,6 +44,8 @@ class OpenAIProvider extends BaseProvider {
         tool_choice: 'auto'
       })
     });
+
+    const responseTime = Date.now() - startTime;
 
     if (!response.ok) {
       throw new Error(`OpenAI API error: ${response.status}`);
@@ -45,25 +54,46 @@ class OpenAIProvider extends BaseProvider {
     const data = await response.json();
     const message = data.choices[0].message;
 
+    // Parse tool calls, handling potential JSON parse errors
+    const rawToolCalls = (message.tool_calls || []).map(tc => {
+      try {
+        return {
+          name: tc.function.name,
+          arguments: JSON.parse(tc.function.arguments)
+        };
+      } catch {
+        return {
+          name: tc.function.name,
+          arguments: tc.function.arguments,
+          parseError: true
+        };
+      }
+    });
+
     return {
       content: message.content,
-      toolCalls: (message.tool_calls || []).map(tc => ({
-        name: tc.function.name,
-        arguments: JSON.parse(tc.function.arguments)
-      }))
+      toolCalls: rawToolCalls.filter(tc => !tc.parseError),
+      metadata: {
+        responseTime,
+        promptTokens: data.usage?.prompt_tokens || null,
+        completionTokens: data.usage?.completion_tokens || null,
+        rawToolCalls
+      }
     };
   }
 }
 
 // Groq Provider
 class GroqProvider extends BaseProvider {
-  constructor(apiKey, model = 'llama-3.3-70b-versatile') {
+  constructor(apiKey, model = 'moonshotai/kimi-k2-instruct-0905') {
     super(apiKey);
     this.model = model;
     this.baseUrl = 'https://api.groq.com/openai/v1';
   }
 
   async call(systemPrompt, userPrompt, tools) {
+    const startTime = Date.now();
+
     const response = await fetch(`${this.baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
@@ -80,6 +110,8 @@ class GroqProvider extends BaseProvider {
         tool_choice: 'auto'
       })
     });
+
+    const responseTime = Date.now() - startTime;
 
     if (!response.ok) {
       const error = await response.text();
@@ -89,12 +121,31 @@ class GroqProvider extends BaseProvider {
     const data = await response.json();
     const message = data.choices[0].message;
 
+    // Parse tool calls, handling potential JSON parse errors
+    const rawToolCalls = (message.tool_calls || []).map(tc => {
+      try {
+        return {
+          name: tc.function.name,
+          arguments: JSON.parse(tc.function.arguments)
+        };
+      } catch {
+        return {
+          name: tc.function.name,
+          arguments: tc.function.arguments,
+          parseError: true
+        };
+      }
+    });
+
     return {
       content: message.content,
-      toolCalls: (message.tool_calls || []).map(tc => ({
-        name: tc.function.name,
-        arguments: JSON.parse(tc.function.arguments)
-      }))
+      toolCalls: rawToolCalls.filter(tc => !tc.parseError),
+      metadata: {
+        responseTime,
+        promptTokens: data.usage?.prompt_tokens || null,
+        completionTokens: data.usage?.completion_tokens || null,
+        rawToolCalls
+      }
     };
   }
 }
@@ -108,6 +159,8 @@ class ClaudeProvider extends BaseProvider {
   }
 
   async call(systemPrompt, userPrompt, tools) {
+    const startTime = Date.now();
+
     const response = await fetch(`${this.baseUrl}/messages`, {
       method: 'POST',
       headers: {
@@ -128,6 +181,8 @@ class ClaudeProvider extends BaseProvider {
       })
     });
 
+    const responseTime = Date.now() - startTime;
+
     if (!response.ok) {
       const error = await response.text();
       throw new Error(`Claude API error: ${response.status} - ${error}`);
@@ -136,21 +191,30 @@ class ClaudeProvider extends BaseProvider {
     const data = await response.json();
 
     // Parse Claude's response format
-    const toolCalls = [];
+    const rawToolCalls = [];
     let content = '';
 
     for (const block of data.content) {
       if (block.type === 'text') {
         content += block.text;
       } else if (block.type === 'tool_use') {
-        toolCalls.push({
+        rawToolCalls.push({
           name: block.name,
           arguments: block.input
         });
       }
     }
 
-    return { content, toolCalls };
+    return {
+      content,
+      toolCalls: rawToolCalls,
+      metadata: {
+        responseTime,
+        promptTokens: data.usage?.input_tokens || null,
+        completionTokens: data.usage?.output_tokens || null,
+        rawToolCalls
+      }
+    };
   }
 }
 
@@ -164,6 +228,8 @@ class AzureClaudeProvider extends BaseProvider {
   }
 
   async call(systemPrompt, userPrompt, tools) {
+    const startTime = Date.now();
+
     const response = await fetch(
       `${this.baseUrl}/openai/deployments/${this.model}/chat/completions?api-version=2024-12-01-preview`,
       {
@@ -183,6 +249,8 @@ class AzureClaudeProvider extends BaseProvider {
       }
     );
 
+    const responseTime = Date.now() - startTime;
+
     if (!response.ok) {
       const error = await response.text();
       throw new Error(`Azure Claude API error: ${response.status} - ${error}`);
@@ -191,12 +259,31 @@ class AzureClaudeProvider extends BaseProvider {
     const data = await response.json();
     const message = data.choices[0].message;
 
+    // Parse tool calls, handling potential JSON parse errors
+    const rawToolCalls = (message.tool_calls || []).map(tc => {
+      try {
+        return {
+          name: tc.function.name,
+          arguments: JSON.parse(tc.function.arguments)
+        };
+      } catch {
+        return {
+          name: tc.function.name,
+          arguments: tc.function.arguments,
+          parseError: true
+        };
+      }
+    });
+
     return {
       content: message.content,
-      toolCalls: (message.tool_calls || []).map(tc => ({
-        name: tc.function.name,
-        arguments: JSON.parse(tc.function.arguments)
-      }))
+      toolCalls: rawToolCalls.filter(tc => !tc.parseError),
+      metadata: {
+        responseTime,
+        promptTokens: data.usage?.prompt_tokens || null,
+        completionTokens: data.usage?.completion_tokens || null,
+        rawToolCalls
+      }
     };
   }
 }

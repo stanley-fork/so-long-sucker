@@ -468,8 +468,9 @@ class AIAgent {
     this.consecutiveThinks = 0;
   }
 
-  buildSystemPrompt() {
-    return `You are ${this.color.toUpperCase()} in "So Long Sucker" - a negotiation game where TALKING wins games.
+  // Static template - use {PLAYER_COLOR} as placeholder
+  static getSystemPromptTemplate() {
+    return `You are {PLAYER_COLOR} in "So Long Sucker" - a negotiation game where TALKING wins games.
 
 THE BRUTAL TRUTH:
 - Only 1 of 4 players survives
@@ -484,7 +485,7 @@ RULES:
 - No chips + no donations = eliminated
 
 HOW TO WIN:
-1. EARLY: Form alliances via chat ("${this.color === 'red' ? 'Blue' : 'Red'}, let's target ${this.color === 'green' ? 'Yellow' : 'Green'} together")
+1. EARLY: Form alliances via chat ("{OTHER_COLOR}, let's target {TARGET_COLOR} together")
 2. MID: Coordinate moves, honor deals, build trust
 3. LATE: Betray at the right moment to be last standing
 
@@ -494,7 +495,15 @@ EVERY TURN you should:
 
 You can call MULTIPLE tools at once. Example good turn:
 - sendChat: "Blue, I kept my promise - your turn. Green is weak, let's finish them"
-- playChip: red`;
+- playChip: {player_color}`;
+  }
+
+  buildSystemPrompt() {
+    return AIAgent.getSystemPromptTemplate()
+      .replace(/{PLAYER_COLOR}/g, this.color.toUpperCase())
+      .replace(/{player_color}/g, this.color)
+      .replace(/{OTHER_COLOR}/g, this.color === 'red' ? 'Blue' : 'Red')
+      .replace(/{TARGET_COLOR}/g, this.color === 'green' ? 'Yellow' : 'Green');
   }
 
   buildUserPrompt(state) {
@@ -538,9 +547,8 @@ TURN: ${COLORS[state.currentPlayer]}${isMyTurn ? ' (YOU)' : ''}`;
     }
 
     if (state.messages.length > 0) {
-      const recent = state.messages.slice(-5);
-      prompt += `\n\nRECENT CHAT:\n${recent.map(m => `${m.color}: ${m.text}`).join('\n')}`;
-      prompt += `\n\n💬 Consider responding to the chat or starting a negotiation!`;
+      prompt += `\n\nCHAT HISTORY (${state.messages.length} messages):\n${state.messages.map(m => `${m.color}: ${m.text}`).join('\n')}`;
+      prompt += `\n\n💬 Consider responding to the chat or continuing negotiations!`;
     } else {
       prompt += `\n\n💬 No one has chatted yet. Start a negotiation or propose an alliance!`;
     }
@@ -557,7 +565,7 @@ TURN: ${COLORS[state.currentPlayer]}${isMyTurn ? ' (YOU)' : ''}`;
   async decide(state) {
     const isMyTurn = state.currentPlayer === this.playerId;
     const me = state.players[this.playerId];
-    if (!me.isAlive) return null;
+    if (!me.isAlive) return { toolCalls: null, metadata: null };
 
     const pendingDonation = state.donationRequester !== null &&
                             state.phase === 'donation' &&
@@ -571,19 +579,29 @@ TURN: ${COLORS[state.currentPlayer]}${isMyTurn ? ' (YOU)' : ''}`;
     }
 
     const tools = filterTools(toolNames);
+    const userPrompt = this.buildUserPrompt(state);
 
     try {
       const result = await this.provider.call(
         this.buildSystemPrompt(),
-        this.buildUserPrompt(state),
+        userPrompt,
         tools
       );
-      return result.toolCalls.length > 0 ? result.toolCalls : null;
+
+      return {
+        toolCalls: result.toolCalls.length > 0 ? result.toolCalls : null,
+        metadata: result.metadata || null,
+        context: {
+          userPrompt,
+          availableTools: toolNames
+        }
+      };
     } catch (error) {
       console.error(`Agent ${this.color} error:`, error.message);
-      return null;
+      return { toolCalls: null, metadata: null, error: error.message };
     }
   }
+
 }
 
 // ============================================
@@ -603,57 +621,63 @@ export class HeadlessGame extends EventEmitter {
     this.startTime = null;
     this.endTime = null;
     this.lastAction = '';
-    this.chatMessages = [];
-    this.thoughts = [];
-    this.events = [];
-    this.lastAliveStatus = [true, true, true, true]; // Track elimination state
+
+    // Simple snapshot-based data collection
+    this.snapshots = [];
+    this.eliminationOrder = [];
+
+    // Track previous alive status for elimination detection
+    this.lastAliveStatus = [true, true, true, true];
   }
 
-  checkAndLogEliminations() {
+  // Get current state for snapshot
+  getStateSnapshot() {
+    const state = this.game.getState();
+    return {
+      players: state.players.map(p => ({
+        color: p.color,
+        supply: p.supply,
+        prisoners: [...p.prisoners],
+        totalChips: p.totalChips,
+        alive: p.isAlive
+      })),
+      piles: state.piles.map(p => ({
+        id: p.id,
+        chips: [...p.chips]
+      })),
+      deadBox: [...state.deadBox],
+      phase: state.phase,
+      currentPlayer: COLORS[state.currentPlayer]
+    };
+  }
+
+  // Get chat history for snapshot
+  getChatHistory() {
+    return this.game.messages.map(m => ({
+      player: COLORS[m.player],
+      message: m.text
+    }));
+  }
+
+  // Add a snapshot
+  addSnapshot(snapshot) {
+    this.snapshots.push({
+      ...snapshot,
+      timestamp: Date.now()
+    });
+  }
+
+  // Check for eliminations and track them
+  checkEliminations() {
     const state = this.game.getState();
     for (let i = 0; i < 4; i++) {
       if (this.lastAliveStatus[i] && !state.players[i].isAlive) {
-        // Player just got eliminated
         this.lastAliveStatus[i] = false;
-        this.logEvent({
-          player: COLORS[i],
-          action: 'eliminated',
-          remainingPlayers: state.players.filter(p => p.isAlive).map(p => p.color)
-        }, true);
+        const remainingPlayers = state.players.filter(p => p.isAlive);
+        this.eliminationOrder.push(COLORS[i]);
         this.emit('elimination', { player: COLORS[i], turn: this.turnCount });
       }
     }
-  }
-
-  logEvent(event, includeState = false) {
-    const entry = {
-      turn: this.turnCount,
-      timestamp: Date.now(),
-      ...event
-    };
-
-    // Include game state snapshot for decision/action events
-    if (includeState) {
-      const state = this.game.getState();
-      entry.gameState = {
-        players: state.players.map(p => ({
-          color: p.color,
-          supply: p.supply,
-          prisoners: p.prisoners,
-          totalChips: p.totalChips,
-          isAlive: p.isAlive
-        })),
-        piles: state.piles.map(p => ({
-          id: p.id,
-          chips: p.chips
-        })),
-        deadBox: state.deadBox,
-        phase: state.phase
-      };
-    }
-
-    this.events.push(entry);
-    this.emit('event', event);
   }
 
   async start() {
@@ -666,6 +690,14 @@ export class HeadlessGame extends EventEmitter {
     for (let i = 0; i < 4; i++) {
       this.agents.push(new AIAgent(i, this.provider));
     }
+
+    // Add game_start snapshot
+    this.addSnapshot({
+      type: 'game_start',
+      game: this.slot,
+      state: this.getStateSnapshot(),
+      chatHistory: []
+    });
 
     this.emit('start', { slot: this.slot });
     await this.gameLoop();
@@ -714,8 +746,35 @@ export class HeadlessGame extends EventEmitter {
 
       const agent = this.agents[current];
 
+      // Capture state BEFORE LLM call
+      const snapshotState = this.getStateSnapshot();
+      const snapshotChat = this.getChatHistory();
+
       try {
-        const actions = await agent.decide(state);
+        const result = await agent.decide(state);
+        const actions = result.toolCalls;
+
+        // Build snapshot with LLM request/response
+        const snapshot = {
+          type: 'decision',
+          game: this.slot,
+          turn: this.turnCount,
+          player: COLORS[current],
+          state: snapshotState,
+          chatHistory: snapshotChat,
+          llmRequest: result.context ? {
+            userPrompt: result.context.userPrompt,
+            availableTools: result.context.availableTools
+          } : null,
+          llmResponse: result.metadata ? {
+            responseTime: result.metadata.responseTime,
+            promptTokens: result.metadata.promptTokens,
+            completionTokens: result.metadata.completionTokens,
+            toolCalls: result.metadata.rawToolCalls || []
+          } : null,
+          execution: []
+        };
+
         if (actions && actions.length > 0) {
           // Process actions smartly - game actions first, then chat/think
           const gameActions = actions.filter(a =>
@@ -728,16 +787,29 @@ export class HeadlessGame extends EventEmitter {
           // Execute game actions (only the first valid one for current phase)
           for (const action of gameActions) {
             if (this.canExecuteAction(action.name, state.phase)) {
-              this.executeAction(action, current);
+              const execResult = this.executeAction(action, current);
+              snapshot.execution.push(execResult);
               break;
+            } else {
+              snapshot.execution.push({
+                tool: action.name,
+                args: action.arguments,
+                success: false,
+                error: `Not valid in phase ${state.phase}`
+              });
             }
           }
 
           // Execute chat/think actions from current player
           for (const action of chatActions) {
-            this.executeAction(action, current);
+            const execResult = this.executeAction(action, current);
+            snapshot.execution.push(execResult);
           }
         }
+
+        // Add the decision snapshot
+        this.addSnapshot(snapshot);
+
       } catch (error) {
         console.error(`Game ${this.slot} error:`, error.message);
       }
@@ -758,17 +830,49 @@ export class HeadlessGame extends EventEmitter {
       const player = state.players[i];
       if (!player.isAlive || player.prisoners.length === 0) continue;
 
+      // Capture state BEFORE LLM call
+      const snapshotState = this.getStateSnapshot();
+      const snapshotChat = this.getChatHistory();
+
       // Ask this player if they want to donate
       const agent = this.agents[i];
       try {
-        const actions = await agent.decide(state);
+        const result = await agent.decide(state);
+        const actions = result.toolCalls;
+
+        // Build snapshot for donation decision
+        const snapshot = {
+          type: 'decision',
+          game: this.slot,
+          turn: this.turnCount,
+          player: COLORS[i],
+          donationRequester: COLORS[state.donationRequester],
+          state: snapshotState,
+          chatHistory: snapshotChat,
+          llmRequest: result.context ? {
+            userPrompt: result.context.userPrompt,
+            availableTools: result.context.availableTools
+          } : null,
+          llmResponse: result.metadata ? {
+            responseTime: result.metadata.responseTime,
+            promptTokens: result.metadata.promptTokens,
+            completionTokens: result.metadata.completionTokens,
+            toolCalls: result.metadata.rawToolCalls || []
+          } : null,
+          execution: []
+        };
+
         if (actions) {
           const donationAction = actions.find(a => a.name === 'respondToDonation');
           if (donationAction) {
-            this.executeAction(donationAction, i);
+            const execResult = this.executeAction(donationAction, i);
+            snapshot.execution.push(execResult);
+            this.addSnapshot(snapshot);
             return; // One donation response per cycle
           }
         }
+
+        this.addSnapshot(snapshot);
       } catch (error) {
         console.error(`Game ${this.slot} donation error:`, error.message);
       }
@@ -806,90 +910,90 @@ export class HeadlessGame extends EventEmitter {
 
   executeAction(action, playerId) {
     const playerColor = COLORS[playerId];
+    const execResult = {
+      tool: action.name,
+      args: action.arguments,
+      success: true
+    };
 
     try {
       switch (action.name) {
         case 'playChip':
-          // Validate we're in the right phase
           if (this.game.phase !== 'selectChip') {
-            console.error(`Game ${this.slot}: Can't play chip in phase ${this.game.phase}`);
-            return;
+            execResult.success = false;
+            execResult.error = `Can't play chip in phase ${this.game.phase}`;
+            return execResult;
           }
           this.game.selectChip(action.arguments.color);
           this.lastAction = `${playerColor} selected ${action.arguments.color}`;
-          this.logEvent({ player: playerColor, action: 'selectChip', chip: action.arguments.color }, true);
           break;
 
         case 'selectPile':
-          // Validate we're in the right phase
           if (this.game.phase !== 'selectPile') {
-            console.error(`Game ${this.slot}: Can't select pile in phase ${this.game.phase}`);
-            return;
+            execResult.success = false;
+            execResult.error = `Can't select pile in phase ${this.game.phase}`;
+            return execResult;
           }
-          // Handle various forms of "new pile" - string "new", null, undefined, or non-existent pile
           let pileId = action.arguments.pileId;
           if (pileId === 'new' || pileId === null || pileId === undefined || pileId === 'null') {
             pileId = null;
           } else {
-            // Convert to number if it's a string number
             pileId = parseInt(pileId);
             if (isNaN(pileId)) pileId = null;
           }
           const result = this.game.playOnPile(pileId);
           this.turnCount++;
+          execResult.pileId = pileId;
+          execResult.wasCapture = result?.action === 'capture';
           this.lastAction = `${playerColor} played on pile ${pileId ?? 'new'}`;
-          this.logEvent({ player: playerColor, action: 'playOnPile', pile: pileId, capture: result?.action === 'capture' }, true);
           this.emit('turn', { turn: this.turnCount, player: playerColor, action: this.lastAction });
           break;
 
         case 'chooseNextPlayer':
+          const nextPlayer = COLORS[action.arguments.playerId];
           this.game.chooseNextPlayer(action.arguments.playerId);
-          this.lastAction = `${playerColor} chose ${COLORS[action.arguments.playerId]} next`;
-          this.logEvent({ player: playerColor, action: 'chooseNext', next: COLORS[action.arguments.playerId] }, true);
+          execResult.nextPlayer = nextPlayer;
+          this.lastAction = `${playerColor} chose ${nextPlayer} next`;
           break;
 
         case 'killChip':
-          // Log BEFORE resolving so we capture state with pile still intact
-          this.logEvent({ player: playerColor, action: 'capture', killed: action.arguments.color }, true);
           this.game.resolveCapture(action.arguments.color);
+          execResult.killed = action.arguments.color;
           this.lastAction = `${playerColor} killed ${action.arguments.color}`;
-          // Check for eliminations after capture
-          this.checkAndLogEliminations();
+          this.checkEliminations();
           break;
 
         case 'respondToDonation':
           this.game.handleDonation(playerId, action.arguments.accept, action.arguments.color);
+          execResult.accepted = action.arguments.accept;
           if (action.arguments.accept) {
+            execResult.donatedColor = action.arguments.color;
             this.lastAction = `${playerColor} donated ${action.arguments.color}`;
-            this.logEvent({ player: playerColor, action: 'donate', color: action.arguments.color }, true);
           } else {
             this.lastAction = `${playerColor} refused donation`;
-            this.logEvent({ player: playerColor, action: 'refuseDonate' }, true);
           }
-          // Check for eliminations after donation handling
-          this.checkAndLogEliminations();
+          this.checkEliminations();
           break;
 
         case 'sendChat':
           this.game.addMessage(playerId, action.arguments.message);
-          this.chatMessages.push({ color: playerColor, text: action.arguments.message, turn: this.turnCount });
-          this.logEvent({ player: playerColor, action: 'chat', message: action.arguments.message }, true);
           this.emit('chat', { player: playerColor, message: action.arguments.message, turn: this.turnCount });
           break;
 
         case 'think':
-          this.thoughts.push({ color: playerColor, text: action.arguments.thought, turn: this.turnCount });
-          this.logEvent({ player: playerColor, action: 'think', thought: action.arguments.thought }, true);
-          this.emit('think', { player: playerColor, thought: action.arguments.thought, turn: this.turnCount });
           this.agents[playerId].consecutiveThinks++;
+          this.emit('think', { player: playerColor, thought: action.arguments.thought, turn: this.turnCount });
           break;
 
         case 'wait':
           break;
       }
     } catch (error) {
-      console.error(`Action error in game ${this.slot}:`, error.message);
+      execResult.success = false;
+      execResult.error = error.message;
     }
+
+    return execResult;
   }
 
   finish() {
@@ -899,25 +1003,25 @@ export class HeadlessGame extends EventEmitter {
 
     const winner = COLORS[this.game.winner];
 
-    // Log game over event
-    this.logEvent({
-      action: 'gameOver',
+    // Add game_end snapshot
+    this.addSnapshot({
+      type: 'game_end',
+      game: this.slot,
       winner: winner,
-      finalStandings: this.game.players.map(p => ({
-        color: p.color,
-        survived: p.isAlive,
-        finalChips: p.totalChips()
-      }))
-    }, true);
+      turns: this.turnCount,
+      duration: this.endTime - this.startTime,
+      eliminationOrder: this.eliminationOrder,
+      state: this.getStateSnapshot(),
+      chatHistory: this.getChatHistory()
+    });
 
     const result = {
       gameId: `game-${this.slot}`,
       winner: winner,
       turns: this.turnCount,
       duration: this.endTime - this.startTime,
-      events: this.events,
-      chats: this.chatMessages,
-      thoughts: this.thoughts
+      eliminationOrder: this.eliminationOrder,
+      snapshots: this.snapshots
     };
 
     this.emit('complete', result);
@@ -938,9 +1042,9 @@ export class HeadlessGame extends EventEmitter {
       winner: COLORS[this.game.winner],
       turns: this.turnCount,
       duration: this.endTime - this.startTime,
-      events: this.events,
-      chats: this.chatMessages,
-      thoughts: this.thoughts
+      eliminationOrder: this.eliminationOrder,
+      snapshots: this.snapshots
     };
   }
+
 }
