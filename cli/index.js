@@ -14,7 +14,7 @@ Usage: node cli/index.js [options]
 Options:
   --games N      Total games to run (default: 10)
   --parallel N   Concurrent games (default: 4)
-  --provider P   LLM provider: groq, openai, claude, azure-claude (default: groq)
+  --provider P   LLM provider: groq, openai, claude, azure-claude, azure-kimi (default: groq)
   --chips N      Chips per player (default: 3)
   --output PATH  Output directory (default: ./data)
   --delay MS     Delay between API calls in ms (default: 500)
@@ -44,7 +44,7 @@ async function main() {
   }
 
   // Validate provider
-  const validProviders = ['groq', 'openai', 'claude', 'azure-claude'];
+  const validProviders = ['groq', 'openai', 'claude', 'azure-claude', 'azure-kimi'];
   if (!validProviders.includes(args.provider)) {
     console.error(`Invalid provider: ${args.provider}`);
     console.error(`Valid providers: ${validProviders.join(', ')}`);
@@ -56,11 +56,12 @@ async function main() {
     'groq': ['GROQ_API_KEY', 'VITE_GROQ_API_KEY'],
     'openai': ['OPENAI_API_KEY', 'VITE_OPENAI_API_KEY'],
     'claude': ['CLAUDE_API_KEY', 'VITE_CLAUDE_API_KEY'],
-    'azure-claude': ['AZURE_API_KEY', 'VITE_AZURE_CLAUDE_API_KEY', 'AZURE_CLAUDE_API_KEY']
+    'azure-claude': ['AZURE_API_KEY', 'VITE_AZURE_CLAUDE_API_KEY', 'AZURE_CLAUDE_API_KEY'],
+    'azure-kimi': ['AZURE_API_KEY', 'AZURE_KIMI_API_KEY', 'VITE_AZURE_API_KEY']
   }[args.provider];
 
   const hasKey = apiKeyNames.some(name => process.env[name]);
-  if (!hasKey && args.provider !== 'azure-claude') {
+  if (!hasKey && !['azure-claude', 'azure-kimi'].includes(args.provider)) {
     console.error(`Missing API key. Set one of: ${apiKeyNames.join(' or ')}`);
     console.error(`Add it to .env file or environment variable`);
     process.exit(1);

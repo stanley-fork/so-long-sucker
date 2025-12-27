@@ -166,6 +166,7 @@ CURRENT TURN: ${COLORS[state.currentPlayer].toUpperCase()}${isMyTurn ? ' (YOU)' 
 
   /**
    * Decide what action to take
+   * Returns: { toolCalls, metadata, context } or null
    */
   async decide(state) {
     const isMyTurn = state.currentPlayer === this.playerId;
@@ -191,20 +192,28 @@ CURRENT TURN: ${COLORS[state.currentPlayer].toUpperCase()}${isMyTurn ? ' (YOU)' 
     }
 
     const tools = filterTools(toolNames);
+    const userPrompt = this.buildUserPrompt(state);
 
     // Call LLM
     try {
       const result = await this.provider.call(
         this.buildSystemPrompt(),
-        this.buildUserPrompt(state),
+        userPrompt,
         tools
       );
 
-      // Return all tool calls so we can process multiple (chat + action)
-      return result.toolCalls.length > 0 ? result.toolCalls : null;
+      // Return tool calls with metadata and context for data collection
+      return {
+        toolCalls: result.toolCalls.length > 0 ? result.toolCalls : null,
+        metadata: result.metadata || null,
+        context: {
+          userPrompt,
+          availableTools: toolNames
+        }
+      };
     } catch (error) {
       console.error(`AI Agent ${this.color} error:`, error);
-      return null;
+      return { toolCalls: null, metadata: null, error: error.message };
     }
   }
 

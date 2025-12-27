@@ -28,6 +28,8 @@ export class OpenAIProvider extends LLMProvider {
   }
 
   async call(systemPrompt, userPrompt, tools) {
+    const startTime = Date.now();
+
     const response = await fetch(this.baseUrl, {
       method: 'POST',
       headers: {
@@ -46,6 +48,8 @@ export class OpenAIProvider extends LLMProvider {
       })
     });
 
+    const responseTime = Date.now() - startTime;
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(`OpenAI API error: ${error.error?.message || response.statusText}`);
@@ -54,15 +58,31 @@ export class OpenAIProvider extends LLMProvider {
     const data = await response.json();
     const message = data.choices[0].message;
 
-    // Extract tool calls
-    const toolCalls = (message.tool_calls || []).map(tc => ({
-      name: tc.function.name,
-      arguments: JSON.parse(tc.function.arguments)
-    }));
+    // Parse tool calls, handling potential JSON parse errors
+    const rawToolCalls = (message.tool_calls || []).map(tc => {
+      try {
+        return {
+          name: tc.function.name,
+          arguments: JSON.parse(tc.function.arguments)
+        };
+      } catch {
+        return {
+          name: tc.function.name,
+          arguments: tc.function.arguments,
+          parseError: true
+        };
+      }
+    });
 
     return {
-      toolCalls,
-      text: message.content || ''
+      toolCalls: rawToolCalls.filter(tc => !tc.parseError),
+      text: message.content || '',
+      metadata: {
+        responseTime,
+        promptTokens: data.usage?.prompt_tokens || null,
+        completionTokens: data.usage?.completion_tokens || null,
+        rawToolCalls
+      }
     };
   }
 }

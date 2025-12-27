@@ -1,19 +1,22 @@
 // Centralized configuration for So Long Sucker
-// API keys are loaded from .env file (via Vite)
+// API keys are loaded from .env file (via Vite) or can be set directly
+
+// Safe accessor for Vite env vars (works without Vite too)
+const env = (typeof import.meta !== 'undefined' && import.meta.env) || {};
 
 export const CONFIG = {
   // Groq API (for Llama & Kimi models)
-  GROQ_API_KEY: import.meta.env.VITE_GROQ_API_KEY || '',
+  GROQ_API_KEY: env.VITE_GROQ_API_KEY || '',
 
   // OpenAI API
-  OPENAI_API_KEY: import.meta.env.VITE_OPENAI_API_KEY || '',
+  OPENAI_API_KEY: env.VITE_OPENAI_API_KEY || '',
 
   // Anthropic Claude API
-  CLAUDE_API_KEY: import.meta.env.VITE_CLAUDE_API_KEY || '',
+  CLAUDE_API_KEY: env.VITE_CLAUDE_API_KEY || '',
 
   // Azure Claude
-  AZURE_RESOURCE: import.meta.env.VITE_AZURE_RESOURCE || 'data4peopleservice-8737-resource',
-  AZURE_MODEL: import.meta.env.VITE_AZURE_MODEL || 'claude-opus-4-5'
+  AZURE_RESOURCE: env.VITE_AZURE_RESOURCE || 'data4peopleservice-8737-resource',
+  AZURE_MODEL: env.VITE_AZURE_MODEL || 'claude-opus-4-5'
 };
 
 // Helper to check if a provider is configured

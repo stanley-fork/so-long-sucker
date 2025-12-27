@@ -25,6 +25,8 @@ export class ClaudeProvider extends LLMProvider {
   }
 
   async call(systemPrompt, userPrompt, tools) {
+    const startTime = Date.now();
+
     const response = await fetch(this.baseUrl, {
       method: 'POST',
       headers: {
@@ -45,6 +47,8 @@ export class ClaudeProvider extends LLMProvider {
       })
     });
 
+    const responseTime = Date.now() - startTime;
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(`Claude API error: ${error.error?.message || response.statusText}`);
@@ -53,12 +57,12 @@ export class ClaudeProvider extends LLMProvider {
     const data = await response.json();
 
     // Extract tool calls and text from content blocks
-    const toolCalls = [];
+    const rawToolCalls = [];
     let text = '';
 
     for (const block of data.content) {
       if (block.type === 'tool_use') {
-        toolCalls.push({
+        rawToolCalls.push({
           name: block.name,
           arguments: block.input
         });
@@ -67,6 +71,15 @@ export class ClaudeProvider extends LLMProvider {
       }
     }
 
-    return { toolCalls, text };
+    return {
+      toolCalls: rawToolCalls,
+      text,
+      metadata: {
+        responseTime,
+        promptTokens: data.usage?.input_tokens || null,
+        completionTokens: data.usage?.output_tokens || null,
+        rawToolCalls
+      }
+    };
   }
 }

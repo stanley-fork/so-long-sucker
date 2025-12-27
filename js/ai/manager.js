@@ -5,6 +5,7 @@ import { OpenAIProvider } from './providers/openai.js';
 import { ClaudeProvider } from './providers/claude.js';
 import { AzureClaudeProvider } from './providers/azure-claude.js';
 import { GroqProvider } from './providers/groq.js';
+import { GameDataCollector } from './data-collector.js';
 import { CONFIG } from '../config.js';
 
 const COLORS = ['red', 'blue', 'green', 'yellow'];
@@ -17,13 +18,18 @@ export class AgentManager {
     this.agents = {}; // playerId -> AIAgent
     this.agentLoops = {}; // playerId -> intervalId (each agent has own loop)
     this.provider = null;
+    this.providerType = null;
     this.running = false;
+
+    // Data collection
+    this.dataCollector = new GameDataCollector();
   }
 
   /**
    * Configure the LLM provider
    */
   setProvider(providerType, apiKey, options = {}) {
+    this.providerType = providerType;
     switch (providerType) {
       case 'openai':
         this.provider = new OpenAIProvider(apiKey);
@@ -81,6 +87,10 @@ export class AgentManager {
     if (this.running) return;
     this.running = true;
     console.log('🤖 Agent manager started');
+
+    // Reset and add game_start snapshot
+    this.dataCollector.reset();
+    this.dataCollector.addGameStart(this.game);
 
     // Start a separate loop for each AI agent with staggered start times
     Object.entries(this.agents).forEach(([id, agent], index) => {
@@ -178,27 +188,65 @@ export class AgentManager {
     agent.startRequest();
     try {
       console.log(`🤖 ${COLORS[playerId].toUpperCase()} (${type}) requesting...`);
-      const actions = await agent.decide(state);
+      const result = await agent.decide(state);
 
-      if (actions) {
+      if (result && result.toolCalls) {
+        const actions = result.toolCalls;
+        const execution = [];
+
         if (type === 'chat') {
           // Only allow chat when not their turn
           const chatActions = actions.filter(a => a.name === 'sendChat');
           if (chatActions.length > 0) {
-            agent.executeAll(chatActions);
+            for (const action of chatActions) {
+              const success = agent.execute(action);
+              execution.push({ tool: action.name, args: action.arguments, success });
+            }
             this.onRender();
           }
         } else if (type === 'donation') {
           // Check for donation response
           const hasDonationResponse = actions.some(a => a.name === 'respondToDonation');
           if (hasDonationResponse) {
-            agent.executeAll(actions);
+            for (const action of actions) {
+              const success = agent.execute(action);
+              execution.push({ tool: action.name, args: action.arguments, success });
+            }
             this.onRender();
           }
         } else {
           // Game action - execute all
-          agent.executeAll(actions);
+          for (const action of actions) {
+            const success = agent.execute(action);
+            execution.push({ tool: action.name, args: action.arguments, success });
+          }
           this.onRender();
+
+          // Increment turn count on game actions
+          if (actions.some(a => a.name === 'selectPile')) {
+            this.dataCollector.incrementTurn();
+          }
+        }
+
+        // Build LLM request/response for snapshot
+        const llmRequest = result.context ? {
+          userPrompt: result.context.userPrompt,
+          availableTools: result.context.availableTools
+        } : null;
+
+        const llmResponse = result.metadata ? {
+          responseTime: result.metadata.responseTime,
+          promptTokens: result.metadata.promptTokens,
+          completionTokens: result.metadata.completionTokens,
+          toolCalls: result.metadata.rawToolCalls || []
+        } : null;
+
+        // Add decision snapshot
+        this.dataCollector.addDecision(this.game, playerId, llmRequest, llmResponse, execution);
+
+        // Check for game over
+        if (state.phase === 'gameOver' || this.game.getState().phase === 'gameOver') {
+          this.dataCollector.addGameEnd(this.game);
         }
       }
     } catch (error) {
@@ -239,15 +287,40 @@ export class AgentManager {
 
       if (agent && state.players[randomId].isAlive) {
         try {
-          const action = await agent.decide(state);
-          if (action && action.name === 'sendChat') {
-            agent.execute(action);
-            this.onRender();
+          const result = await agent.decide(state);
+          if (result && result.toolCalls) {
+            const action = result.toolCalls.find(a => a.name === 'sendChat');
+            if (action) {
+              agent.execute(action);
+              this.onRender();
+            }
           }
         } catch (error) {
           console.error('Chat trigger error:', error);
         }
       }
     }
+  }
+
+  /**
+   * Download collected game data as JSON
+   */
+  downloadGameData() {
+    const modelName = this.provider?.model || 'unknown';
+    return this.dataCollector.downloadJSON(this.providerType, modelName);
+  }
+
+  /**
+   * Get snapshot count for display
+   */
+  getSnapshotCount() {
+    return this.dataCollector.getSnapshotCount();
+  }
+
+  /**
+   * Get the data collector instance
+   */
+  getDataCollector() {
+    return this.dataCollector;
   }
 }

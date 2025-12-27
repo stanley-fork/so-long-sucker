@@ -483,6 +483,13 @@ class SoLongSucker {
   exportGame() {
     if (!this.game) return;
 
+    // If AI is active, export the AI snapshots instead
+    if (this.agentManager && this.agentManager.getSnapshotCount() > 0) {
+      this.agentManager.downloadGameData();
+      return;
+    }
+
+    // Otherwise export basic game state
     const data = this.game.toJSON();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);

@@ -288,6 +288,105 @@ class AzureClaudeProvider extends BaseProvider {
   }
 }
 
+// Azure Kimi Provider (Kimi-K2-Thinking via Azure)
+class AzureKimiProvider extends BaseProvider {
+  constructor(apiKey, resource = 'data4peopleservice-6121-resource', model = 'Kimi-K2-Thinking') {
+    super(apiKey);
+    this.resource = resource;
+    this.model = model;
+    this.baseUrl = `https://${resource}.openai.azure.com/openai/v1`;
+  }
+
+  async call(systemPrompt, userPrompt, tools, maxRetries = 2) {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await this._callWithTimeout(systemPrompt, userPrompt, tools, 60000);
+      } catch (error) {
+        const isLastAttempt = attempt === maxRetries;
+        const isRetryable = error.message.includes('408') || error.message.includes('429') || error.message.includes('timeout');
+
+        if (isLastAttempt || !isRetryable) {
+          throw error;
+        }
+
+        const delay = 3000 * Math.pow(2, attempt); // 3s, 6s, 12s
+        await new Promise(r => setTimeout(r, delay));
+      }
+    }
+  }
+
+  async _callWithTimeout(systemPrompt, userPrompt, tools, timeout) {
+    const startTime = Date.now();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+    try {
+      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': this.apiKey
+        },
+        body: JSON.stringify({
+          model: this.model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+          tools: tools.map(t => ({ type: 'function', function: t })),
+          tool_choice: 'auto',
+          temperature: 0.7
+        }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+      const responseTime = Date.now() - startTime;
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Azure Kimi API error: ${response.status} - ${error}`);
+      }
+
+      const data = await response.json();
+      const message = data.choices[0].message;
+
+      // Parse tool calls, handling potential JSON parse errors
+      const rawToolCalls = (message.tool_calls || []).map(tc => {
+        try {
+          return {
+            name: tc.function.name,
+            arguments: JSON.parse(tc.function.arguments)
+          };
+        } catch {
+          return {
+            name: tc.function.name,
+            arguments: tc.function.arguments,
+            parseError: true
+          };
+        }
+      });
+
+      return {
+        content: message.content,
+        toolCalls: rawToolCalls.filter(tc => !tc.parseError),
+        metadata: {
+          responseTime,
+          promptTokens: data.usage?.prompt_tokens || null,
+          completionTokens: data.usage?.completion_tokens || null,
+          rawToolCalls
+        }
+      };
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        throw new Error('Azure Kimi API error: timeout');
+      }
+      throw error;
+    }
+  }
+}
+
 /**
  * Get env variable with or without VITE_ prefix
  */
@@ -316,9 +415,16 @@ export function createProvider(type) {
         getEnv('AZURE_MODEL') || 'claude-sonnet-4-20250514'
       );
 
+    case 'azure-kimi':
+      return new AzureKimiProvider(
+        getEnv('AZURE_API_KEY') || getEnv('AZURE_KIMI_API_KEY'),
+        getEnv('AZURE_KIMI_RESOURCE') || 'data4peopleservice-6121-resource',
+        getEnv('AZURE_KIMI_MODEL') || 'Kimi-K2-Thinking'
+      );
+
     default:
       throw new Error(`Unknown provider: ${type}`);
   }
 }
 
-export { OpenAIProvider, GroqProvider, ClaudeProvider, AzureClaudeProvider };
+export { OpenAIProvider, GroqProvider, ClaudeProvider, AzureClaudeProvider, AzureKimiProvider };

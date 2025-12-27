@@ -52,6 +52,8 @@ export class AzureClaudeProvider extends LLMProvider {
    * Internal call with timeout
    */
   async _callWithTimeout(systemPrompt, userPrompt, tools, timeout) {
+    const startTime = Date.now();
+
     const requestBody = {
       model: this.model,
       max_tokens: 1024,
@@ -91,6 +93,7 @@ export class AzureClaudeProvider extends LLMProvider {
       });
 
       clearTimeout(timeoutId);
+      const responseTime = Date.now() - startTime;
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -102,12 +105,12 @@ export class AzureClaudeProvider extends LLMProvider {
       console.log('✅ Azure Claude Response:', data);
 
       // Extract tool calls and text from content blocks
-      const toolCalls = [];
+      const rawToolCalls = [];
       let text = '';
 
       for (const block of data.content) {
         if (block.type === 'tool_use') {
-          toolCalls.push({
+          rawToolCalls.push({
             name: block.name,
             arguments: block.input
           });
@@ -116,8 +119,17 @@ export class AzureClaudeProvider extends LLMProvider {
         }
       }
 
-      console.log('🔧 Extracted:', { toolCalls, text: text.substring(0, 100) });
-      return { toolCalls, text };
+      console.log('🔧 Extracted:', { rawToolCalls, text: text.substring(0, 100) });
+      return {
+        toolCalls: rawToolCalls,
+        text,
+        metadata: {
+          responseTime,
+          promptTokens: data.usage?.input_tokens || null,
+          completionTokens: data.usage?.output_tokens || null,
+          rawToolCalls
+        }
+      };
     } catch (error) {
       clearTimeout(timeoutId);
       if (error.name === 'AbortError') {
