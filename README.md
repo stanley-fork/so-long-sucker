@@ -69,6 +69,81 @@ Open [http://localhost:5173](http://localhost:5173)
 
 ---
 
+## CLI Usage
+
+### Run Simulations
+
+```bash
+# Basic simulation (10 games, 4 parallel, groq)
+npm run simulate
+
+# Quick test - 1 game with Groq
+npm run simulate -- --games 1 --provider groq --chips 3
+
+# 6 games with Kimi, 3 running in parallel
+npm run simulate  -- --games 6 --parallel 3 --provider azure-kimi
+
+# Large batch with Claude - 100 games, 2 parallel (slower but smarter)
+npm run simulate -- --games 100 --parallel 2 --provider azure-claude
+
+# Fast batch with Groq - 50 games, 8 parallel
+npm run simulate -- --games 50 --parallel 8 --provider groq --chips 3
+
+# Longer games (7 chips) - more complex negotiations
+npm run simulate -- --games 20 --parallel 4 --provider azure-kimi --chips 7
+
+# Headless mode (no TUI, good for background runs)
+npm run simulate -- --games 100 --parallel 4 --provider groq --headless
+
+# Custom output directory
+npm run simulate -- --games 10 --output ./experiments/run1
+
+# Slower API calls (avoid rate limits)
+npm run simulate -- --games 50 --provider openai --delay 1000
+
+
+
+npm run simulate  -- --games 3 --parallel 3  --chips 7 --provider azure-kimi
+
+
+```
+
+**Options:**
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--games N` | Total games to run | 10 |
+| `--parallel N` | Concurrent games | 4 |
+| `--provider P` | LLM provider | groq |
+| `--chips N` | Chips per player | 3 |
+| `--output PATH` | Output directory | ./data |
+| `--delay MS` | Delay between API calls | 500 |
+| `--headless` | Run without TUI | false |
+
+**Providers:** `groq`, `openai`, `claude`, `azure-claude`, `azure-kimi`
+
+**TUI Controls:**
+- `1-9` Focus on game N
+- `ESC` Back to overview
+- `q` Quit (auto-saves)
+- `p` Pause all games
+- `r` Resume all games
+
+### Analyze Results
+
+```bash
+# Analyze a session file
+node cli/analyze.js ./data/session-2025-12-27T22-11-53-096Z.json
+```
+
+Outputs:
+- Win rates by player color
+- Agent behavior stats (chat, think, response times)
+- Tool usage breakdown
+- Key moments (eliminations, captures, negotiations)
+- Strategic thinking from winners
+
+---
+
 ## Deployment
 
 ### Vercel (Recommended)
@@ -218,11 +293,6 @@ This implementation is designed for studying:
 ## License
 
 MIT License — feel free to use, modify, and distribute.
-
----
-
-
-  npm run simulate -- --games 1 --provider groq --chips 3
 
 ---
 

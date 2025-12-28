@@ -387,6 +387,134 @@ class AzureKimiProvider extends BaseProvider {
   }
 }
 
+// Gemini Provider
+class GeminiProvider extends BaseProvider {
+  constructor(apiKey, model = 'gemini-2.5-flash') {
+    super(apiKey);
+    this.model = model;
+    this.baseUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+  }
+
+  // Convert JSON Schema to Gemini's expected format
+  convertSchema(schema) {
+    if (!schema || typeof schema !== 'object') return schema;
+
+    const result = {};
+
+    // Handle type - Gemini doesn't support array types like ['integer', 'string']
+    if (schema.type) {
+      if (Array.isArray(schema.type)) {
+        // Use first type or STRING as fallback
+        result.type = schema.type[0] === 'integer' ? 'INTEGER' : 'STRING';
+      } else {
+        // Convert to uppercase for Gemini
+        const typeMap = {
+          'string': 'STRING',
+          'integer': 'INTEGER',
+          'number': 'NUMBER',
+          'boolean': 'BOOLEAN',
+          'array': 'ARRAY',
+          'object': 'OBJECT'
+        };
+        result.type = typeMap[schema.type] || 'STRING';
+      }
+    }
+
+    if (schema.description) result.description = schema.description;
+    if (schema.enum) result.enum = schema.enum;
+
+    // Handle properties recursively
+    if (schema.properties) {
+      result.properties = {};
+      for (const [key, value] of Object.entries(schema.properties)) {
+        result.properties[key] = this.convertSchema(value);
+      }
+    }
+
+    if (schema.required) result.required = schema.required;
+    if (schema.items) result.items = this.convertSchema(schema.items);
+
+    return result;
+  }
+
+  async call(systemPrompt, userPrompt, tools) {
+    const startTime = Date.now();
+
+    const response = await fetch(this.baseUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': this.apiKey
+      },
+      body: JSON.stringify({
+        systemInstruction: {
+          parts: [{ text: systemPrompt }]
+        },
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: userPrompt }]
+          }
+        ],
+        tools: [{
+          functionDeclarations: tools.map(t => ({
+            name: t.name,
+            description: t.description,
+            parameters: this.convertSchema(t.parameters)
+          }))
+        }],
+        toolConfig: {
+          functionCallingConfig: {
+            mode: 'AUTO'
+          }
+        },
+        generationConfig: {
+          temperature: 0.7
+        }
+      })
+    });
+
+    const responseTime = Date.now() - startTime;
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Gemini API error: ${response.status} - ${error}`);
+    }
+
+    const data = await response.json();
+    const candidate = data.candidates?.[0];
+    const content = candidate?.content;
+    const parts = content?.parts || [];
+
+    // Extract text and function calls from parts
+    let text = '';
+    const rawToolCalls = [];
+
+    for (const part of parts) {
+      if (part.text) {
+        text += part.text;
+      }
+      if (part.functionCall) {
+        rawToolCalls.push({
+          name: part.functionCall.name,
+          arguments: part.functionCall.args || {}
+        });
+      }
+    }
+
+    return {
+      content: text,
+      toolCalls: rawToolCalls,
+      metadata: {
+        responseTime,
+        promptTokens: data.usageMetadata?.promptTokenCount || null,
+        completionTokens: data.usageMetadata?.candidatesTokenCount || null,
+        rawToolCalls
+      }
+    };
+  }
+}
+
 /**
  * Get env variable with or without VITE_ prefix
  */
@@ -422,9 +550,12 @@ export function createProvider(type) {
         getEnv('AZURE_KIMI_MODEL') || 'Kimi-K2-Thinking'
       );
 
+    case 'gemini':
+      return new GeminiProvider(getEnv('GEMINI_API_KEY'));
+
     default:
       throw new Error(`Unknown provider: ${type}`);
   }
 }
 
-export { OpenAIProvider, GroqProvider, ClaudeProvider, AzureClaudeProvider, AzureKimiProvider };
+export { OpenAIProvider, GroqProvider, ClaudeProvider, AzureClaudeProvider, AzureKimiProvider, GeminiProvider };

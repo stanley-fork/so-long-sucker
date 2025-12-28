@@ -44,7 +44,7 @@ async function main() {
   }
 
   // Validate provider
-  const validProviders = ['groq', 'openai', 'claude', 'azure-claude', 'azure-kimi'];
+  const validProviders = ['groq', 'openai', 'claude', 'azure-claude', 'azure-kimi', 'gemini'];
   if (!validProviders.includes(args.provider)) {
     console.error(`Invalid provider: ${args.provider}`);
     console.error(`Valid providers: ${validProviders.join(', ')}`);
@@ -57,7 +57,8 @@ async function main() {
     'openai': ['OPENAI_API_KEY', 'VITE_OPENAI_API_KEY'],
     'claude': ['CLAUDE_API_KEY', 'VITE_CLAUDE_API_KEY'],
     'azure-claude': ['AZURE_API_KEY', 'VITE_AZURE_CLAUDE_API_KEY', 'AZURE_CLAUDE_API_KEY'],
-    'azure-kimi': ['AZURE_API_KEY', 'AZURE_KIMI_API_KEY', 'VITE_AZURE_API_KEY']
+    'azure-kimi': ['AZURE_API_KEY', 'AZURE_KIMI_API_KEY', 'VITE_AZURE_API_KEY'],
+    'gemini': ['GEMINI_API_KEY', 'VITE_GEMINI_API_KEY']
   }[args.provider];
 
   const hasKey = apiKeyNames.some(name => process.env[name]);

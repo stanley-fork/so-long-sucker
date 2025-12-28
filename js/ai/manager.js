@@ -5,6 +5,7 @@ import { OpenAIProvider } from './providers/openai.js';
 import { ClaudeProvider } from './providers/claude.js';
 import { AzureClaudeProvider } from './providers/azure-claude.js';
 import { GroqProvider } from './providers/groq.js';
+import { GeminiProvider } from './providers/gemini.js';
 import { GameDataCollector } from './data-collector.js';
 import { CONFIG } from '../config.js';
 
@@ -46,6 +47,9 @@ export class AgentManager {
         break;
       case 'groq':
         this.provider = new GroqProvider(apiKey, options.model || 'llama-3.3-70b-versatile');
+        break;
+      case 'gemini':
+        this.provider = new GeminiProvider(apiKey, options.model || 'gemini-2.5-flash');
         break;
       default:
         throw new Error(`Unknown provider: ${providerType}`);
