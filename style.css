@@ -121,9 +121,12 @@ body {
    ============================================ */
 
 #setup-screen {
-  min-height: auto;
-  padding-bottom: var(--space-2xl);
+  min-height: 100vh;
+  padding: var(--space-2xl);
   background: var(--bg-deep);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 #landing-hero::before {
@@ -277,25 +280,9 @@ body {
   font-size: 1.1rem;
 }
 
-/* ============================================
-   SETUP SCREEN
-   ============================================ */
-
-#setup-screen {
-  min-height: auto;
-  padding-bottom: var(--space-2xl);
-  background: var(--bg-deep);
-}
-
 .setup-content {
   width: 100%;
-  max-width: 560px;
-  animation: fadeIn 0.6s ease-out;
-}
-
-.setup-content {
-  width: 100%;
-  max-width: 560px;
+  max-width: 600px;
   animation: fadeIn 0.6s ease-out;
 }
 
