@@ -1,6 +1,4 @@
 // Results page - Analyze and display AI game data
-import { COLORS, colorize, colorChip } from './utils.js';
-
 class ResultsAnalyzer {
   constructor() {
     this.data = null;
@@ -89,10 +87,19 @@ class ResultsAnalyzer {
         }
       }
 
-      if (snapshot.type === 'game_end' && snapshot.state?.winner) {
-        const winner = snapshot.state.winner;
-        this.playerStats[winner].wins++;
-        this.games[gameId].winner = winner;
+      if (snapshot.type === 'game_end') {
+        // Try to get winner from state.winner, or determine from alive players
+        let winner = snapshot.state?.winner;
+        if (!winner && snapshot.state?.players) {
+          const alive = snapshot.state.players.filter(p => p.alive);
+          if (alive.length === 1) {
+            winner = alive[0].color;
+          }
+        }
+        if (winner) {
+          this.playerStats[winner].wins++;
+          this.games[gameId].winner = winner;
+        }
       }
     }
 

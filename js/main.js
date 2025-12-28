@@ -28,9 +28,30 @@ class SoLongSucker {
     this.simulationContainer = document.getElementById('simulation-container');
 
     // Mode/setup elements
+    this.landingHero = document.getElementById('landing-hero');
     this.modeSelection = document.getElementById('mode-selection');
     this.playSetup = document.getElementById('play-setup');
     this.simulationSetup = document.getElementById('simulation-setup');
+
+    // Initialize visibility based on whether hero exists
+    if (this.landingHero) {
+      // We're on index.html - hide everything initially, show hero
+      this.landingHero.style.display = 'flex';
+      this.setupScreen.style.display = 'none';
+    } else {
+      // We're on game.html - show mode selection immediately
+      this.setupScreen.style.display = 'block';
+      this.setupScreen.style.opacity = '1';
+      this.setupScreen.style.pointerEvents = 'auto';
+      const setupContent = this.setupScreen.querySelector('.setup-content');
+      if (setupContent) {
+        setupContent.style.opacity = '1';
+        setupContent.style.pointerEvents = 'auto';
+      }
+      this.modeSelection.style.display = 'grid';
+      this.playSetup.style.display = 'none';
+      this.simulationSetup.style.display = 'none';
+    }
 
     this.bindSetupEvents();
     this.bindModeEvents();
@@ -171,9 +192,82 @@ class SoLongSucker {
    * Show mode selection
    */
   showModeSelection() {
-    this.modeSelection.classList.remove('hidden');
-    this.playSetup.classList.add('hidden');
-    this.simulationSetup.classList.add('hidden');
+    if (this.landingHero) {
+      this.landingHero.style.display = 'none';
+    }
+    this.setupScreen.style.display = 'block';
+    this.setupScreen.style.opacity = '1';
+    this.setupScreen.style.pointerEvents = 'auto';
+    const setupContent = this.setupScreen.querySelector('.setup-content');
+    if (setupContent) {
+      setupContent.style.opacity = '1';
+      setupContent.style.pointerEvents = 'auto';
+    }
+    this.modeSelection.style.display = 'grid';
+    this.playSetup.style.display = 'none';
+    this.simulationSetup.style.display = 'none';
+  }
+    this.modeSelection.style.display = 'none';
+    this.playSetup.style.display = 'block';
+    this.simulationSetup.style.display = 'none';
+    this.updateAIConfigVisibility();
+  }
+
+  /**
+   * Show play game setup
+   */
+  showPlaySetup() {
+    if (this.landingHero) {
+      this.landingHero.style.display = 'none';
+    }
+    this.setupScreen.style.display = 'block';
+    this.setupScreen.style.opacity = '1';
+    this.setupScreen.style.pointerEvents = 'auto';
+    const setupContent = this.setupScreen.querySelector('.setup-content');
+    if (setupContent) {
+      setupContent.style.opacity = '1';
+      setupContent.style.pointerEvents = 'auto';
+    }
+    this.modeSelection.style.display = 'none';
+    this.playSetup.style.display = 'block';
+    this.simulationSetup.style.display = 'none';
+    this.updateAIConfigVisibility();
+  }
+
+  /**
+   * Show simulation setup
+   */
+  showSimulationSetup() {
+    if (this.landingHero) {
+      this.landingHero.style.display = 'none';
+    }
+    this.setupScreen.style.display = 'block';
+    this.setupScreen.style.opacity = '1';
+    this.setupScreen.style.pointerEvents = 'auto';
+    const setupContent = this.setupScreen.querySelector('.setup-content');
+    if (setupContent) {
+      setupContent.style.opacity = '1';
+      setupContent.style.pointerEvents = 'auto';
+    }
+    this.modeSelection.style.display = 'none';
+    this.playSetup.style.display = 'none';
+    this.simulationSetup.style.display = 'block';
+
+    // Load saved API key into simulation form
+    const apiKey = document.getElementById('api-key').value;
+    document.getElementById('sim-api-key').value = apiKey;
+  }
+    this.modeSelection.style.display = 'none';
+    this.playSetup.style.display = 'none';
+    this.simulationSetup.style.display = 'block';
+
+    // Load saved API key into simulation form
+    const apiKey = document.getElementById('api-key').value;
+    document.getElementById('sim-api-key').value = apiKey;
+  }
+    this.modeSelection.style.display = 'grid';
+    this.playSetup.style.display = 'none';
+    this.simulationSetup.style.display = 'none';
   }
 
   /**

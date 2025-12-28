@@ -110,24 +110,11 @@ body {
   position: relative;
 }
 
-#setup-screen #mode-selection {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.6s ease-out;
-}
+/* Opacity rules removed - now handled by JavaScript */
 
-#setup-screen .setup-content {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.6s ease-out;
-}
+/* Opacity rules removed - now handled by JavaScript */
 
-/* When mode selection is visible */
-#setup-screen.setup-mode-visible .mode-selection,
-#setup-screen.setup-mode-visible .setup-content {
-  opacity: 1;
-  pointer-events: auto;
-}
+/* Opacity rules removed - now handled by JavaScript */
 
 /* ============================================
    SETUP SCREEN
