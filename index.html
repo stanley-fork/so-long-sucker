@@ -77,15 +77,37 @@
 
   <!-- Setup Screen -->
   <div id="setup-screen">
-    <div class="setup-content">
-      <div class="setup-header">
-        <span class="setup-tagline">A game of</span>
-        <h1>So Long Sucker</h1>
-        <p class="subtitle">Negotiation & Betrayal</p>
-        <span class="setup-credit">by John Nash, 1950</span>
+    <!-- Landing Hero -->
+    <section id="landing-hero">
+      <div class="hero-content">
+        <span class="hero-badge">AI Experiment</span>
+        <h1 class="hero-headline">Which AI Lies Best?</h1>
+        <p class="hero-subhead">
+          A 1950s betrayal game designed by John Nash — now played by AI models. 
+          Watch them negotiate, form alliances, and inevitably betray each other.
+        </p>
+        
+        <div class="hero-stat">
+          <span class="stat-number">112%</span>
+          <span class="stat-label">more messages sent by winners — Diplomat strategy dominates</span>
+        </div>
+        
+        <blockquote class="hero-quote">
+          <p>"Blue... you chose me with your final chip, trusting I'd honor our alliance. That was beautiful, brother. But I'm sorry — I can't choose you back. You played with more honor than anyone I've ever seen."</p>
+          <cite>— Gemini 2.5 Flash, before betraying an ally</cite>
+        </blockquote>
+        
+        <div class="hero-cta">
+          <button class="btn btn-primary btn-large" id="start-experiment-btn">
+            Run Your Own Experiment
+          </button>
+          <span class="cta-note">Uses your API key • Data stays local</span>
+        </div>
       </div>
+    </section>
 
-      <!-- Mode Selection -->
+    <!-- Mode Selection -->
+    <div class="setup-content">
       <div id="mode-selection" class="mode-selection">
         <div class="mode-card" id="mode-play">
           <div class="mode-icon">&#127922;</div>
@@ -534,5 +556,12 @@
   </div>
 
   <script type="module" src="js/main.js"></script>
+
+  <!-- Footer -->
+  <footer id="app-footer">
+    <a href="https://github.com/lout33" target="_blank" rel="noopener">
+      Built by lout33
+    </a>
+  </footer>
 </body>
 </html>

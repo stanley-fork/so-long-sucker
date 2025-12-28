@@ -42,6 +42,12 @@ class SoLongSucker {
    * Bind setup screen events
    */
   bindSetupEvents() {
+    // Hero CTA button
+    document.getElementById('start-experiment-btn')?.addEventListener('click', () => {
+      this.setupScreen.classList.add('setup-mode-visible');
+      this.modeSelection.scrollIntoView({ behavior: 'smooth' });
+    });
+
     document.getElementById('start-game-btn').addEventListener('click', () => {
       this.startGame(false); // New game
     });
