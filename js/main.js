@@ -257,26 +257,25 @@ class SoLongSucker {
     const apiKey = document.getElementById('api-key').value;
     document.getElementById('sim-api-key').value = apiKey;
   }
-    this.modeSelection.style.display = 'none';
-    this.playSetup.style.display = 'none';
-    this.simulationSetup.style.display = 'block';
-
-    // Load saved API key into simulation form
-    const apiKey = document.getElementById('api-key').value;
-    document.getElementById('sim-api-key').value = apiKey;
-  }
-    this.modeSelection.style.display = 'grid';
-    this.playSetup.style.display = 'none';
-    this.simulationSetup.style.display = 'none';
-  }
 
   /**
    * Show play game setup
    */
   showPlaySetup() {
-    this.modeSelection.classList.add('hidden');
-    this.playSetup.classList.remove('hidden');
-    this.simulationSetup.classList.add('hidden');
+    if (this.landingHero) {
+      this.landingHero.style.display = 'none';
+    }
+    this.setupScreen.style.display = 'block';
+    this.setupScreen.style.opacity = '1';
+    this.setupScreen.style.pointerEvents = 'auto';
+    const setupContent = this.setupScreen.querySelector('.setup-content');
+    if (setupContent) {
+      setupContent.style.opacity = '1';
+      setupContent.style.pointerEvents = 'auto';
+    }
+    this.modeSelection.style.display = 'none';
+    this.playSetup.style.display = 'block';
+    this.simulationSetup.style.display = 'none';
     this.updateAIConfigVisibility();
   }
 
@@ -284,9 +283,20 @@ class SoLongSucker {
    * Show simulation setup
    */
   showSimulationSetup() {
-    this.modeSelection.classList.add('hidden');
-    this.playSetup.classList.add('hidden');
-    this.simulationSetup.classList.remove('hidden');
+    if (this.landingHero) {
+      this.landingHero.style.display = 'none';
+    }
+    this.setupScreen.style.display = 'block';
+    this.setupScreen.style.opacity = '1';
+    this.setupScreen.style.pointerEvents = 'auto';
+    const setupContent = this.setupScreen.querySelector('.setup-content');
+    if (setupContent) {
+      setupContent.style.opacity = '1';
+      setupContent.style.pointerEvents = 'auto';
+    }
+    this.modeSelection.style.display = 'none';
+    this.playSetup.style.display = 'none';
+    this.simulationSetup.style.display = 'block';
 
     // Load saved API key into simulation form
     const apiKey = document.getElementById('api-key').value;
@@ -297,9 +307,9 @@ class SoLongSucker {
    * Show setup screen (from simulation)
    */
   showSetupScreen() {
-    this.setupScreen.classList.remove('hidden');
-    this.gameContainer.classList.add('hidden');
-    this.simulationContainer.classList.add('hidden');
+    this.setupScreen.style.display = 'block';
+    this.gameContainer.style.display = 'none';
+    this.simulationContainer.style.display = 'none';
     this.showModeSelection();
   }
 
@@ -349,9 +359,9 @@ class SoLongSucker {
     }
 
     // Switch to simulation screen
-    this.setupScreen.classList.add('hidden');
-    this.gameContainer.classList.add('hidden');
-    this.simulationContainer.classList.remove('hidden');
+    this.setupScreen.style.display = 'none';
+    this.gameContainer.style.display = 'none';
+    this.simulationContainer.style.display = 'block';
 
     // Create and start simulation manager
     this.simulationManager = new SimulationManager({
@@ -375,7 +385,7 @@ class SoLongSucker {
     // Show stats panel
     const statsPanel = document.getElementById('sim-stats-panel');
     const statsContent = document.getElementById('sim-stats-content');
-    statsPanel.classList.remove('hidden');
+    statsPanel.style.display = 'block';
     this.simulationManager.renderStats(statsContent);
   }
 
@@ -691,8 +701,8 @@ class SoLongSucker {
     }
 
     // Switch from setup to game
-    this.setupScreen.classList.add('hidden');
-    this.gameContainer.classList.remove('hidden');
+    this.setupScreen.style.display = 'none';
+    this.gameContainer.style.display = 'block';
 
     // Bind game control events (export/import)
     this.bindGameEvents();
