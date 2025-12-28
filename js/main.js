@@ -207,11 +207,6 @@ class SoLongSucker {
     this.playSetup.style.display = 'none';
     this.simulationSetup.style.display = 'none';
   }
-    this.modeSelection.style.display = 'none';
-    this.playSetup.style.display = 'block';
-    this.simulationSetup.style.display = 'none';
-    this.updateAIConfigVisibility();
-  }
 
   /**
    * Show play game setup
