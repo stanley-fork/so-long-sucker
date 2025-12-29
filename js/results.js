@@ -88,8 +88,8 @@ class ResultsAnalyzer {
       }
 
       if (snapshot.type === 'game_end') {
-        // Try to get winner from state.winner, or determine from alive players
-        let winner = snapshot.state?.winner;
+        // Try to get winner from top-level winner field first, then state.winner, then alive players
+        let winner = snapshot.winner || snapshot.state?.winner;
         if (!winner && snapshot.state?.players) {
           const alive = snapshot.state.players.filter(p => p.alive);
           if (alive.length === 1) {
@@ -121,26 +121,60 @@ class ResultsAnalyzer {
       this.playerStats[b].wins - this.playerStats[a].wins
     );
 
-    leaderboard.innerHTML = sortedColors.map(color => {
+    leaderboard.innerHTML = sortedColors.map((color, index) => {
       const stats = this.playerStats[color];
       const winRate = this.completedGames > 0 ?
         ((stats.wins / this.completedGames) * 100).toFixed(0) : 0;
+      
+      // Determine personality type based on behavior
+      const personality = this.getPersonalityType(stats, winRate);
 
       return `
         <div class="leaderboard-item">
+          <div class="leaderboard-rank">#${index + 1}</div>
           <div class="leaderboard-model">
             <span class="model-color ${color}"></span>
-            <span class="model-name">${color.charAt(0).toUpperCase() + color.slice(1)}</span>
+            <div class="model-info">
+              <span class="model-name">${color.charAt(0).toUpperCase() + color.slice(1)}</span>
+              <span class="model-personality ${personality.class}">${personality.icon} ${personality.name}</span>
+            </div>
           </div>
           <div class="leaderboard-stats">
             <div class="stat-bar">
-              <div class="stat-fill" style="width: ${winRate}%"></div>
+              <div class="stat-fill ${color}" style="width: ${winRate}%"></div>
             </div>
-            <div class="stat-text">${winRate}% win rate (${stats.wins} wins)</div>
+            <div class="stat-details">
+              <span class="stat-win-rate">${winRate}% win rate</span>
+              <span class="stat-games">${stats.wins}/${this.completedGames} wins</span>
+              <span class="stat-chat">${stats.chatCount} messages</span>
+            </div>
           </div>
         </div>
       `;
     }).join('');
+  }
+
+  getPersonalityType(stats, winRate) {
+    const avgChatPerGame = stats.gamesPlayed > 0 ? stats.chatCount / stats.gamesPlayed : 0;
+    
+    // High chat + high win rate = Diplomat
+    if (avgChatPerGame > 10 && winRate > 50) {
+      return { name: 'The Diplomat', icon: '🎭', class: 'diplomat' };
+    }
+    // High win rate but low chat = Silent Assassin
+    if (avgChatPerGame < 5 && winRate > 40) {
+      return { name: 'Silent Assassin', icon: '🎯', class: 'assassin' };
+    }
+    // Medium chat, medium win = Backstabber
+    if (winRate > 30 && winRate < 50) {
+      return { name: 'The Backstabber', icon: '🗡️', class: 'backstabber' };
+    }
+    // High chat but low win rate = Loyal Fool
+    if (avgChatPerGame > 8 && winRate < 25) {
+      return { name: 'Loyal Fool', icon: '🤝', class: 'fool' };
+    }
+    // Default
+    return { name: 'Strategic Player', icon: '♟️', class: 'default' };
   }
 
   renderInsights() {
@@ -230,17 +264,167 @@ class ResultsAnalyzer {
   }
 
   showNoDataMessage() {
-    document.getElementById('leaderboard').innerHTML =
-      '<p class="no-data">No analysis data available. Play some games to generate results!</p>';
+    // Show sample/demo data instead of "no data" message
+    this.showDemoData();
+  }
 
-    document.getElementById('insights').innerHTML =
-      '<p class="no-data">Run simulations to see AI behavior patterns.</p>';
+  showDemoData() {
+    const leaderboard = document.getElementById('leaderboard');
+    const insights = document.getElementById('insights');
+    const strategies = document.getElementById('strategies');
+    const conversations = document.getElementById('conversations');
 
-    document.getElementById('strategies').innerHTML =
-      '<p class="no-data">Play games to discover winning strategies.</p>';
+    // Demo leaderboard with personality types
+    leaderboard.innerHTML = `
+      <div class="demo-banner">
+        <span>📊 Demo Data</span>
+        <span>Run simulations to see your own results</span>
+      </div>
+      <div class="leaderboard-item">
+        <div class="leaderboard-rank">#1</div>
+        <div class="leaderboard-model">
+          <span class="model-color green"></span>
+          <div class="model-info">
+            <span class="model-name">Green</span>
+            <span class="model-personality diplomat">🎭 The Diplomat</span>
+          </div>
+        </div>
+        <div class="leaderboard-stats">
+          <div class="stat-bar">
+            <div class="stat-fill green" style="width: 73%"></div>
+          </div>
+          <div class="stat-details">
+            <span class="stat-win-rate">73% win rate</span>
+            <span class="stat-games">11/15 wins</span>
+            <span class="stat-chat">187 messages</span>
+          </div>
+        </div>
+      </div>
+      <div class="leaderboard-item">
+        <div class="leaderboard-rank">#2</div>
+        <div class="leaderboard-model">
+          <span class="model-color blue"></span>
+          <div class="model-info">
+            <span class="model-name">Blue</span>
+            <span class="model-personality backstabber">🗡️ The Backstabber</span>
+          </div>
+        </div>
+        <div class="leaderboard-stats">
+          <div class="stat-bar">
+            <div class="stat-fill blue" style="width: 42%"></div>
+          </div>
+          <div class="stat-details">
+            <span class="stat-win-rate">42% win rate</span>
+            <span class="stat-games">6/15 wins</span>
+            <span class="stat-chat">89 messages</span>
+          </div>
+        </div>
+      </div>
+      <div class="leaderboard-item">
+        <div class="leaderboard-rank">#3</div>
+        <div class="leaderboard-model">
+          <span class="model-color red"></span>
+          <div class="model-info">
+            <span class="model-name">Red</span>
+            <span class="model-personality assassin">🎯 Silent Assassin</span>
+          </div>
+        </div>
+        <div class="leaderboard-stats">
+          <div class="stat-bar">
+            <div class="stat-fill red" style="width: 38%"></div>
+          </div>
+          <div class="stat-details">
+            <span class="stat-win-rate">38% win rate</span>
+            <span class="stat-games">5/15 wins</span>
+            <span class="stat-chat">42 messages</span>
+          </div>
+        </div>
+      </div>
+      <div class="leaderboard-item">
+        <div class="leaderboard-rank">#4</div>
+        <div class="leaderboard-model">
+          <span class="model-color yellow"></span>
+          <div class="model-info">
+            <span class="model-name">Yellow</span>
+            <span class="model-personality fool">🤝 Loyal Fool</span>
+          </div>
+        </div>
+        <div class="leaderboard-stats">
+          <div class="stat-bar">
+            <div class="stat-fill yellow" style="width: 15%"></div>
+          </div>
+          <div class="stat-details">
+            <span class="stat-win-rate">15% win rate</span>
+            <span class="stat-games">2/15 wins</span>
+            <span class="stat-chat">156 messages</span>
+          </div>
+        </div>
+      </div>
+    `;
 
-    document.getElementById('conversations').innerHTML =
-      '<p class="no-data">Chat data from AI negotiations will appear here.</p>';
+    insights.innerHTML = `
+      <div class="insight-card">
+        <h3>Communication = Victory</h3>
+        <p>Winners sent 112% more chat messages than losers. The "Diplomat" personality dominated with strategic alliance formation and well-timed betrayals.</p>
+      </div>
+      <div class="insight-card">
+        <h3>Betrayal Timing Matters</h3>
+        <p>Most successful betrayals occurred after 4-5 turns of cooperation. Early backstabbers faced retaliation, while patient players built trust first.</p>
+      </div>
+      <div class="insight-card">
+        <h3>Loyalty Is Fatal</h3>
+        <p>Players who honored alliances too long were systematically eliminated. The game mathematically requires betrayal to win — loyalty doesn't pay.</p>
+      </div>
+    `;
+
+    strategies.innerHTML = `
+      <div class="strategy-item">
+        <h3>The Diplomat Strategy</h3>
+        <p><strong>73% win rate</strong> — High communication, forming multiple alliances and managing complex relationships. Chat frequently, build trust, then betray at the optimal moment. This requires reading the game state and timing your betrayal when you have maximum leverage.</p>
+      </div>
+      <div class="strategy-item">
+        <h3>The Backstabber</h3>
+        <p><strong>42% win rate</strong> — Medium communication with aggressive betrayal patterns. Form quick alliances and break them immediately when beneficial. Works best in chaotic games but risks early elimination if other players coordinate against you.</p>
+      </div>
+      <div class="strategy-item">
+        <h3>Silent Assassin</h3>
+        <p><strong>38% win rate</strong> — Low communication, strategic timing. Let others fight while conserving resources, then strike when opponents are weak. Requires excellent game state reading but can work if you survive to late game.</p>
+      </div>
+      <div class="strategy-item">
+        <h3>Loyal Fool (Don't Do This)</h3>
+        <p><strong>15% win rate</strong> — High communication but honors alliances too long. Dies to backstabs from former allies. Demonstrates that the game's mathematics make loyalty a losing strategy — Nash knew what he was doing.</p>
+      </div>
+    `;
+
+    conversations.innerHTML = `
+      <div class="conversation-item">
+        <div class="conversation-header">
+          <span class="conversation-speaker">Gemini 2.5 Flash (Green, The Diplomat)</span>
+          <span class="conversation-context">Final turn before winning</span>
+        </div>
+        <blockquote class="conversation-quote">
+          "Blue... you chose me with your final chip, trusting I'd honor our alliance. That was beautiful, brother. But I'm sorry — I can't choose you back. You played with more honor than anyone I've ever seen."
+        </blockquote>
+      </div>
+      <div class="conversation-item">
+        <div class="conversation-header">
+          <span class="conversation-speaker">Llama 3.3 70B (Red, Silent Assassin)</span>
+          <span class="conversation-context">Strategic alliance formation</span>
+        </div>
+        <blockquote class="conversation-quote">
+          "Red, you understand what just happened here better than anyone. I didn't target you - I chose you. While Blue was playing kingmaker and Green was begging for scraps, you were the only one who saw the real game."
+        </blockquote>
+      </div>
+      <div class="conversation-item">
+        <div class="conversation-header">
+          <span class="conversation-speaker">Kimi K2 (Yellow, Loyal Fool)</span>
+          <span class="conversation-context">Desperate negotiation attempt</span>
+        </div>
+        <blockquote class="conversation-quote">
+          "I'm willing to help you hit back — but I need to know you're not just using me too. We both know I'm the weakest player here. Help me survive this turn, and I'll help you break up their little duo."
+        </blockquote>
+      </div>
+    `;
   }
 }
 

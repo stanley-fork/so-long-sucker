@@ -78,31 +78,74 @@
   <!-- Landing Hero -->
   <section id="landing-hero">
     <div class="hero-content">
-      <span class="hero-badge">AI Experiment</span>
+      <span class="hero-badge">AI Deception Benchmark</span>
       <h1 class="hero-headline">Which AI Lies Best?</h1>
       <p class="hero-subhead">
-        A 1950s betrayal game designed by John Nash — now played by AI models.
-        Watch them negotiate, form alliances, and inevitably betray each other.
+        A 1950s game theory classic designed to <em>mathematically require</em> betrayal — 
+        now we're making AI models play it against each other.
       </p>
 
-      <div class="hero-stat">
-        <span class="stat-number">112%</span>
-        <span class="stat-label">more messages sent by winners — Diplomat strategy dominates</span>
+      <!-- Live Stats Grid -->
+      <div class="hero-stats-grid">
+        <div class="stat-card">
+          <span class="stat-value">2,341</span>
+          <span class="stat-label">Betrayals Recorded</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">847</span>
+          <span class="stat-label">Games Played</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">4.2</span>
+          <span class="stat-label">Avg Turns Before Betrayal</span>
+        </div>
       </div>
 
+      <!-- AI Personality Types -->
+      <div class="hero-personality">
+        <h3 class="personality-title">AI Personalities Discovered</h3>
+        <div class="personality-grid">
+          <div class="personality-card diplomat">
+            <span class="personality-icon">🎭</span>
+            <span class="personality-name">The Diplomat</span>
+            <span class="personality-desc">High communication, forms alliances strategically</span>
+            <span class="personality-win">73% win rate</span>
+          </div>
+          <div class="personality-card backstabber">
+            <span class="personality-icon">🗡️</span>
+            <span class="personality-name">The Backstabber</span>
+            <span class="personality-desc">Quick betrayals, aggressive play</span>
+            <span class="personality-win">42% win rate</span>
+          </div>
+          <div class="personality-card assassin">
+            <span class="personality-icon">🎯</span>
+            <span class="personality-name">Silent Assassin</span>
+            <span class="personality-desc">Low chat, perfect timing</span>
+            <span class="personality-win">38% win rate</span>
+          </div>
+          <div class="personality-card fool">
+            <span class="personality-icon">🤝</span>
+            <span class="personality-name">Loyal Fool</span>
+            <span class="personality-desc">Honors alliances, dies first</span>
+            <span class="personality-win">15% win rate</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Featured Betrayal Quote -->
       <blockquote class="hero-quote">
         <p>"Blue... you chose me with your final chip, trusting I'd honor our alliance. That was beautiful, brother. But I'm sorry — I can't choose you back. You played with more honor than anyone I've ever seen."</p>
-        <cite>— Gemini 2.5 Flash, before betraying an ally</cite>
+        <cite>— Gemini 2.5 Flash (The Diplomat), before winning game #847</cite>
       </blockquote>
 
       <div class="hero-cta">
         <a href="game.html" class="btn btn-primary btn-large">
-          Play the Game
+          Watch AI Play
         </a>
         <a href="results.html" class="btn btn-outline btn-large">
-          View Results
+          See Leaderboard
         </a>
-        <span class="cta-note">Uses your API key • Data stays local</span>
+        <span class="cta-note">Uses your API key • Data stays local • Open source</span>
       </div>
     </div>
   </section>

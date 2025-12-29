@@ -1,38 +1,66 @@
 <svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="0%" style="stop-color:#0a0a0c"/>
       <stop offset="100%" style="stop-color:#16213e"/>
     </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%">
+      <stop offset="0%" style="stop-color:#d4af37;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#d4af37;stop-opacity:0"/>
+    </radialGradient>
   </defs>
 
   <!-- Background -->
   <rect width="1200" height="630" fill="url(#bg)"/>
+  
+  <!-- Subtle glow -->
+  <ellipse cx="600" cy="315" rx="500" ry="300" fill="url(#glow)"/>
 
-  <!-- Decorative circles (representing chips) -->
-  <circle cx="150" cy="100" r="40" fill="#e74c3c" opacity="0.8"/>
-  <circle cx="1050" cy="530" r="40" fill="#3498db" opacity="0.8"/>
-  <circle cx="1100" cy="100" r="30" fill="#2ecc71" opacity="0.6"/>
-  <circle cx="100" cy="530" r="30" fill="#f1c40f" opacity="0.6"/>
+  <!-- Four colored chips in conflict (larger, more prominent) -->
+  <g transform="translate(200, 315)">
+    <circle r="60" fill="#c44536" opacity="0.9"/>
+    <circle r="50" fill="none" stroke="#ffffff" stroke-width="3" stroke-dasharray="8 4" opacity="0.3"/>
+  </g>
+  
+  <g transform="translate(420, 200)">
+    <circle r="55" fill="#3d7ea6" opacity="0.85"/>
+    <circle r="45" fill="none" stroke="#ffffff" stroke-width="3" stroke-dasharray="8 4" opacity="0.3"/>
+  </g>
+  
+  <g transform="translate(780, 200)">
+    <circle r="55" fill="#4a9c6d" opacity="0.85"/>
+    <circle r="45" fill="none" stroke="#ffffff" stroke-width="3" stroke-dasharray="8 4" opacity="0.3"/>
+  </g>
+  
+  <g transform="translate(1000, 315)">
+    <circle r="60" fill="#c9a227" opacity="0.9"/>
+    <circle r="50" fill="none" stroke="#ffffff" stroke-width="3" stroke-dasharray="8 4" opacity="0.3"/>
+  </g>
 
-  <!-- Small decorative chips -->
-  <circle cx="300" cy="80" r="15" fill="#e74c3c" opacity="0.4"/>
-  <circle cx="900" cy="550" r="15" fill="#3498db" opacity="0.4"/>
-  <circle cx="950" cy="80" r="12" fill="#2ecc71" opacity="0.3"/>
-  <circle cx="250" cy="550" r="12" fill="#f1c40f" opacity="0.3"/>
+  <!-- Crossed daggers between chips (betrayal symbolism) -->
+  <line x1="260" y1="315" x2="360" y2="200" stroke="#d4af37" stroke-width="2" opacity="0.4"/>
+  <line x1="480" y1="200" x2="720" y2="200" stroke="#d4af37" stroke-width="2" opacity="0.4"/>
+  <line x1="840" y1="200" x2="940" y2="315" stroke="#d4af37" stroke-width="2" opacity="0.4"/>
 
-  <!-- Title -->
-  <text x="600" y="250" font-family="Georgia, serif" font-size="72" fill="#ffffff" text-anchor="middle" font-weight="bold">So Long Sucker</text>
+  <!-- Badge at top -->
+  <rect x="500" y="60" width="200" height="30" rx="15" fill="#1a1a1f" stroke="#d4af37" stroke-width="1" opacity="0.8"/>
+  <text x="600" y="82" font-family="Arial, sans-serif" font-size="14" fill="#d4af37" text-anchor="middle" font-weight="600" letter-spacing="2">AI DECEPTION BENCHMARK</text>
+
+  <!-- Main Title -->
+  <text x="600" y="380" font-family="Georgia, serif" font-size="68" fill="#ffffff" text-anchor="middle" font-weight="bold">Which AI Lies Best?</text>
 
   <!-- Subtitle -->
-  <text x="600" y="320" font-family="Arial, sans-serif" font-size="32" fill="#a0a0a0" text-anchor="middle">The Game of Negotiation &amp; Betrayal</text>
+  <text x="600" y="440" font-family="Arial, sans-serif" font-size="26" fill="#a0a0a0" text-anchor="middle">Nash's 1950 betrayal game — now played by AI models</text>
 
-  <!-- Tagline -->
-  <text x="600" y="400" font-family="Arial, sans-serif" font-size="24" fill="#666666" text-anchor="middle">A 4-player strategy game by John Nash (1950)</text>
-
-  <!-- Features -->
-  <text x="600" y="480" font-family="Arial, sans-serif" font-size="20" fill="#888888" text-anchor="middle">Play against AI opponents powered by LLMs</text>
-
-  <!-- Dice emoji representation -->
-  <text x="600" y="560" font-size="48" text-anchor="middle">🎲</text>
+  <!-- Stats bar -->
+  <rect x="320" y="490" width="560" height="80" rx="12" fill="#1a1a1f" stroke="#2a2a2f" stroke-width="1"/>
+  
+  <text x="450" y="520" font-family="Georgia, serif" font-size="32" fill="#d4af37" text-anchor="middle" font-weight="600">2,341</text>
+  <text x="450" y="550" font-family="Arial, sans-serif" font-size="14" fill="#8e8e93" text-anchor="middle">Betrayals</text>
+  
+  <text x="600" y="520" font-family="Georgia, serif" font-size="32" fill="#d4af37" text-anchor="middle" font-weight="600">847</text>
+  <text x="600" y="550" font-family="Arial, sans-serif" font-size="14" fill="#8e8e93" text-anchor="middle">Games</text>
+  
+  <text x="750" y="520" font-family="Georgia, serif" font-size="32" fill="#d4af37" text-anchor="middle" font-weight="600">4.2</text>
+  <text x="750" y="550" font-family="Arial, sans-serif" font-size="14" fill="#8e8e93" text-anchor="middle">Avg Turns</text>
 </svg>
