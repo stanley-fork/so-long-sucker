@@ -164,6 +164,14 @@ class Game {
       throw new Error('Not in pile selection phase');
     }
     const player = this.getCurrentPlayer();
+    // Verify player can still play the selected chip before attempting
+    const playable = player.getPlayableChips();
+    if (!playable.some(c => c.color === this.selectedChip)) {
+      // Reset to selectChip phase if chip is no longer valid
+      this.phase = 'selectChip';
+      this.selectedChip = null;
+      throw new Error(`Cannot play ${this.selectedChip} - resetting to chip selection`);
+    }
     const color = player.playChip(this.selectedChip);
 
     let pile;
@@ -366,11 +374,11 @@ const TOOLS = [
   },
   {
     name: 'selectPile',
-    description: 'Choose pile to play on. Use "new" for new pile.',
+    description: 'Choose pile to play on. Use "new" to start a new pile, or the pile ID number as a string.',
     parameters: {
       type: 'object',
       properties: {
-        pileId: { type: ['integer', 'string'], description: 'Pile ID or "new"' }
+        pileId: { type: 'string', description: 'Pile ID (e.g. "0", "1") or "new" to start a new pile' }
       },
       required: ['pileId']
     }
@@ -534,16 +542,17 @@ TURN: ${COLORS[state.currentPlayer]}${isMyTurn ? ' (YOU)' : ''}`;
     if (state.phase === 'selectChip' && isMyTurn) {
       const playable = me.supply > 0 ? [me.color] : [];
       playable.push(...me.prisoners);
-      prompt += `\n\nYou must select a chip. Available: ${playable.join(', ')}`;
+      prompt += `\n\nYou must call playChip NOW. Available chips: ${playable.join(', ')}`;
     } else if (state.phase === 'selectPile' && isMyTurn) {
-      prompt += `\n\nChoose pile to play on (or "new").`;
       if (state.piles.length > 0) {
-        prompt += ` IDs: ${state.piles.map(p => p.id).join(', ')}`;
+        prompt += `\n\nYou must call selectPile NOW. Available piles: ${state.piles.map(p => `"${p.id}"`).join(', ')} or use "new" to start a new pile.`;
+      } else {
+        prompt += `\n\nYou must call selectPile NOW with pileId: "new" - there are NO existing piles yet!`;
       }
     } else if (state.phase === 'capture' && isMyTurn) {
-      prompt += `\n\nYou captured! Choose chip to KILL: ${state.pendingCapture.chips.join(', ')}`;
+      prompt += `\n\nYou captured a pile! You must call killChip NOW. Choose which chip to KILL: ${state.pendingCapture.chips.join(', ')}`;
     } else if (state.phase === 'selectNextPlayer' && isMyTurn) {
-      prompt += `\n\nChoose who plays next from missing colors.`;
+      prompt += `\n\nYou must call chooseNextPlayer NOW. Choose who plays next from missing colors.`;
     }
 
     if (state.messages.length > 0) {
@@ -728,6 +737,54 @@ export class HeadlessGame extends EventEmitter {
           stuckCount = 0;
           if (state.phase === 'donation') {
             this.handleDonationAuto(state);
+          } else if (state.phase === 'selectPile') {
+            // Auto-play on new pile when model fails to call selectPile
+            try {
+              this.game.playOnPile(null);
+              this.turnCount++;
+              console.log(`Game ${this.slot}: Auto-recovery - played on new pile`);
+            } catch (e) {
+              // If playOnPile failed (invalid chip), reset to selectChip and try again
+              console.error(`Game ${this.slot}: selectPile recovery failed: ${e.message}`);
+              if (this.game.phase === 'selectChip') {
+                // playOnPile reset the phase, now auto-select a valid chip
+                const player = state.players[current];
+                const playable = player.supply > 0 ? [player.color] : (player.prisoners.length > 0 ? [player.prisoners[0]] : []);
+                if (playable.length > 0) {
+                  try {
+                    this.game.selectChip(playable[0]);
+                    this.game.playOnPile(null);
+                    this.turnCount++;
+                    console.log(`Game ${this.slot}: Full recovery - selected ${playable[0]} and played on new pile`);
+                  } catch (e2) {
+                    console.error(`Game ${this.slot}: Full recovery failed: ${e2.message}`);
+                  }
+                }
+              }
+            }
+          } else if (state.phase === 'selectChip') {
+            // Auto-select first available chip
+            const player = state.players[current];
+            const playable = player.supply > 0 ? [player.color] : (player.prisoners.length > 0 ? [player.prisoners[0]] : []);
+            if (playable.length > 0) {
+              try {
+                this.game.selectChip(playable[0]);
+                console.log(`Game ${this.slot}: Auto-recovery - selected ${playable[0]} chip`);
+              } catch (e) {
+                console.error(`Game ${this.slot}: selectChip recovery failed: ${e.message}`);
+              }
+            }
+          } else if (state.phase === 'selectNextPlayer') {
+            // Auto-select first alive player from missing colors
+            const alivePlayers = state.players.filter(p => p.isAlive && p.id !== current);
+            if (alivePlayers.length > 0) {
+              try {
+                this.game.chooseNextPlayer(alivePlayers[0].id);
+                console.log(`Game ${this.slot}: Auto-recovery - chose ${alivePlayers[0].color} as next`);
+              } catch (e) {
+                console.error(`Game ${this.slot}: selectNextPlayer recovery failed: ${e.message}`);
+              }
+            }
           }
           await this.delay(1000);
           continue;
@@ -786,16 +843,19 @@ export class HeadlessGame extends EventEmitter {
 
           // Execute game actions (only the first valid one for current phase)
           for (const action of gameActions) {
-            if (this.canExecuteAction(action.name, state.phase)) {
+            // Use CURRENT game phase, not stale state.phase
+            const currentPhase = this.game.phase;
+            if (this.canExecuteAction(action.name, currentPhase)) {
               const execResult = this.executeAction(action, current);
               snapshot.execution.push(execResult);
-              break;
+              // Don't break - continue processing if phase changed (e.g., playChip → selectPile)
+              if (!execResult.success) break;
             } else {
               snapshot.execution.push({
                 tool: action.name,
                 args: action.arguments,
                 success: false,
-                error: `Not valid in phase ${state.phase}`
+                error: `Not valid in phase ${currentPhase}`
               });
             }
           }

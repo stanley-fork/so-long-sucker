@@ -46,8 +46,61 @@ This game was designed by Nobel laureates to study:
 ### AI Players
 Powered by LLMs with strategic reasoning:
 - **Groq** (Llama 3.3 70B) — Fast, free tier available
-- **Azure Claude** (Opus) — Advanced reasoning
-- **OpenAI** (GPT-4o-mini) — Coming soon
+- **Gemini** (Gemini 3 Flash) — Google's latest model
+- **Azure Claude** (Sonnet 4) — Advanced reasoning
+- **Azure Kimi** (K2 Thinking) — Deep reasoning
+- **OpenRouter** (Various free models) — Cost-effective
+
+### AI Agent Decision Flow
+
+```mermaid
+flowchart LR
+    subgraph INPUT [Game State Input]
+        STATE[Current Phase<br/>Player Status<br/>Piles<br/>Chat History]
+    end
+
+    subgraph LLM [LLM Processing]
+        SYSTEM[System Prompt<br/>Game Rules + Strategy]
+        USER[User Prompt<br/>Current State + Instructions]
+        TOOLS[Available Tools<br/>Based on Phase]
+        
+        SYSTEM --> CALL[API Call]
+        USER --> CALL
+        TOOLS --> CALL
+    end
+
+    subgraph OUTPUT [Tool Execution]
+        PARSE[Parse Tool Calls]
+        GAME_ACTION[Game Actions<br/>playChip, selectPile<br/>killChip, etc.]
+        CHAT[Chat Actions<br/>sendChat, think]
+        
+        PARSE --> GAME_ACTION
+        PARSE --> CHAT
+    end
+
+    STATE --> USER
+    CALL --> PARSE
+    GAME_ACTION --> UPDATE[Update Game State]
+    CHAT --> LOG[Log to Chat History]
+```
+
+### Tools by Phase
+
+```mermaid
+graph TD
+    subgraph ALWAYS [Always Available]
+        CHAT[sendChat]
+        THINK[think]
+    end
+
+    subgraph PHASES [Phase-Specific Tools]
+        SC[selectChip Phase] --> PC[playChip]
+        SP[selectPile Phase] --> SPI[selectPile]
+        CAP[capture Phase] --> KILL[killChip]
+        NP[selectNextPlayer Phase] --> CHOOSE[chooseNextPlayer]
+        DON[donation Phase] --> RESPOND[respondToDonation]
+    end
+```
 
 ---
 
@@ -220,6 +273,76 @@ so-long-sucker/
 ### Setup
 - 4 players with 7 chips each (Red, Blue, Green, Yellow)
 - Random starting player
+
+### Game Flow Diagram
+
+```mermaid
+flowchart TD
+    START([Game Start]) --> INIT[Initialize 4 players<br/>7 chips each]
+    INIT --> TURN
+
+    subgraph TURN [Turn Loop]
+        CHECK_ALIVE{Player has<br/>chips?}
+        CHECK_ALIVE -->|Yes| SELECT_CHIP[selectChip Phase<br/>Choose chip to play]
+        CHECK_ALIVE -->|No| DONATION
+
+        subgraph DONATION [Donation Phase]
+            ASK[Ask each player<br/>for donation]
+            ASK --> DONATED{Someone<br/>donates?}
+            DONATED -->|Yes| SELECT_CHIP
+            DONATED -->|No, all refuse| ELIMINATE[Player Eliminated]
+        end
+
+        SELECT_CHIP --> SELECT_PILE[selectPile Phase<br/>Choose pile or create new]
+        SELECT_PILE --> PLAY[Place chip on pile]
+        PLAY --> CAPTURE_CHECK{Top chip matches<br/>chip below?}
+        
+        CAPTURE_CHECK -->|Yes| CAPTURE[Capture Phase]
+        CAPTURE_CHECK -->|No| NEXT_PLAYER
+
+        subgraph CAPTURE [Capture Resolution]
+            KILL[Kill 1 chip<br/>→ Dead Box]
+            KILL --> TAKE[Take rest as prisoners]
+            TAKE --> EXTRA[Player gets<br/>another turn]
+        end
+
+        EXTRA --> CHECK_ALIVE
+
+        subgraph NEXT_PLAYER [Determine Next Player]
+            MISSING{All 4 colors<br/>in pile?}
+            MISSING -->|No| CHOOSE[Current player chooses<br/>from missing colors]
+            MISSING -->|Yes| DEEPEST[Owner of deepest<br/>chip goes next]
+        end
+    end
+
+    NEXT_PLAYER --> WIN_CHECK{Only 1 player<br/>alive?}
+    ELIMINATE --> WIN_CHECK
+    WIN_CHECK -->|No| TURN
+    WIN_CHECK -->|Yes| WIN([Winner!])
+```
+
+### Phase State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> selectChip: Game starts
+
+    selectChip --> selectPile: playChip()
+    selectChip --> donation: No chips available
+
+    selectPile --> capture: Chip matches below
+    selectPile --> selectNextPlayer: Missing colors in pile
+    selectPile --> selectChip: All colors present<br/>(deepest owner's turn)
+
+    capture --> selectChip: After kill + take prisoners
+
+    selectNextPlayer --> selectChip: Next player chosen
+
+    donation --> selectChip: Donation received
+    donation --> [*]: All refuse → Eliminated
+
+    selectChip --> [*]: Last player wins
+```
 
 ### Turn Flow
 1. **Play a chip** on a pile (existing or new)

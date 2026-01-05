@@ -14,7 +14,7 @@ Usage: node cli/index.js [options]
 Options:
   --games N      Total games to run (default: 10)
   --parallel N   Concurrent games (default: 4)
-  --provider P   LLM provider: groq, openai, claude, azure-claude, azure-kimi (default: groq)
+  --provider P   LLM provider: groq, gemini, gemini3, azure-deepseek, azure-kimi, azure-claude, openai, claude (default: groq)
   --chips N      Chips per player (default: 3)
   --output PATH  Output directory (default: ./data)
   --delay MS     Delay between API calls in ms (default: 500)
@@ -24,6 +24,7 @@ Options:
 Examples:
   node cli/index.js --games 100 --provider groq
   node cli/index.js --games 50 --parallel 2 --chips 5
+  node cli/index.js --games 20 --provider azure-deepseek
   npm run simulate -- --games 20
 
 Controls (in TUI mode):
@@ -44,7 +45,7 @@ async function main() {
   }
 
   // Validate provider
-  const validProviders = ['groq', 'openai', 'claude', 'azure-claude', 'azure-kimi', 'gemini'];
+  const validProviders = ['groq', 'groq-llama', 'groq-gpt-oss', 'gpt-oss', 'openai', 'claude', 'azure-claude', 'azure-kimi', 'azure-deepseek', 'gemini', 'gemini3', 'openrouter-mimo', 'openrouter'];
   if (!validProviders.includes(args.provider)) {
     console.error(`Invalid provider: ${args.provider}`);
     console.error(`Valid providers: ${validProviders.join(', ')}`);
@@ -54,15 +55,22 @@ async function main() {
   // Check API key (supports both VITE_ prefixed and unprefixed)
   const apiKeyNames = {
     'groq': ['GROQ_API_KEY', 'VITE_GROQ_API_KEY'],
+    'groq-llama': ['GROQ_API_KEY', 'VITE_GROQ_API_KEY'],
+    'groq-gpt-oss': ['GROQ_API_KEY', 'VITE_GROQ_API_KEY'],
+    'gpt-oss': ['GROQ_API_KEY', 'VITE_GROQ_API_KEY'],
     'openai': ['OPENAI_API_KEY', 'VITE_OPENAI_API_KEY'],
     'claude': ['CLAUDE_API_KEY', 'VITE_CLAUDE_API_KEY'],
     'azure-claude': ['AZURE_API_KEY', 'VITE_AZURE_CLAUDE_API_KEY', 'AZURE_CLAUDE_API_KEY'],
     'azure-kimi': ['AZURE_API_KEY', 'AZURE_KIMI_API_KEY', 'VITE_AZURE_API_KEY'],
-    'gemini': ['GEMINI_API_KEY', 'VITE_GEMINI_API_KEY']
+    'azure-deepseek': ['AZURE_DEEPSEEK_API_KEY', 'AZURE_API_KEY', 'VITE_AZURE_API_KEY'],
+    'gemini': ['GEMINI_API_KEY', 'VITE_GEMINI_API_KEY'],
+    'gemini3': ['GEMINI_API_KEY', 'VITE_GEMINI_API_KEY'],
+    'openrouter-mimo': ['OPENROUTER_API_KEY', 'VITE_OPENROUTER_API_KEY'],
+    'openrouter': ['OPENROUTER_API_KEY', 'VITE_OPENROUTER_API_KEY']
   }[args.provider];
 
   const hasKey = apiKeyNames.some(name => process.env[name]);
-  if (!hasKey && !['azure-claude', 'azure-kimi'].includes(args.provider)) {
+  if (!hasKey && !['azure-claude', 'azure-kimi', 'azure-deepseek'].includes(args.provider)) {
     console.error(`Missing API key. Set one of: ${apiKeyNames.join(' or ')}`);
     console.error(`Add it to .env file or environment variable`);
     process.exit(1);

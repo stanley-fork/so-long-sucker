@@ -387,7 +387,7 @@ ${colorize('──────────────────────�
     process.stdout.write(output);
   }
 
-  async gracefulShutdown() {
+  async gracefulShutdown(skipSave = false) {
     // Stop all active games
     for (const game of this.activeGames) {
       game.stop();
@@ -402,14 +402,25 @@ ${colorize('──────────────────────�
     }
 
     console.log('\n⏳ Shutting down gracefully...');
-    await this.saveResults();
+    if (!skipSave) {
+      await this.saveResults();
+    }
 
     process.exit(0);
   }
 
   async saveAndExit() {
+    // Pause games first so we get a clean snapshot
+    this.isPaused = true;
+    
+    // Give a moment for any in-flight API calls to complete
+    await new Promise(r => setTimeout(r, 500));
+    
+    // Save all data including active games
     await this.saveResults();
-    this.gracefulShutdown();
+    
+    // Shutdown without saving again
+    this.gracefulShutdown(true);
   }
 
   async finish() {
@@ -474,11 +485,27 @@ ${colorize('╚═════════════════════�
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `${this.outputDir}/session-${timestamp}.json`;
 
-    // Collect all snapshots from all games
+    // Collect all snapshots from all games (both completed AND active)
     const allSnapshots = [];
+    
+    // Add snapshots from completed games
     for (const result of this.completedGames) {
       if (result.snapshots) {
         allSnapshots.push(...result.snapshots);
+      }
+    }
+    
+    // Also add snapshots from currently active games (important for mid-session saves!)
+    for (const game of this.activeGames) {
+      if (game.snapshots && game.snapshots.length > 0) {
+        allSnapshots.push(...game.snapshots);
+      }
+    }
+    
+    // And from queued games that might have started but not finished
+    for (const game of this.queue) {
+      if (game.snapshots && game.snapshots.length > 0) {
+        allSnapshots.push(...game.snapshots);
       }
     }
 
@@ -491,12 +518,14 @@ ${colorize('╚═════════════════════�
         startTime: this.startTime,
         endTime: Date.now(),
         totalGames: this.totalGames,
-        chips: this.chips
+        chips: this.chips,
+        completedGames: this.completedGames.length,
+        activeGames: this.activeGames.length
       },
       snapshots: allSnapshots
     };
 
     fs.writeFileSync(filename, JSON.stringify(data, null, 2));
-    console.log(`\n💾 Saved: ${filename}`);
+    console.log(`\n💾 Saved ${allSnapshots.length} snapshots to: ${filename}`);
   }
 }

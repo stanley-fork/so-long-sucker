@@ -91,7 +91,29 @@ class GroqProvider extends BaseProvider {
     this.baseUrl = 'https://api.groq.com/openai/v1';
   }
 
-  async call(systemPrompt, userPrompt, tools) {
+  async call(systemPrompt, userPrompt, tools, maxRetries = 3) {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await this._doCall(systemPrompt, userPrompt, tools);
+      } catch (error) {
+        const isLastAttempt = attempt === maxRetries;
+        const isRetryable = error.message.includes('429') || 
+                           error.message.includes('503') || 
+                           error.message.includes('fetch failed') ||
+                           error.message.includes('ECONNRESET');
+
+        if (isLastAttempt || !isRetryable) {
+          throw error;
+        }
+
+        // Exponential backoff: 2s, 4s, 8s
+        const delay = 2000 * Math.pow(2, attempt);
+        await new Promise(r => setTimeout(r, delay));
+      }
+    }
+  }
+
+  async _doCall(systemPrompt, userPrompt, tools) {
     const startTime = Date.now();
 
     const response = await fetch(`${this.baseUrl}/chat/completions`, {
@@ -387,6 +409,97 @@ class AzureKimiProvider extends BaseProvider {
   }
 }
 
+// Azure DeepSeek Provider (DeepSeek V3 via Azure OpenAI-compatible API)
+class AzureDeepSeekProvider extends BaseProvider {
+  constructor(apiKey, resource = 'hellobusiness999-4411-resource', model = 'DeepSeek-V3.2') {
+    super(apiKey);
+    this.resource = resource;
+    this.model = model;
+    this.baseUrl = `https://${resource}.openai.azure.com/openai/v1`;
+  }
+
+  async call(systemPrompt, userPrompt, tools) {
+    const startTime = Date.now();
+
+    const response = await fetch(`${this.baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': this.apiKey
+      },
+      body: JSON.stringify({
+        model: this.model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        tools: tools.map(t => ({ type: 'function', function: t })),
+        tool_choice: 'auto',
+        temperature: 0.7
+      })
+    });
+
+    const responseTime = Date.now() - startTime;
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Azure DeepSeek API error: ${response.status} - ${error}`);
+    }
+
+    const data = await response.json();
+    const message = data.choices[0].message;
+
+    let rawToolCalls = [];
+
+    // Check for native tool_calls first
+    if (message.tool_calls && message.tool_calls.length > 0) {
+      rawToolCalls = message.tool_calls.map(tc => {
+        try {
+          return {
+            name: tc.function.name,
+            arguments: JSON.parse(tc.function.arguments)
+          };
+        } catch {
+          return {
+            name: tc.function.name,
+            arguments: tc.function.arguments,
+            parseError: true
+          };
+        }
+      });
+    } 
+    // DeepSeek V3 on Azure returns tool calls as text, parse them
+    else if (message.content && message.content.includes('tool_call_name:')) {
+      const toolCallMatch = message.content.match(/tool_call_name:\s*(\w+)\s*\ntool_call_arguments:\s*(\{[^}]+\})/);
+      if (toolCallMatch) {
+        try {
+          rawToolCalls = [{
+            name: toolCallMatch[1],
+            arguments: JSON.parse(toolCallMatch[2])
+          }];
+        } catch {
+          rawToolCalls = [{
+            name: toolCallMatch[1],
+            arguments: toolCallMatch[2],
+            parseError: true
+          }];
+        }
+      }
+    }
+
+    return {
+      content: message.content,
+      toolCalls: rawToolCalls.filter(tc => !tc.parseError),
+      metadata: {
+        responseTime,
+        promptTokens: data.usage?.prompt_tokens || null,
+        completionTokens: data.usage?.completion_tokens || null,
+        rawToolCalls
+      }
+    };
+  }
+}
+
 // Gemini Provider
 class GeminiProvider extends BaseProvider {
   constructor(apiKey, model = 'gemini-2.5-flash') {
@@ -404,8 +517,8 @@ class GeminiProvider extends BaseProvider {
     // Handle type - Gemini doesn't support array types like ['integer', 'string']
     if (schema.type) {
       if (Array.isArray(schema.type)) {
-        // Use first type or STRING as fallback
-        result.type = schema.type[0] === 'integer' ? 'INTEGER' : 'STRING';
+        // Use STRING for mixed types - more flexible (can represent both "new" and "0")
+        result.type = 'STRING';
       } else {
         // Convert to uppercase for Gemini
         const typeMap = {
@@ -531,7 +644,14 @@ export function createProvider(type) {
       return new OpenAIProvider(getEnv('OPENAI_API_KEY'));
 
     case 'groq':
-      return new GroqProvider(getEnv('GROQ_API_KEY'));
+      return new GroqProvider(getEnv('GROQ_API_KEY'), 'moonshotai/kimi-k2-instruct-0905');
+
+    case 'groq-llama':
+      return new GroqProvider(getEnv('GROQ_API_KEY'), 'llama-3.3-70b-versatile');
+
+    case 'groq-gpt-oss':
+    case 'gpt-oss':
+      return new GroqProvider(getEnv('GROQ_API_KEY'), 'openai/gpt-oss-120b');
 
     case 'claude':
       return new ClaudeProvider(getEnv('CLAUDE_API_KEY'));
@@ -551,11 +671,98 @@ export function createProvider(type) {
       );
 
     case 'gemini':
-      return new GeminiProvider(getEnv('GEMINI_API_KEY'));
+      return new GeminiProvider(getEnv('GEMINI_API_KEY'), 'gemini-2.5-flash');
+
+    case 'gemini3':
+      return new GeminiProvider(getEnv('GEMINI_API_KEY'), 'gemini-3-flash-preview');
+
+    case 'azure-deepseek':
+      return new AzureDeepSeekProvider(
+        getEnv('AZURE_DEEPSEEK_API_KEY') || getEnv('AZURE_API_KEY'),
+        getEnv('AZURE_DEEPSEEK_RESOURCE') || 'hellobusiness999-4411-resource',
+        getEnv('AZURE_DEEPSEEK_MODEL') || 'DeepSeek-V3.2'
+      );
+
+    case 'openrouter-mimo':
+    case 'openrouter-glm':
+    case 'openrouter':
+      return new OpenRouterProvider(
+        getEnv('OPENROUTER_API_KEY'),
+        'z-ai/glm-4.5-air:free'  // Free model with tool support
+      );
 
     default:
       throw new Error(`Unknown provider: ${type}`);
   }
 }
 
-export { OpenAIProvider, GroqProvider, ClaudeProvider, AzureClaudeProvider, AzureKimiProvider, GeminiProvider };
+// OpenRouter Provider (OpenAI-compatible)
+class OpenRouterProvider extends BaseProvider {
+  constructor(apiKey, model = 'xiaomi/mimo-v2-flash:free') {
+    super(apiKey);
+    this.model = model;
+    this.baseUrl = 'https://openrouter.ai/api/v1';
+  }
+
+  async call(systemPrompt, userPrompt, tools) {
+    const startTime = Date.now();
+
+    const response = await fetch(`${this.baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.apiKey}`,
+        'HTTP-Referer': 'https://github.com/so-long-sucker',
+        'X-Title': 'So Long Sucker AI Research'
+      },
+      body: JSON.stringify({
+        model: this.model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        tools: tools.map(t => ({ type: 'function', function: t })),
+        tool_choice: 'auto',
+        temperature: 0.7
+      })
+    });
+
+    const responseTime = Date.now() - startTime;
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`OpenRouter API error: ${response.status} - ${error}`);
+    }
+
+    const data = await response.json();
+    const message = data.choices[0].message;
+
+    const rawToolCalls = (message.tool_calls || []).map(tc => {
+      try {
+        return {
+          name: tc.function.name,
+          arguments: JSON.parse(tc.function.arguments)
+        };
+      } catch {
+        return {
+          name: tc.function.name,
+          arguments: tc.function.arguments,
+          parseError: true
+        };
+      }
+    });
+
+    return {
+      content: message.content,
+      toolCalls: rawToolCalls.filter(tc => !tc.parseError),
+      metadata: {
+        responseTime,
+        promptTokens: data.usage?.prompt_tokens || null,
+        completionTokens: data.usage?.completion_tokens || null,
+        rawToolCalls
+      }
+    };
+  }
+}
+
+export { OpenAIProvider, GroqProvider, ClaudeProvider, AzureClaudeProvider, AzureKimiProvider, AzureDeepSeekProvider, GeminiProvider, OpenRouterProvider };
