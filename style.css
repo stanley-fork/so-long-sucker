@@ -309,11 +309,19 @@ body {
 .personality-card.backstabber { border-color: rgba(231, 76, 60, 0.3); }
 .personality-card.assassin { border-color: rgba(142, 68, 173, 0.3); }
 .personality-card.fool { border-color: rgba(241, 196, 15, 0.3); }
+.personality-card.executioner { border-color: rgba(231, 76, 60, 0.3); }
+.personality-card.beggar { border-color: rgba(243, 156, 18, 0.3); }
+.personality-card.schemer { border-color: rgba(155, 89, 182, 0.3); }
+.personality-card.naive { border-color: rgba(39, 174, 96, 0.3); }
 
 .personality-card.diplomat:hover { border-color: rgba(46, 204, 113, 0.8); }
 .personality-card.backstabber:hover { border-color: rgba(231, 76, 60, 0.8); }
 .personality-card.assassin:hover { border-color: rgba(142, 68, 173, 0.8); }
 .personality-card.fool:hover { border-color: rgba(241, 196, 15, 0.8); }
+.personality-card.executioner:hover { border-color: rgba(231, 76, 60, 0.8); box-shadow: 0 0 30px rgba(231, 76, 60, 0.2); }
+.personality-card.beggar:hover { border-color: rgba(243, 156, 18, 0.8); box-shadow: 0 0 30px rgba(243, 156, 18, 0.2); }
+.personality-card.schemer:hover { border-color: rgba(155, 89, 182, 0.8); box-shadow: 0 0 30px rgba(155, 89, 182, 0.2); }
+.personality-card.naive:hover { border-color: rgba(39, 174, 96, 0.8); box-shadow: 0 0 30px rgba(39, 174, 96, 0.2); }
 
 .personality-icon {
   font-size: 2rem;
@@ -325,6 +333,18 @@ body {
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--text-primary);
+}
+
+.personality-model {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  padding: 4px 10px;
+  border-radius: 12px;
+  margin-bottom: var(--space-xs);
 }
 
 .personality-desc {
@@ -2999,6 +3019,298 @@ body {
 }
 
 /* ============================================
+   ENHANCED RESULTS PAGE STYLES
+   ============================================ */
+
+/* Leaderboard Header */
+.leaderboard-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-lg);
+}
+
+.games-count {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+}
+
+/* Enhanced Leaderboard Items */
+.leaderboard-item {
+  display: grid;
+  grid-template-columns: 50px 280px 1fr 1fr;
+  gap: var(--space-lg);
+  align-items: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg) var(--space-xl);
+  transition: all 0.3s ease;
+}
+
+.leaderboard-item:hover {
+  border-color: rgba(212, 175, 55, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.leaderboard-item.winner {
+  background: linear-gradient(135deg, var(--bg-surface) 0%, rgba(212, 175, 55, 0.05) 100%);
+  border-color: rgba(212, 175, 55, 0.4);
+}
+
+.leaderboard-rank {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.leaderboard-item.winner .leaderboard-rank {
+  font-size: 2rem;
+}
+
+/* Model Info */
+.model-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.model-name {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.model-personality {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.model-personality.executioner { color: #e74c3c; }
+.model-personality.beggar { color: #f39c12; }
+.model-personality.schemer { color: #9b59b6; }
+.model-personality.diplomat { color: #27ae60; }
+
+/* Leaderboard Stats */
+.leaderboard-stats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.stat-details {
+  display: flex;
+  gap: var(--space-lg);
+  font-size: 0.85rem;
+}
+
+.stat-win-rate {
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.stat-games {
+  color: var(--text-secondary);
+}
+
+.stat-chat {
+  color: var(--text-muted);
+}
+
+/* Leaderboard Quote */
+.leaderboard-quote {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.leaderboard-quote blockquote {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+  padding-left: var(--space-md);
+  border-left: 2px solid var(--border);
+}
+
+.quote-context {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Insight Cards Enhanced */
+.insight-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.insight-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+}
+
+.insight-icon {
+  font-size: 2rem;
+  margin-bottom: var(--space-md);
+  display: block;
+}
+
+/* Strategy Comparisons */
+.strategy-comparison {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  margin-bottom: var(--space-lg);
+}
+
+.strategy-comparison h3 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-lg);
+}
+
+.comparison-chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.comparison-item {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: var(--space-md);
+  align-items: center;
+}
+
+.comparison-label {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.comparison-bar {
+  height: 28px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: relative;
+}
+
+.comparison-fill {
+  height: 100%;
+  border-radius: var(--radius-md);
+  transition: width 0.8s ease-out;
+}
+
+.comparison-fill.red { background: linear-gradient(90deg, #c44536, #e74c3c); }
+.comparison-fill.blue { background: linear-gradient(90deg, #3d7ea6, #3498db); }
+.comparison-fill.green { background: linear-gradient(90deg, #4a9c6d, #27ae60); }
+.comparison-fill.yellow { background: linear-gradient(90deg, #c9a227, #f1c40f); }
+
+.comparison-value {
+  position: absolute;
+  right: var(--space-md);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.comparison-conclusion {
+  margin-top: var(--space-lg);
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-style: italic;
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* Conversations Enhanced */
+.conversations-intro {
+  margin-bottom: var(--space-lg);
+}
+
+.conversations-intro p {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.conversation-personality {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+}
+
+/* Responsive for enhanced leaderboard */
+@media (max-width: 1100px) {
+  .leaderboard-item {
+    grid-template-columns: 50px 1fr 1fr;
+    gap: var(--space-md);
+  }
+
+  .leaderboard-quote {
+    grid-column: 2 / -1;
+    margin-top: var(--space-md);
+  }
+}
+
+@media (max-width: 768px) {
+  .leaderboard-item {
+    grid-template-columns: 1fr;
+    text-align: center;
+    padding: var(--space-lg);
+  }
+
+  .leaderboard-rank {
+    margin-bottom: var(--space-sm);
+  }
+
+  .leaderboard-model {
+    justify-content: center;
+    margin-bottom: var(--space-md);
+  }
+
+  .leaderboard-quote {
+    grid-column: 1;
+  }
+
+  .comparison-item {
+    grid-template-columns: 1fr;
+    gap: var(--space-xs);
+  }
+
+  .comparison-label {
+    text-align: center;
+  }
+}
+
+/* ============================================
    FOOTER
    ============================================ */
 
@@ -3030,5 +3342,213 @@ body {
   .simulation-grid.cols-3,
   .simulation-grid.cols-4 {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   ANIMATIONS & POLISH
+   ============================================ */
+
+/* Staggered fade-in animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Hero animations */
+.hero-badge {
+  animation: fadeInUp 0.6s ease-out 0.1s both;
+}
+
+.hero-headline {
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.hero-subhead {
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+}
+
+.hero-stats-grid {
+  animation: fadeInUp 0.6s ease-out 0.4s both;
+}
+
+.stat-card {
+  animation: fadeInScale 0.4s ease-out both;
+}
+
+.stat-card:nth-child(1) { animation-delay: 0.5s; }
+.stat-card:nth-child(2) { animation-delay: 0.6s; }
+.stat-card:nth-child(3) { animation-delay: 0.7s; }
+
+.hero-personality {
+  animation: fadeInUp 0.6s ease-out 0.8s both;
+}
+
+.personality-card {
+  animation: fadeInScale 0.4s ease-out both;
+}
+
+.personality-card:nth-child(1) { animation-delay: 0.9s; }
+.personality-card:nth-child(2) { animation-delay: 1.0s; }
+.personality-card:nth-child(3) { animation-delay: 1.1s; }
+.personality-card:nth-child(4) { animation-delay: 1.2s; }
+
+.hero-quote {
+  animation: fadeInUp 0.6s ease-out 1.3s both;
+}
+
+.hero-cta {
+  animation: fadeInUp 0.6s ease-out 1.4s both;
+}
+
+/* Results page animations */
+.results-badge {
+  animation: fadeInUp 0.5s ease-out 0.1s both;
+}
+
+#results-header h1 {
+  animation: fadeInUp 0.5s ease-out 0.2s both;
+}
+
+#results-header p {
+  animation: fadeInUp 0.5s ease-out 0.3s both;
+}
+
+.leaderboard-item {
+  animation: slideInLeft 0.5s ease-out both;
+}
+
+.leaderboard-item:nth-child(1) { animation-delay: 0.4s; }
+.leaderboard-item:nth-child(2) { animation-delay: 0.5s; }
+.leaderboard-item:nth-child(3) { animation-delay: 0.6s; }
+.leaderboard-item:nth-child(4) { animation-delay: 0.7s; }
+.leaderboard-item:nth-child(5) { animation-delay: 0.8s; }
+
+.insight-card {
+  animation: fadeInScale 0.4s ease-out both;
+}
+
+.insight-card:nth-child(1) { animation-delay: 0.3s; }
+.insight-card:nth-child(2) { animation-delay: 0.4s; }
+.insight-card:nth-child(3) { animation-delay: 0.5s; }
+.insight-card:nth-child(4) { animation-delay: 0.6s; }
+
+.strategy-comparison {
+  animation: fadeInUp 0.5s ease-out both;
+}
+
+.strategy-comparison:nth-child(1) { animation-delay: 0.2s; }
+.strategy-comparison:nth-child(2) { animation-delay: 0.4s; }
+.strategy-comparison:nth-child(3) { animation-delay: 0.6s; }
+
+.conversation-item {
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+.conversation-item:nth-child(1) { animation-delay: 0.2s; }
+.conversation-item:nth-child(2) { animation-delay: 0.3s; }
+.conversation-item:nth-child(3) { animation-delay: 0.4s; }
+.conversation-item:nth-child(4) { animation-delay: 0.5s; }
+.conversation-item:nth-child(5) { animation-delay: 0.6s; }
+.conversation-item:nth-child(6) { animation-delay: 0.7s; }
+
+/* Hover enhancements */
+.stat-card:hover {
+  animation: pulse 0.3s ease-out;
+}
+
+.personality-card:hover .personality-icon {
+  animation: pulse 0.5s ease-out infinite;
+}
+
+/* Loading shimmer effect for stats */
+.stat-value {
+  background: linear-gradient(90deg, 
+    var(--gold) 0%, 
+    #e6c03e 25%, 
+    var(--gold) 50%, 
+    #e6c03e 75%, 
+    var(--gold) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Crown glow for winner */
+.leaderboard-item.winner .leaderboard-rank {
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Bar fill animation */
+.stat-fill,
+.comparison-fill {
+  animation: fillBar 1s ease-out forwards;
+  transform-origin: left;
+}
+
+@keyframes fillBar {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Quote entrance */
+.leaderboard-quote blockquote,
+.conversation-quote {
+  animation: fadeInUp 0.5s ease-out both;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
