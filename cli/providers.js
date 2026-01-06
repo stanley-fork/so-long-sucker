@@ -653,6 +653,14 @@ export function createProvider(type) {
     case 'gpt-oss':
       return new GroqProvider(getEnv('GROQ_API_KEY'), 'openai/gpt-oss-120b');
 
+    case 'groq-qwen3':
+    case 'qwen3':
+      return new GroqProvider(getEnv('GROQ_API_KEY'), 'qwen/qwen3-32b');
+
+    case 'groq-kimi':
+    case 'kimi':
+      return new GroqProvider(getEnv('GROQ_API_KEY'), 'moonshotai/kimi-k2-instruct-0905');
+
     case 'claude':
       return new ClaudeProvider(getEnv('CLAUDE_API_KEY'));
 

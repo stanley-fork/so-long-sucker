@@ -14,12 +14,14 @@ export class SimulatorTUI {
     this.totalGames = config.totalGames;
     this.parallel = Math.min(config.parallel, config.totalGames);
     this.providerType = config.provider;
+    this.providerTypes = config.providers || null; // Array of 4 provider types for mixed-model
     this.chips = config.chips;
     this.outputDir = config.outputDir;
     this.delay = config.delay;
     this.headless = config.headless;
 
     this.provider = null;
+    this.providers = null; // Array of 4 provider instances for mixed-model
     this.games = [];        // All game instances
     this.activeGames = [];  // Currently running
     this.completedGames = [];
@@ -37,8 +39,15 @@ export class SimulatorTUI {
   }
 
   async start() {
-    // Initialize provider
-    this.provider = createProvider(this.providerType);
+    // Initialize provider(s)
+    if (this.providerTypes && this.providerTypes.length === 4) {
+      // Mixed-model mode: create 4 separate provider instances
+      this.providers = this.providerTypes.map(type => createProvider(type));
+      this.provider = this.providers[0]; // For backward compatibility in stats display
+    } else {
+      // Single provider mode (legacy)
+      this.provider = createProvider(this.providerType);
+    }
     this.startTime = Date.now();
     this.isRunning = true;
 
@@ -54,11 +63,19 @@ export class SimulatorTUI {
 
     // Initialize all games
     for (let i = 0; i < this.totalGames; i++) {
-      const game = new HeadlessGame(i, {
+      const gameConfig = {
         chips: this.chips,
-        provider: this.provider,
         delay: this.delay
-      });
+      };
+      
+      // Pass either array of providers or single provider
+      if (this.providers) {
+        gameConfig.providers = this.providers;
+      } else {
+        gameConfig.provider = this.provider;
+      }
+      
+      const game = new HeadlessGame(i, gameConfig);
 
       // Set up event listeners
       game.on('start', () => this.onGameStart(i));
@@ -233,13 +250,16 @@ export class SimulatorTUI {
 
     const elapsed = formatDuration(Date.now() - this.startTime);
     const completed = this.completedGames.length;
+    const providerDisplay = this.providerTypes 
+      ? `${colorize('MIXED', 'magenta')} (${this.providerTypes.join(', ')})` 
+      : colorize(this.providerType, 'yellow');
 
     let output = `
 ${colorize('╔═══════════════════════════════════════════════════════════════════╗', 'cyan')}
 ${colorize('║', 'cyan')}  🎮 ${colorize('So Long Sucker - Mass Simulation', 'bold')}                           ${colorize('║', 'cyan')}
 ${colorize('╚═══════════════════════════════════════════════════════════════════╝', 'cyan')}
 
-  Provider: ${colorize(this.providerType, 'yellow')} | Games: ${colorize(`${completed}/${this.totalGames}`, 'green')} | Time: ${elapsed}
+  Provider: ${providerDisplay} | Games: ${colorize(`${completed}/${this.totalGames}`, 'green')} | Time: ${elapsed}
   ${this.isPaused ? colorize('⏸  PAUSED', 'yellow') : colorize('▶  Running', 'green')}
 
 ${colorize('─────────────────────────────────────────────────────────────────────', 'gray')}
@@ -513,8 +533,17 @@ ${colorize('╚═════════════════════�
     const data = {
       session: {
         id: `session-${Date.now()}`,
-        provider: this.providerType,
-        model: this.provider?.getModelName?.() || this.provider?.model || 'unknown',
+        provider: this.providerTypes ? 'mixed' : this.providerType,
+        model: this.providerTypes 
+          ? this.providers.map(p => p.getModelName?.() || p.model || 'unknown')
+          : (this.provider?.getModelName?.() || this.provider?.model || 'unknown'),
+        // For mixed-model games, store model per player color
+        playerModels: this.providerTypes ? {
+          red: this.providers[0]?.getModelName?.() || 'unknown',
+          blue: this.providers[1]?.getModelName?.() || 'unknown',
+          green: this.providers[2]?.getModelName?.() || 'unknown',
+          yellow: this.providers[3]?.getModelName?.() || 'unknown'
+        } : null,
         startTime: this.startTime,
         endTime: Date.now(),
         totalGames: this.totalGames,

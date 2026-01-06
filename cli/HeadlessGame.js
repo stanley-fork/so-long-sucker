@@ -622,7 +622,9 @@ export class HeadlessGame extends EventEmitter {
     this.slot = slot;
     this.config = config;
     this.game = new Game(config.chips);
-    this.provider = config.provider;
+    // Support both single provider (legacy) and array of 4 providers (mixed-model)
+    this.provider = config.provider; // legacy single provider
+    this.providers = config.providers || null; // array of 4 providers for mixed-model games
     this.agents = [];
     this.isRunning = false;
     this.isFinished = false;
@@ -695,17 +697,22 @@ export class HeadlessGame extends EventEmitter {
     this.isRunning = true;
     this.startTime = Date.now();
 
-    // Create AI agents
+    // Create AI agents - use per-player providers if available, otherwise single provider
     for (let i = 0; i < 4; i++) {
-      this.agents.push(new AIAgent(i, this.provider));
+      const playerProvider = this.providers ? this.providers[i] : this.provider;
+      this.agents.push(new AIAgent(i, playerProvider));
     }
 
-    // Add game_start snapshot
+    // Add game_start snapshot with model info
     this.addSnapshot({
       type: 'game_start',
       game: this.slot,
       state: this.getStateSnapshot(),
-      chatHistory: []
+      chatHistory: [],
+      models: this.agents.map(a => ({
+        player: a.color,
+        model: a.provider.getModelName()
+      }))
     });
 
     this.emit('start', { slot: this.slot });
@@ -763,15 +770,29 @@ export class HeadlessGame extends EventEmitter {
               }
             }
           } else if (state.phase === 'selectChip') {
-            // Auto-select first available chip
+            // Check if player has no chips - should trigger donation
             const player = state.players[current];
-            const playable = player.supply > 0 ? [player.color] : (player.prisoners.length > 0 ? [player.prisoners[0]] : []);
-            if (playable.length > 0) {
+            if (player.supply === 0 && player.prisoners.length === 0) {
+              // Player has no chips - trigger donation phase
+              console.log(`Game ${this.slot}: Player ${COLORS[current]} has no chips, triggering donation`);
               try {
-                this.game.selectChip(playable[0]);
-                console.log(`Game ${this.slot}: Auto-recovery - selected ${playable[0]} chip`);
+                const result = this.game.startDonation();
+                if (result.action === 'eliminated' || result.action === 'gameOver') {
+                  this.checkEliminations();
+                }
               } catch (e) {
-                console.error(`Game ${this.slot}: selectChip recovery failed: ${e.message}`);
+                console.error(`Game ${this.slot}: Donation trigger failed: ${e.message}`);
+              }
+            } else {
+              // Auto-select first available chip
+              const playable = player.supply > 0 ? [player.color] : [player.prisoners[0]];
+              if (playable.length > 0) {
+                try {
+                  this.game.selectChip(playable[0]);
+                  console.log(`Game ${this.slot}: Auto-recovery - selected ${playable[0]} chip`);
+                } catch (e) {
+                  console.error(`Game ${this.slot}: selectChip recovery failed: ${e.message}`);
+                }
               }
             }
           } else if (state.phase === 'selectNextPlayer') {
@@ -801,6 +822,25 @@ export class HeadlessGame extends EventEmitter {
         continue;
       }
 
+      // Check if current player has no chips - trigger donation immediately
+      // This prevents the LLM from trying to play when it has nothing to play
+      if (state.phase === 'selectChip') {
+        const player = state.players[current];
+        if (player.supply === 0 && player.prisoners.length === 0) {
+          console.log(`Game ${this.slot}: ${COLORS[current]} has no chips, triggering donation`);
+          try {
+            const result = this.game.startDonation();
+            this.checkEliminations();
+            if (this.game.phase === 'gameOver') {
+              break;
+            }
+          } catch (e) {
+            console.error(`Game ${this.slot}: startDonation failed: ${e.message}`);
+          }
+          continue; // Re-check state after donation
+        }
+      }
+
       const agent = this.agents[current];
 
       // Capture state BEFORE LLM call
@@ -817,6 +857,7 @@ export class HeadlessGame extends EventEmitter {
           game: this.slot,
           turn: this.turnCount,
           player: COLORS[current],
+          model: agent.provider.getModelName(), // Track which model made this decision
           state: snapshotState,
           chatHistory: snapshotChat,
           llmRequest: result.context ? {
@@ -906,6 +947,7 @@ export class HeadlessGame extends EventEmitter {
           game: this.slot,
           turn: this.turnCount,
           player: COLORS[i],
+          model: agent.provider.getModelName(), // Track which model made this decision
           donationRequester: COLORS[state.donationRequester],
           state: snapshotState,
           chatHistory: snapshotChat,
@@ -951,6 +993,7 @@ export class HeadlessGame extends EventEmitter {
       if (this.game.phase !== 'donation') break;
       try {
         this.game.handleDonation(i, false);
+        this.checkEliminations(); // Check after each refusal in case player was eliminated
       } catch (e) {
         // Ignore - might already have been asked
       }

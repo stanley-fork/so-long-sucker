@@ -34,6 +34,10 @@ export function parseArgs(argv) {
         args.provider = next || args.provider;
         i++;
         break;
+      case '--providers':
+        args.providers = next || null;
+        i++;
+        break;
       case '--chips':
       case '-c':
         args.chips = parseInt(next) || args.chips;
