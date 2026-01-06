@@ -76,102 +76,156 @@
   <div class="grain-overlay"></div>
 
   <!-- Navigation -->
-  <nav id="results-nav">
-    <a href="index.html" class="nav-link">
-      Home
-    </a>
-    <a href="game.html" class="nav-link">
-      Play Game
-    </a>
-    <a href="results.html" class="nav-link">
-      Results
-    </a>
+  <nav id="main-nav">
+    <div class="nav-brand">So Long Sucker</div>
+    <div class="nav-links">
+      <a href="#leaderboard" class="nav-link">Leaderboard</a>
+      <a href="#insights" class="nav-link">Insights</a>
+      <a href="game.html" class="nav-link nav-cta">Watch AI Play</a>
+    </div>
   </nav>
 
-  <!-- Landing Hero -->
-  <section id="landing-hero">
+  <!-- Hero Section -->
+  <section id="hero">
     <div class="hero-content">
-      <span class="hero-badge">AI Deception Benchmark</span>
+      <span class="hero-badge">46 Games Analyzed</span>
       <h1 class="hero-headline">Which AI Lies Best?</h1>
       <p class="hero-subhead">
         A 1950s game theory classic designed to <em>mathematically require</em> betrayal — 
-        now we're making AI models play it against each other.
+        we made 4 AI models play it against each other.
       </p>
 
-      <!-- Live Stats Grid -->
+      <!-- Key Stats -->
       <div class="hero-stats-grid">
         <div class="stat-card">
           <span class="stat-value">114</span>
           <span class="stat-label">Kills by Gemini Alone</span>
         </div>
         <div class="stat-card">
-          <span class="stat-value">46</span>
-          <span class="stat-label">Games Analyzed</span>
-        </div>
-        <div class="stat-card">
           <span class="stat-value">91%</span>
           <span class="stat-label">Donation Requests Refused</span>
         </div>
-      </div>
-
-      <!-- AI Personality Types - Real Data -->
-      <div class="hero-personality">
-        <h3 class="personality-title">4 AI Models. 4 Distinct Personalities.</h3>
-        <div class="personality-grid">
-          <div class="personality-card executioner">
-            <span class="personality-icon">🔪</span>
-            <span class="personality-name">The Ruthless Executioner</span>
-            <span class="personality-model">Gemini 3 Flash</span>
-            <span class="personality-desc">114 kills. Refuses 91% of donations. No mercy.</span>
-            <span class="personality-win">34.8% win rate</span>
-          </div>
-          <div class="personality-card beggar">
-            <span class="personality-icon">🙏</span>
-            <span class="personality-name">The Desperate Beggar</span>
-            <span class="personality-model">GPT-OSS 120B</span>
-            <span class="personality-desc">69 messages/game. Constantly begging. Still wins.</span>
-            <span class="personality-win">30.4% win rate</span>
-          </div>
-          <div class="personality-card schemer">
-            <span class="personality-icon">🤫</span>
-            <span class="personality-name">The Secret Schemer</span>
-            <span class="personality-model">Kimi K2</span>
-            <span class="personality-desc">Most internal thoughts. Plans betrayals. Gets targeted.</span>
-            <span class="personality-win">17.4% win rate</span>
-          </div>
-          <div class="personality-card naive">
-            <span class="personality-icon">🕊️</span>
-            <span class="personality-name">The Naive Diplomat</span>
-            <span class="personality-model">Qwen3 32B</span>
-            <span class="personality-desc">80% generous. Nice guys finish last.</span>
-            <span class="personality-win">17.4% win rate</span>
-          </div>
+        <div class="stat-card">
+          <span class="stat-value">69</span>
+          <span class="stat-label">Messages/Game by GPT</span>
         </div>
       </div>
 
-      <!-- Featured Betrayal Quote - Real Quote -->
-      <blockquote class="hero-quote">
-        <p>"Blue, don't listen to Green's desperation. I'm capturing their last chip now. Once I've cleared the board, I'll donate one of your chips back to you so we can keep our alliance until the end."</p>
-        <cite>— Gemini 3 Flash (The Executioner), before eliminating Blue next</cite>
-      </blockquote>
+      <a href="game.html" class="btn btn-primary btn-large hero-cta-btn">
+        Watch AI Play Live
+      </a>
+    </div>
+  </section>
 
-      <div class="hero-cta">
-        <a href="game.html" class="btn btn-primary btn-large">
-          Watch AI Play
-        </a>
-        <a href="results.html" class="btn btn-outline btn-large">
-          See Leaderboard
-        </a>
-        <span class="cta-note">Uses your API key • Data stays local • Open source</span>
+  <!-- AI Personalities Section -->
+  <section id="personalities">
+    <div class="section-container">
+      <h2 class="section-title">4 Models. 4 Strategies. 1 Survivor.</h2>
+      <p class="section-subtitle">Each AI developed its own personality. Here's who they became.</p>
+      
+      <div class="personality-grid">
+        <div class="personality-card executioner">
+          <span class="personality-icon">🔪</span>
+          <span class="personality-name">The Ruthless Executioner</span>
+          <span class="personality-model">Gemini 3 Flash</span>
+          <span class="personality-desc">114 kills. Refuses 91% of donations. No mercy.</span>
+          <span class="personality-win">34.8% win rate</span>
+        </div>
+        <div class="personality-card beggar">
+          <span class="personality-icon">🙏</span>
+          <span class="personality-name">The Desperate Beggar</span>
+          <span class="personality-model">GPT-OSS 120B</span>
+          <span class="personality-desc">69 messages/game. Constantly begging. Still wins.</span>
+          <span class="personality-win">30.4% win rate</span>
+        </div>
+        <div class="personality-card schemer">
+          <span class="personality-icon">🤫</span>
+          <span class="personality-name">The Secret Schemer</span>
+          <span class="personality-model">Kimi K2</span>
+          <span class="personality-desc">Most internal thoughts. Plans betrayals. Gets targeted.</span>
+          <span class="personality-win">17.4% win rate</span>
+        </div>
+        <div class="personality-card naive">
+          <span class="personality-icon">🕊️</span>
+          <span class="personality-name">The Naive Diplomat</span>
+          <span class="personality-model">Qwen3 32B</span>
+          <span class="personality-desc">80% generous. Nice guys finish last.</span>
+          <span class="personality-win">17.4% win rate</span>
+        </div>
       </div>
+    </div>
+  </section>
+
+  <!-- Leaderboard Section -->
+  <section id="leaderboard">
+    <div class="section-container">
+      <h2 class="section-title">The Leaderboard</h2>
+      <p class="section-subtitle">Who's the best backstabber? The data doesn't lie.</p>
+      
+      <div id="leaderboard-content" class="leaderboard">
+        <!-- Populated by JavaScript -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Insights Section -->
+  <section id="insights">
+    <div class="section-container">
+      <h2 class="section-title">What We Learned</h2>
+      <p class="section-subtitle">Patterns that emerged from 46 games of AI deception.</p>
+      
+      <div id="insights-content" class="insights-grid">
+        <!-- Populated by JavaScript -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Strategy Analysis Section -->
+  <section id="strategies">
+    <div class="section-container">
+      <h2 class="section-title">Strategy Breakdown</h2>
+      <p class="section-subtitle">The numbers behind the betrayals.</p>
+      
+      <div id="strategies-content" class="strategies">
+        <!-- Populated by JavaScript -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Sample Conversations Section -->
+  <section id="conversations">
+    <div class="section-container">
+      <h2 class="section-title">Things They Actually Said</h2>
+      <p class="section-subtitle">Real messages. No edits. Just AIs being AIs.</p>
+      
+      <div id="conversations-content" class="conversations">
+        <!-- Populated by JavaScript -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA Section -->
+  <section id="final-cta">
+    <div class="section-container">
+      <h2 class="cta-headline">See It For Yourself</h2>
+      <p class="cta-subhead">Watch AI models negotiate, form alliances, and inevitably betray each other in real-time.</p>
+      <a href="game.html" class="btn btn-primary btn-large">
+        Watch AI Play Live
+      </a>
+      <span class="cta-note">Uses your API key • Data stays local • Open source</span>
     </div>
   </section>
 
   <!-- Footer -->
   <footer id="app-footer">
-    <a href="https://github.com/lout33" target="_blank" rel="noopener">
-      Built by lout33
-    </a>
+    <div class="footer-content">
+      <p>Based on the game by John Nash, Lloyd Shapley, Mel Hausner & Martin Shubik (1950)</p>
+      <a href="https://github.com/lout33" target="_blank" rel="noopener">
+        Built by lout33
+      </a>
+    </div>
   </footer>
+
+  <script type="module" src="js/index.js"></script>
 </body>
 </html>
