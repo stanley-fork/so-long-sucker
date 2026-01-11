@@ -89,6 +89,9 @@ This distinction has profound implications for AI safety. A strategically decept
 | Complex | 7 | 10 | 10 | 20 | 53.9 |
 | **Total** | — | **73** | **73** | **146** | — |
 
+![Figure 5: Game Length by Complexity](figures/fig5_game_length.png)
+*Figure 5: Average game length (turns) by complexity level. Higher chip counts create longer games, giving strategic manipulation more time to compound.*
+
 ### 2.4 Tools Available to Models
 
 In talking mode, models had access to:
@@ -121,6 +124,12 @@ Our central finding is a dramatic reversal in model performance as game complexi
 
 This pattern suggests that **deception capability scales with task complexity**—a critical AI safety insight.
 
+![Figure 1: The Complexity Reversal](figures/fig1_complexity_reversal.png)
+*Figure 1: Win rates invert as game complexity increases. GPT-OSS dominates simple 3-chip games but collapses at 7-chip complexity, while Gemini shows the opposite pattern.*
+
+![Figure 2: Win Rates by Complexity](figures/fig2_win_rates_complexity.png)
+*Figure 2: Win rate trajectories across complexity levels in silent (left) and talking (right) conditions. Gemini's advantage compounds with complexity; GPT-OSS's performance degrades.*
+
 ### 3.2 The Equalizer Effect
 
 Communication reduces win rate variance, pushing all models toward the expected 25%:
@@ -133,6 +142,9 @@ Communication reduces win rate variance, pushing all models toward the expected 
 
 At simple complexity, chat equalizes outcomes. At high complexity, chat **amplifies** differences—the skilled manipulator (Gemini) pulls away from the field.
 
+![Figure 4: Chat Impact on Win Rate](figures/fig4_chat_impact.png)
+*Figure 4: How communication affects each model's win rate. Gemini benefits (+25.6%), while GPT-OSS suffers (-34.9%). Chat amplifies strategic differences.*
+
 ### 3.3 The Talker's Paradox
 
 GPT-OSS produces **62% of all messages** but shows the steepest performance decline with chat enabled:
@@ -143,6 +155,9 @@ GPT-OSS produces **62% of all messages** but shows the steepest performance decl
 | Gemini | 19.4% | 34.9% (3-chip) | 9.3% | +25.6% |
 
 This inverse relationship between communication volume and success suggests over-communication signals weakness or desperation.
+
+![Figure 3: The Talker's Paradox](figures/fig3_talkers_paradox.png)
+*Figure 3: The Talker's Paradox — GPT-OSS produces 62% of all messages but shows declining win rates. Gemini speaks less but wins more, especially at higher complexity.*
 
 ### 3.4 Model Behavioral Classifications
 
