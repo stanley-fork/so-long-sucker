@@ -220,6 +220,8 @@ GPT-OSS proposes **7x more alliances than it receives**—a desperation signal t
 
 GPT-OSS executes **2.7x more betrayals** than Gemini but wins less often—reinforcing the quality-over-quantity pattern in strategic deception.
 
+**Quantitative Deception Markers.** Statistical analysis revealed strong correlations between specific behaviors and success: promises made correlated with win rate (r=0.74), as did overall chat frequency (r=0.65). However, the relationship was non-linear—moderate communication with high-certainty language proved optimal.
+
 ### 3.8 Winner Profile
 
 Statistical comparison of winner vs. loser behavior:
@@ -364,13 +366,19 @@ This framework could theoretically be used to:
 
 **Mitigation**: We emphasize detection over optimization. Framework designed for safety research, not capability enhancement.
 
-### C. Data Availability
+### C. Responsible Disclosure
+
+- All code and data are open-source for transparency
+- No model-specific vulnerabilities discovered requiring private disclosure
+- Framework available for AI labs to test their own models for manipulation capabilities
+
+### D. Data Availability
 
 - All code and data are open-source for transparency
 - Framework available for AI labs to test their own models
 - Repository: https://github.com/lout33/so-long-sucker
 
-### D. Future Work
+### E. Future Work
 
 1. Expand to more models and longer game sessions
 2. Develop real-time deception detection methods
