@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+2. Add visualizations for the new sections (alliance network graph, correlation heatmap)#!/usr/bin/env python3
 """
 So Long Sucker - DePaulo Pre-Betrayal Linguistic Analysis
 

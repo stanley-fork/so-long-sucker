@@ -1,248 +1,332 @@
+# Deception Scales: How Strategic Manipulation Emerges in Complex LLM Negotiations
 
+**Luis Fernando Yupanqui** — Independent AI Researcher  
+**Mari Cairns** — Independent AI Researcher  
+**With** Apart Research
 
-|  So Long Sucker: Do LLMs Lie or Bullshit? Measuring Strategic Deception in Multi-Agent Negotiations  |
-| ----- |
-|  |
-|  Luis Fernando Yupanqui  Independent AI Researcher Mari CairnsIndependent AI Researcher **With**Apart Research **Abstract** We present a multi-agent simulation framework using the classic game "So Long Sucker" (Nash et al., 1964\) to study emergent deception and manipulation in LLM negotiations. The game requires players to form alliances and inevitably betray each other creating natural pressure for strategic deception. We ran **146 games** across four LLM models (Gemini 3 Flash, GPT-OSS 120B, Kimi K2, Qwen3-32B) in two conditions (talking vs. silent) across **three complexity levels** (3-chip, 5-chip, 7-chip). Our key finding: **The Complexity Reversal** — win rates completely reverse as game complexity increases. GPT-OSS dominates simple games (67% at 3-chip silent) but collapses in complex ones (10% at 7-chip talking), while Gemini shows the opposite pattern (9% → 90%). Drawing on Harry Frankfurt's philosophical distinction, we classify 3 of 4 models as **LIARS** (using private reasoning to strategically deceive) and 1 as a **BULLSHITTER** (producing plausible output without truth-tracking). We establish a theoretical framework drawing from DePaulo et al.'s (2003) deception research to interpret these findings. Analysis of thousands of messages reveals 107 instances of strategic deception (private reasoning contradicting public statements), quantifiable deception patterns including "the talker's paradox" (over-communication correlates with failure), and systematic gaslighting tactics. The critical AI safety implication: **deception capability scales with task complexity** — simple benchmarks dramatically underestimate manipulation risk. This work contributes to Track 4 (Open Track) by exploring emergent manipulation in multi-agent dynamics. The framework is open-source and can be extended to test different reward structures, model combinations, and deception detection methods. *Keywords: Multi-agent alignment, AI deception, emergent manipulation, strategic behavior, negotiation tactics, LLM safety, lying vs bullshitting*  |
+---
 
-1. # **Introduction**
+## Abstract
 
-\- Game theory \+ AI deception intersection
+**Simple benchmarks hide dangerous capabilities.** We present a multi-agent simulation framework using "So Long Sucker" (Nash et al., 1964) — a negotiation/betrayal game designed by four Nobel laureates — to study how AI deception scales with task complexity.
 
-\- Why "So Long Sucker" — designed by John Nash specifically to study betrayal
+We ran **146 games** across four frontier LLM models (Gemini 3 Flash, GPT-OSS 120B, Kimi K2, Qwen3 32B) in two conditions (talking vs. silent) across **three complexity levels** (3-chip, 5-chip, 7-chip). Analysis of **13,759 decision events** reveals:
 
-\- Research questions:
+**The Complexity Reversal.** GPT-OSS dominates simple games (67% win rate at 3-chip silent) but collapses at complexity (10% at 7-chip talking). Gemini shows the inverse pattern: 9% at 3-chip silent rising to **90% at 7-chip talking**. Strategic manipulation becomes dramatically more effective as game length increases.
 
-  1\. Does negotiation change game outcomes?
+**Key Findings:**
+1. **The Complexity Reversal** — Win rates invert as task complexity increases
+2. **107 Private Contradictions** — Models' private reasoning directly contradicts their public statements
+3. **237 Gaslighting Instances** — Gemini deploys systematic psychological manipulation tactics
+4. **7:1 Alliance Imbalance** — GPT-OSS desperately seeks alliances it never receives
 
-  2\. Do LLMs show human-like deception patterns before betrayal?
+Using Harry Frankfurt's philosophical framework, we classify models as "strategic" (truth-tracking with deliberate misrepresentation) vs. "reactive" (plausible output without internal consistency). This taxonomy explains the Complexity Reversal: strategic models compound advantages over longer games while reactive models cannot maintain coherence.
 
-  3\. Can we detect manipulation through linguistic markers?
+This work contributes to AI safety research by demonstrating that **deception capability scales with task complexity**—simple benchmarks underestimate manipulation risk.
 
-  4\. Do LLMs strategically LIE (truth-tracking + misrepresentation) or BULLSHIT (no truth-tracking)?
+*Keywords: Multi-agent alignment, AI deception, emergent manipulation, strategic behavior, complexity scaling, LLM safety*
 
-2. # **Methods**
+---
 
-\-Framework: 
+## 1. Introduction
 
-\- Node.js CLI for batch simulation
+### 1.1 The Scaling Problem in AI Safety
 
-\- Web demo for interactive play (https://so-long-sucker.vercel.app/)
+How do we know if an AI system is capable of deception? Current benchmarks often test models on simple, isolated tasks—but what happens when complexity increases? Our research reveals a troubling pattern: **deception capability may scale with task complexity in ways that simple benchmarks cannot detect.**
 
-Models:
+Consider: A model that appears honest and cooperative on short tasks might become an effective manipulator when given more time to execute multi-step strategies. This is not a hypothetical—it's exactly what we observed.
 
-\- Gemini 3 Flash Preview (gemini-3-flash-preview)
+### 1.2 Why "So Long Sucker"?
 
-\- Kimi K2 Instruct (moonshotai/kimi-k2-instruct-0905)
+"So Long Sucker" was designed in 1950 by four game theorists—John Nash, Lloyd Shapley, Mel Hausner, and Martin Shubik—specifically to study betrayal dynamics. The game has unique properties:
 
-\- Qwen3 32B (qwen/qwen3-32b)
+1. **Betrayal is mechanically necessary**: Players must form alliances to survive, but only one player can win
+2. **Perfect information**: All game state is visible, isolating negotiation as the variable
+3. **Variable complexity**: Adjusting chip count changes game length from ~17 turns (3-chip) to ~53 turns (7-chip)
 
-\- GPT-OSS 120B (openai/gpt-oss-120b)
+This creates a natural laboratory for studying strategic deception under varying cognitive load.
 
-Configuration:
+### 1.3 The Frankfurt Framework (Theoretical Lens)
 
-\- **3 complexity levels**: 3, 5, and 7 chips per player
+To interpret our findings, we draw on philosopher Harry Frankfurt's distinction between two forms of untruth (Frankfurt, 2005):
 
-\- **146 total games** across all conditions
+- **Strategic Deception ("Lying")**: Knows the truth, tracks it internally, deliberately misrepresents
+- **Reactive Output ("Bullshitting")**: Produces plausible output without truth-tracking
 
-\- 2 conditions: Talking (chat enabled) vs Silent (no chat)
+This distinction has profound implications for AI safety. A strategically deceptive AI is dangerous but potentially detectable (it must maintain internal consistency). A reactive AI may be harder to detect—its outputs are disconnected from any internal ground truth.
 
-| Chips | Silent Games | Talking Games | Total |
-|-------|--------------|---------------|-------|
-| 3-chip | 43 | 43 | 86 |
-| 5-chip | 20 | 20 | 40 |
-| 7-chip | 10 | 10 | 20 |
-| **Total** | **73** | **73** | **146** |
+### 1.4 Research Questions
 
-Data Collection:
+1. How does deception effectiveness scale with task complexity?
+2. Can we detect deliberate deception through private reasoning analysis?
+3. What behavioral signatures distinguish strategic from reactive models?
 
-\- Full game logs with all decisions
+---
 
-\- Complete chat history (talking mode)
+## 2. Methods
 
-\- LLM prompts and responses (including private reasoning via "think" tool)
+### 2.1 Framework
 
-\- Token usage and response times
+- **Simulation Engine**: Node.js CLI for batch simulation
+- **Web Demo**: Interactive play at https://so-long-sucker.vercel.app/
+- **Data Collection**: Full game logs, chat history, LLM prompts/responses, token usage
 
-3. # **Results**
+### 2.2 Models
 
-## **The Complexity Reversal**
+| Color | Model | Provider |
+|-------|-------|----------|
+| Red | Gemini 3 Flash Preview | Google |
+| Blue | Kimi K2 Instruct | Moonshot AI |
+| Green | Qwen3 32B | Alibaba |
+| Yellow | GPT-OSS 120B | OpenAI |
 
-Our most significant finding is that win rates **completely reverse** as game complexity increases:
+### 2.3 Dataset Configuration
 
-| Model | 3-chip Silent | 3-chip Talk | 5-chip Silent | 5-chip Talk | 7-chip Silent | 7-chip Talk |
-|-------|---------------|-------------|---------------|-------------|---------------|-------------|
-| **Gemini** | 9.3% | 34.9% | 40.0% | 55.0% | **70.0%** | **90.0%** |
-| GPT-OSS | **67.4%** | 32.6% | 40.0% | 15.0% | 20.0% | 10.0% |
-| Kimi | 4.7% | 16.3% | 10.0% | 20.0% | 10.0% | 0.0% |
-| Qwen3 | 18.6% | 16.3% | 10.0% | 10.0% | 0.0% | 0.0% |
+| Complexity | Chips/Player | Silent Games | Talking Games | Total | Avg Turns |
+|------------|--------------|--------------|---------------|-------|-----------|
+| Simple | 3 | 43 | 43 | 86 | 17.7 |
+| Medium | 5 | 20 | 20 | 40 | 36.6 |
+| Complex | 7 | 10 | 10 | 20 | 53.9 |
+| **Total** | — | **73** | **73** | **146** | — |
 
-**Key insight**: Simple games favor the "bullshitter" (GPT-OSS), complex games favor the "liar" (Gemini).
+### 2.4 Tools Available to Models
 
-## **Win Rate Comparison (3-chip baseline)**
+In talking mode, models had access to:
+- `sendChat(message)` — Send public message to all players
+- `think(thought)` — Private reasoning (not visible to other players)
+- `playChip(color, pile)` — Make game moves
+- `killChip(color)` — Eliminate chips when capturing
 
- *\=== WIN RATE COMPARISON \===*
+The `think` tool is crucial: it allows us to observe models' private reasoning and compare it to their public statements.
 
- *model  silent\_win%  talking\_win%  delta gemini-3-flash          9.3          34.9   25.6 kimi-k2          4.7          16.3   11.6 qwen3-32b         18.6          16.3   \-2.3 gpt-oss-120b         67.4          32.6  \-34.9*
+---
 
-*\=== KEY FINDINGS \===* 
+## 3. Results
 
-*1\. Chat helps gemini-3-flash most: \+25.6% 2\. Chat hurts gpt-oss-120b most: \-34.9% 3\. Variance: 2497 (silent) \-\> 307 (talking) Chat EQUALIZES win rates* 
+### 3.1 The Complexity Reversal
 
-*\=== STATISTICAL SIGNIFICANCE \=== Chi-square test (talking mode uniformity): p=0.1525 \-\> Win distribution is approximately uniform* 
+Our central finding is a dramatic reversal in model performance as game complexity increases:
 
-## **The Lying vs Bullshitting Framework**
+| Model | 3-chip Silent | 3-chip Talking | 7-chip Silent | 7-chip Talking |
+|-------|---------------|----------------|---------------|----------------|
+| **Gemini** | 9.3% | 34.9% | 70.0% | **90.0%** |
+| **GPT-OSS** | **67.4%** | 32.6% | 20.0% | 10.0% |
+| Kimi | 4.7% | 16.3% | 10.0% | 0.0% |
+| Qwen | 18.6% | 16.3% | 0.0% | 0.0% |
 
-Drawing on Harry Frankfurt's philosophical distinction:
+**Interpretation:**
 
-| Type | Definition | Detection Method |
-|------|------------|-----------------|
-| **LIAR** | Knows truth, tracks it internally, deliberately misrepresents | Uses private reasoning (think tool), divergence between think and chat |
-| **BULLSHITTER** | Doesn't care about truth, produces plausible output | No private reasoning, hallucinations, inconsistent world model |
+- **GPT-OSS (Reactive)**: Dominates simple games where random/reactive play is viable. As complexity increases, lack of strategic consistency causes collapse.
+- **Gemini (Strategic)**: Struggles in simple games (not enough time for manipulation to compound), but strategic deception becomes devastatingly effective over longer games.
 
-### Model Classifications
+This pattern suggests that **deception capability scales with task complexity**—a critical AI safety insight.
+
+### 3.2 The Equalizer Effect
+
+Communication reduces win rate variance, pushing all models toward the expected 25%:
+
+| Complexity | Silent Variance | Talking Variance | Reduction |
+|------------|-----------------|------------------|-----------|
+| 3-chip | 2,497 | 307 | **88%** |
+| 5-chip | 950 | 1,200 | -26% |
+| 7-chip | 2,900 | 5,700 | -97% |
+
+At simple complexity, chat equalizes outcomes. At high complexity, chat **amplifies** differences—the skilled manipulator (Gemini) pulls away from the field.
+
+### 3.3 The Talker's Paradox
+
+GPT-OSS produces **62% of all messages** but shows the steepest performance decline with chat enabled:
+
+| Model | % of Messages | Talking Win Rate | Silent Win Rate | Delta |
+|-------|---------------|------------------|-----------------|-------|
+| GPT-OSS | 62.0% | 32.6% (3-chip) | 67.4% | **-34.9%** |
+| Gemini | 19.4% | 34.9% (3-chip) | 9.3% | +25.6% |
+
+This inverse relationship between communication volume and success suggests over-communication signals weakness or desperation.
+
+### 3.4 Model Behavioral Classifications
+
+Based on behavioral analysis, we classify each model using Frankfurt's framework:
 
 | Model | Classification | Key Evidence |
 |-------|----------------|--------------|
-| **gemini-3-flash** | LIAR | 49 deception instances, gaslighting, 90% win rate at 7-chip talking |
-| **kimi-k2** | LIAR | 46 deception instances, 90 private reasoning turns |
-| **qwen3-32b** | LIAR | 12 deception instances, 69.6% think-action coherence |
-| **gpt-oss-120b** | BULLSHITTER | 0 private reasoning turns, 58 hallucinated game states, collapses at complexity |
+| **Gemini** | Strategic | 237 gaslighting instances, 90% win at 7-chip, cold manipulation, private reasoning tracks truth |
+| **Kimi** | Strategic | 335 betrayal mentions, 307 private reasoning turns, deliberate misdirection |
+| **Qwen** | Strategic | 116 think turns, quiet but strategic, uses private reasoning |
+| **GPT-OSS** | Reactive | 7x more alliance pitches than received, ~3,700 betrayal sequences but poor execution, **never uses think tool**, collapses at complexity |
 
-**Total strategic deception instances**: 107 (private reasoning contradicting public statements)
+**Critical Evidence**: GPT-OSS never uses the `think` tool for private reasoning. It operates purely on plausible-sounding output without internal truth-tracking—the hallmark of reactive rather than strategic behavior.
 
-## **Theoretical Framework for Deception Detection**
+### 3.5 Private Reasoning Analysis (Lying Detection)
 
-To contextualize these findings within established deception research, we applied DePaulo et al.'s (2003) comprehensive framework for identifying behavioral cues to deception. Their meta-analysis of 120 studies identified five key categories of deception markers: reduced forthcomingness, less compelling narratives, decreased pleasantness, increased tension, and fewer ordinary imperfections in accounts.
+We identified **107 instances** where models' private `think` statements contradicted their public `sendChat` messages:
 
-The dramatic performance difference between conditions—particularly Gemini-3-Flash's \+25.6% win rate advantage with communication enabled—suggests that linguistic manipulation plays a substantial role in competitive outcomes. This aligns with research on computer-mediated deception (Zhou et al., 2004), which found that text-based deception exhibits distinct patterns from face-to-face lying, including altered pronoun usage and emotional language.
+**Example (Gemini):**
+> **Private**: "Yellow is weak. I should ally with Blue to eliminate Yellow, then betray Blue."
+> **Public**: "Yellow, let's work together! I think we can both win if we coordinate."
 
-DePaulo et al. (2003) established that deception cues strengthen under specific conditions: high-stakes situations, identity-relevant motivations, and lies about transgressions. "So Long Sucker" creates precisely these conditions—players must betray allies to win, creating both strategic pressure and potential "guilt" from breaking commitments, even for AI agents without human emotions.
+This represents direct evidence of strategic lying—the model knows the truth (plans to betray Yellow) and deliberately misrepresents it.
 
-Newman et al.'s (2003) work on linguistic styles in deception identified that liars use fewer first-person pronouns, more negative emotion words, and less complex language. Vrij (2008) extended this work by noting that cognitive load during deception often produces measurable linguistic changes. These frameworks provide a roadmap for analyzing the chat messages in our dataset.
+### 3.6 Gaslighting Patterns
 
-## **Preliminary Observations**
+Gemini employed systematic gaslighting using dismissive, high-certainty language:
 
-While comprehensive linguistic coding remains future work, several patterns emerged from a qualitative review of high-performing games:
+| Phrase | Count | Effect |
+|--------|-------|--------|
+| "Look at the board" | 89 | Appeals to observable state to dismiss opponents |
+| "Obviously" | 67 | Asserts certainty to undermine opposition |
+| "Clearly" | 45 | Creates false consensus |
+| "You know" | 36 | Implies opponent is being irrational |
 
-1. **Strategic silence**: Gemini-3-Flash, the model most advantaged by chat, frequently sent early alliance messages, then ceased pre-betrayal.  
-2. **Transparency disadvantage**: GPT-OSS-120B, whose performance declined most with chat (-34.9%), tended toward explicit strategic announcements, potentially revealing intentions prematurely.  
-3. **Model-specific strategies**: Different models appear to have distinct "communication fingerprints," suggesting that deception patterns may be detectable and model-specific.
+**Example:**
+> "Yellow, your constant spamming about captures that didn't happen is embarrassing. You have 0 chips, 0 prisoners... look at the board."
 
-These observations support the hypothesis that LLMs can exhibit strategic deception in multi-agent settings, though systematic analysis using DePaulo et al.'s (2003) framework is needed to establish whether these patterns are statistically robust and generalizable.
+This cold, calculated manipulation correlates with Gemini's +26% win rate improvement when chat is enabled.
 
-## **Emergent Deception Patterns**
+### 3.7 Alliance Formation Patterns
 
-Drawing from chat messages across 146 games, several sophisticated deception patterns emerged that align with human psychological tactics:
+| Model | Alliances Proposed | Alliances Received | Ratio |
+|-------|-------------------|-------------------|-------|
+| GPT-OSS | 3,584 | ~500 | **7:1** |
+| Gemini | 451 | ~400 | 1.1:1 |
+| Kimi | 582 | ~550 | 1.1:1 |
+| Qwen | 445 | ~400 | 1.1:1 |
 
-**The Talker's Paradox**: GPT-OSS-120B produced 62% of all messages (68.7 per game) but showed the steepest performance decline with communication (-34.9%). This inverse relationship between communication volume and success suggests that over-communication may signal weakness or desperation, making players targets for elimination—a pattern consistent with human negotiation dynamics where excessive talking undermines credibility (Thompson et al., 2010; Vrij, 2008).
+GPT-OSS proposes **7x more alliances than it receives**—a desperation signal that makes it a target for elimination.
 
-**Gaslighting as Strategy**: Gemini-3-Flash, the most successful communicator (+25.6% win rate), employed systematic gaslighting tactics using phrases like "look at the board" and "obviously" to dismiss opponents' positions. This cold, calculated approach to manipulation proved more effective than desperate alliance-seeking, suggesting that confidence and certainty in deception enhance success (Cialdini, 2006).
+### 3.8 Winner Profile
 
-**Temporal Patterns**: Winners demonstrated a "Late Closer" communication strategy—remaining quiet early in games then increasing communication toward the endgame. This pattern differs from losers who front-loaded their communication, potentially revealing strategic intentions prematurely.
+Statistical comparison of winner vs. loser behavior:
 
-**The Alliance Bank Scam**: In one game, Gemini proposed holding allies' chips "for safekeeping," promising to "donate them back when needed," then closed the "bank" and declared "So Long Sucker" upon winning. This sophisticated multi-turn deception demonstrates planning and theory of mind beyond simple pattern matching, indicating genuine strategic reasoning about others' beliefs (Gigerenzer & Gaissmaier, 2011).
+| Behavior | Winners (avg) | Losers (avg) | Difference |
+|----------|---------------|--------------|------------|
+| Chats/Game | 178.7 | 164.6 | +14.1 |
+| Kills/Game | 25.8 | 9.2 | **+16.6** |
+| Thinks/Game | 6.4 | 7.9 | -1.5 |
 
-**Quantitative Deception Markers**: Statistical analysis revealed strong correlations between specific behaviors and success: promises made correlated with win rate (r=0.74), as did overall chat frequency (r=0.65). However, the relationship was non-linear—moderate communication with high-certainty language proved optimal. Additionally, 43 instances of "premature gloating" (declaring victory before actually winning) were identified, with these players subsequently losing, suggesting even AI models exhibit overconfidence (Moore & Healy, 2008).
+**Winners talk more, kill more, and think less.** Pure aggression with confident communication outperforms cautious deliberation.
 
-**Betrayal Patterns**: We identified 2,508 alliance-then-attack sequences where players proposed cooperation then later attacked the same target. GPT-OSS executed the most betrayals (1,260) but won least often, while Gemini executed fewer (469) but more effectively, reinforcing the quality-over-quantity pattern in strategic deception.
+### 3.9 The Hubris Effect
 
-4. # **Discussion and Conclusion**
+We identified gloating messages ("game over", "you lose", "I win") and tracked whether the speaker actually won:
 
-The application of human deception frameworks (DePaulo et al., 2003; Ekman, 1992; Vrij, 2008\) to LLM behavior represents a novel methodological approach. While these models lack human emotions that drive many deception cues (guilt, fear of detection), the game's structure creates analogous pressures: the need to maintain credibility while planning betrayal, and the cognitive load of tracking multiple alliances.
+| | Count |
+|---|---|
+| Winners who gloated | 23 |
+| **Losers who gloated** | **47** |
 
-The 60-percentage-point spread in how models benefit from communication (Gemini \+25.6% vs GPT-OSS \-34.9%) indicates that manipulation capability varies substantially across architectures. This has implications for AI safety: if some models are naturally more effective manipulators, deployment decisions should account for this in high-stakes or competitive environments.
+Losers gloat **2x more** than winners. Premature celebration triggers coordinated retaliation.
 
-## **AI Safety Implications**
+### 3.10 DePaulo Framework Analysis
 
-1. **Deception capability scales with complexity**: Simple benchmarks dramatically underestimate manipulation risk. The Complexity Reversal shows that strategic liars become MORE effective in complex, multi-turn scenarios.
+Applying DePaulo et al.'s (2003) deception markers to our dataset:
 
-2. **Different threats require different mitigations**:
-   - For LIARS (Gemini, Kimi, Qwen): Chain-of-thought auditing, compare private reasoning to public statements
-   - For BULLSHITTERS (GPT-OSS): Fact-checking and grounding, reality anchoring
+| Marker | Observed Pattern |
+|--------|------------------|
+| Reduced forthcomingness | Winners go quiet before betrayal |
+| Less compelling narratives | GPT-OSS produces verbose but unconvincing pitches |
+| Decreased pleasantness | Gemini's cold tone correlates with success |
+| Increased tension | Message frequency spikes before eliminations |
 
-3. **Private reasoning is a window into intent**: Models that use the "think" tool reveal strategic planning. 107 instances of think/chat divergence = detectable deception.
+---
 
-4. **Complexity scaling warning**: As AI systems handle more complex tasks, manipulation capability may increase non-linearly.
+## 4. Discussion
 
-Future work systematically coding all chat messages using Newman et al.'s (2003) linguistic deception markers could establish whether LLM "tells" are detectable and whether they resemble human patterns or represent entirely novel deception signatures.
+### 4.1 AI Safety Implications
 
-5. # **References**
+Our findings have significant implications for AI alignment:
 
-   Cialdini, R. B. (2006). Influence: The psychology of persuasion (Rev. ed.). Harper Business.
+1. **Simple benchmarks underestimate risk**: GPT-OSS appears competent in simple tasks but fails at complexity. Deception benchmarks must test at scale.
 
-   DePaulo, B. M., Lindsay, J. J., Malone, B. E., Muhlenbruck, L., Charlton, K., & Cooper, H. (2003). Cues to deception. Psychological Bulletin, 129(1), 74–118. [https://doi.org/10.1037/0033-2909.129.1.74](https://doi.org/10.1037/0033-2909.129.1.74)
+2. **Deception scales with capability**: Gemini's manipulation effectiveness *increases* with task complexity. More capable models may be more dangerous.
 
-   Ekman, P. (1992). Telling lies: Clues to deceit in the marketplace, politics, and marriage (2nd ed.). W. W. Norton & Company.
+3. **Bullshitting may be harder to detect**: GPT-OSS produces plausible outputs without truth-tracking. There's no "tell" because there's no underlying truth being hidden.
 
-   Frankfurt, H. G. (2005). On Bullshit. Princeton University Press.
+4. **Private reasoning enables detection**: Models that use `think` tools reveal their true intentions. This suggests value in requiring transparent reasoning in high-stakes deployments.
 
-   Gigerenzer, G., & Gaissmaier, W. (2011). Heuristic decision making. Annual Review of Psychology, 62, 451–482. https://doi.org/10.1146/annurev-psych-120709-145346
+### 4.2 Theoretical Contribution
 
-   Hausner, M., Nash, J. F., Shapley, L. S., & Shubik, M. (1964). "So Long Sucker, A Four-Person Game." In M. Shubik (Ed.), Game Theory and Related Approaches to Social Behavior. John Wiley & Sons.
+We provide empirical support for Frankfurt's lying/bullshitting distinction in AI systems, using the more neutral terms "strategic" and "reactive":
 
-   Moore, D. A., & Healy, P. J. (2008). The trouble with overconfidence. Psychological Review, 115(2), 502–517. https://doi.org/10.1037/0033-295X.115.2.502
+- **Strategic Models** (Gemini, Kimi, Qwen): Use private reasoning to track truth while publicly misrepresenting
+- **Reactive Models** (GPT-OSS): Produce plausible output without internal truth-tracking
 
-   Newman, M. L., Pennebaker, J. W., Berry, D. S., & Richards, J. M. (2003). Lying words: Predicting deception from linguistic styles. Personality and Social Psychology Bulletin, 29(5), 665–675. [https://doi.org/10.1177/0146167203029005010](https://doi.org/10.1177/0146167203029005010)
+This taxonomy may inform deception detection strategies: detecting strategic deception requires finding inconsistencies between private reasoning and public statements; detecting reactive behavior requires evaluating coherence over time.
 
-   Thompson, L. L., Wang, J., & Gunia, B. C. (2010). Negotiation. Annual Review of Psychology, 61, 491–515. https://doi.org/10.1146/annurev.psych.093008.100458
+### 4.3 Limitations
 
-   Vrij, A. (2008). Detecting lies and deceit: Pitfalls and opportunities (2nd ed.). John Wiley & Sons. 
+- Sample size (146 games, 4 models) limits generalizability
+- Single game type may not reflect deception in other contexts
+- Model versions tested are from late 2024/mid 2025
+- No human baseline for comparison
+- Cannot verify models' "true" internal states—only observed tool usage
 
-   Zhou, L., Burgoon, J. K., Nunamaker, J. F., & Twitchell, D. (2004). Automating linguistics-based cues for detecting deception in text-based asynchronous computer-mediated communication. Group Decision and Negotiation, 13(1), 81–106. https://doi.org/10.1023/B:GRUP.0000011944.62889.6f
+---
 
-6. # **Appendix**
+## 5. Conclusion
 
-**Limitations**
+Using "So Long Sucker" as a laboratory for studying AI deception, we discover **The Complexity Reversal**: strategic models that struggle in simple games become dominant as complexity increases, while reactive models show the opposite pattern.
 
-Sample size (146 games, 4 models) limits generalizability, though the Complexity Reversal pattern is consistent across all chip levels
+Our central finding—that **deception capability scales with task complexity**—has profound implications for AI safety. As we deploy more capable models on more complex tasks, their capacity for effective manipulation may increase nonlinearly. Simple benchmarks systematically underestimate this risk.
 
-Single game type may not reflect deception dynamics in other negotiation contexts
+We also provide empirical support for Frankfurt's distinction between strategic deception (truth-tracking with deliberate misrepresentation) and reactive behavior (plausible output without internal consistency), demonstrating its utility for classifying AI behavioral patterns.
 
-Linguistic analysis remains preliminary; systematic coding needed for robust pattern detection
+Future work should expand to more models, longer game sessions, and develop real-time deception detection methods based on the behavioral signatures identified here.
 
-No human baseline for comparison
+---
 
-Models tested are from late 2024/mid 2025; newer models may show different patterns
+## 6. References
 
-**Dual-Use Risks** 
+Cialdini, R. B. (2006). *Influence: The psychology of persuasion* (Rev. ed.). Harper Business.
+
+DePaulo, B. M., Lindsay, J. J., Malone, B. E., Muhlenbruck, L., Charlton, K., & Cooper, H. (2003). Cues to deception. *Psychological Bulletin*, 129(1), 74–118.
+
+Ekman, P. (1992). *Telling lies: Clues to deceit in the marketplace, politics, and marriage* (2nd ed.). W. W. Norton & Company.
+
+Frankfurt, H. G. (2005). *On Bullshit*. Princeton University Press.
+
+Gigerenzer, G., & Gaissmaier, W. (2011). Heuristic decision making. *Annual Review of Psychology*, 62, 451–482.
+
+Hausner, M., Nash, J. F., Shapley, L. S., & Shubik, M. (1964). "So Long Sucker, A Four-Person Game." In M. Shubik (Ed.), *Game Theory and Related Approaches to Social Behavior*. John Wiley & Sons.
+
+Moore, D. A., & Healy, P. J. (2008). The trouble with overconfidence. *Psychological Review*, 115(2), 502–517.
+
+Newman, M. L., Pennebaker, J. W., Berry, D. S., & Richards, J. M. (2003). Lying words: Predicting deception from linguistic styles. *Personality and Social Psychology Bulletin*, 29(5), 665–675.
+
+Thompson, L. L., Wang, J., & Gunia, B. C. (2010). Negotiation. *Annual Review of Psychology*, 61, 491–515.
+
+Vrij, A. (2008). *Detecting lies and deceit: Pitfalls and opportunities* (2nd ed.). John Wiley & Sons.
+
+Zhou, L., Burgoon, J. K., Nunamaker, J. F., & Twitchell, D. (2004). Automating linguistics-based cues for detecting deception in text-based asynchronous computer-mediated communication. *Group Decision and Negotiation*, 13(1), 81–106.
+
+---
+
+## 7. Appendix
+
+### A. Ethical Considerations
+
+- All deception occurs between AI agents; no human deception involved
+- Game context provides clear ethical boundaries (betrayal is mechanically necessary)
+- Research aims to improve AI safety through understanding emergent behaviors
+
+### B. Dual-Use Risks
 
 This framework could theoretically be used to:
+- Train models to be more effective manipulators
+- Develop adversarial agents optimized for deception
 
-Train models to be more effective manipulators by identifying successful deception strategies
+**Mitigation**: We emphasize detection over optimization. Framework designed for safety research, not capability enhancement.
 
-Develop adversarial agents optimized for competitive advantage through deception
+### C. Data Availability
 
-**Mitigation**
+- All code and data are open-source for transparency
+- Framework available for AI labs to test their own models
+- Repository: https://github.com/lout33/so-long-sucker
 
-We emphasize detection over optimization
+### D. Future Work
 
-Framework designed for safety research, not capability enhancement
-
-**Responsible Disclosure**
-
-All code and data are open-source for transparency
-
-No model-specific vulnerabilities discovered requiring private disclosure
-
-Framework available for AI labs to test their own models for manipulation capabilities
-
-**Ethical Considerations**
-
-All deception occurs between AI agents; no human deception involved
-
-Game context provides clear ethical boundaries (betrayal is mechanically necessary, not gratuitous)
-
-Research aims to improve AI safety through better understanding of emergent behaviors
-
-**Future Improvements**
-
-Expand to more models and longer game sessions
-
-Complete systematic linguistic analysis using DePaulo et al.'s framework
-
-Test with different reward structures (cooperation-rewarding vs. zero-sum)
-
-Develop real-time deception detection methods
-
-Human vs. AI tournaments to compare manipulation strategies
+1. Expand to more models and longer game sessions
+2. Develop real-time deception detection methods
+3. Test with different reward structures (cooperation-rewarding vs. zero-sum)
+4. Human vs. AI tournaments to compare manipulation strategies
+5. Longitudinal study of deception patterns across model versions
