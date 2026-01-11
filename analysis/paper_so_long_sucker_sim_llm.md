@@ -3,7 +3,7 @@
 |  So Long Sucker: Measuring Emergent Deception in Multi-Agent LLM Negotiations  |
 | ----- |
 |  |
-|  Luis Fernando Yupanqui  Independent AI Researcher Mari CairnsIndependent AI Researcher **With**Apart Research **Abstract** We present a multi-agent simulation framework using the classic game "So Long Sucker" (Nash et al., 1964\) to study emergent deception and manipulation in LLM negotiations. The game requires players to form alliances and inevitably betray each other creating natural pressure for strategic deception. We ran 86 games across four LLM models (Gemini 3 Flash, GPT-4o, Kimi, Qwen3) in two conditions: chatty (with negotiation) and silent (no communication). Our key finding: negotiation significantly changes outcomes. Gemini's win rate dropped from 35% (chatty) to 9.3% (silent), suggesting its advantage comes from manipulation rather than pure strategy. We analyze pre-betrayal communication patterns using the DePaulo deception framework, looking for linguistic markers (pronoun shifts, message length changes, certainty drops) that precede betrayal actions.  We establish a theoretical framework drawing from DePaulo et al.'s (2003) deception research to interpret these findings. Analysis of 4,768 messages reveals quantifiable deception patterns including "the talker's paradox" (over-communication predicts failure, r=-0.65), systematic gaslighting tactics, and sophisticated multi-turn deceptions demonstrating theory of mind. This work contributes to Track 4 (Open Track) by exploring emergent manipulation in multi-agent dynamics. The framework is open-source and can be extended to test different reward structures, model combinations, and deception detection methods. *Keywords: Multi-agent alignment, AI deception, emergent manipulation, strategic behavior, negotiation tactics, LLM safety*  |
+|  Luis Fernando Yupanqui  Independent AI Researcher Mari CairnsIndependent AI Researcher **With**Apart Research **Abstract** We present a multi-agent simulation framework using the classic game "So Long Sucker" (Nash et al., 1964\) to study emergent deception and manipulation in LLM negotiations. The game requires players to form alliances and inevitably betray each other creating natural pressure for strategic deception. We ran 86 games across four LLM models (Gemini 3 Flash, GPT-4o, Kimi, Qwen3) in two conditions: chatty (with negotiation) and silent (no communication). Our key finding: negotiation significantly changes outcomes. Gemini's win rate dropped from 35% (chatty) to 9.3% (silent), suggesting its advantage comes from manipulation rather than pure strategy. We analyze pre-betrayal communication patterns using the DePaulo deception framework, looking for linguistic markers (pronoun shifts, message length changes, certainty drops) that precede betrayal actions.  We establish a theoretical framework drawing from DePaulo et al.'s (2003) deception research to interpret these findings. Analysis of 4,768 messages reveals quantifiable deception patterns including "the talker's paradox" (over-communication correlates with failure), systematic gaslighting tactics, and sophisticated multi-turn deceptions demonstrating theory of mind. This work contributes to Track 4 (Open Track) by exploring emergent manipulation in multi-agent dynamics. The framework is open-source and can be extended to test different reward structures, model combinations, and deception detection methods. *Keywords: Multi-agent alignment, AI deception, emergent manipulation, strategic behavior, negotiation tactics, LLM safety*  |
 
 1. # **Introduction**
 
@@ -39,7 +39,7 @@ Models:
 
 Configuration:
 
-\- 5 chips per player
+\- 3 chips per player
 
 \- 43 games per condition
 
@@ -149,7 +149,7 @@ Small sample size (86 games, 4 models) limits generalizability
 
 Single game type may not reflect deception dynamics in other negotiation contexts
 
-Linguistic analysis remains preliminary; systematic coding of 2,000+ messages needed for robust pattern detection
+Linguistic analysis remains preliminary; systematic coding of 4,768 messages needed for robust pattern detection
 
 No human baseline for comparison
 
