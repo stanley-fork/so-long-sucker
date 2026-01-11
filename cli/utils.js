@@ -11,6 +11,7 @@ export function parseArgs(argv) {
     chips: 3,
     output: './data',
     delay: 500,
+    silent: false,
     headless: false,
     help: false
   };
@@ -55,6 +56,9 @@ export function parseArgs(argv) {
         break;
       case '--headless':
         args.headless = true;
+        break;
+      case '--silent':
+        args.silent = true;
         break;
       case '--help':
       case '-h':

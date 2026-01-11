@@ -18,6 +18,7 @@ export class SimulatorTUI {
     this.chips = config.chips;
     this.outputDir = config.outputDir;
     this.delay = config.delay;
+    this.silent = config.silent || false; // No chat mode for control experiments
     this.headless = config.headless;
 
     this.provider = null;
@@ -65,7 +66,8 @@ export class SimulatorTUI {
     for (let i = 0; i < this.totalGames; i++) {
       const gameConfig = {
         chips: this.chips,
-        delay: this.delay
+        delay: this.delay,
+        silent: this.silent // Pass silent mode to HeadlessGame
       };
       
       // Pass either array of providers or single provider
@@ -544,6 +546,7 @@ ${colorize('╚═════════════════════�
           green: this.providers[2]?.getModelName?.() || 'unknown',
           yellow: this.providers[3]?.getModelName?.() || 'unknown'
         } : null,
+        silent: this.silent, // Track if this was a silent (no-chat) run
         startTime: this.startTime,
         endTime: Date.now(),
         totalGames: this.totalGames,

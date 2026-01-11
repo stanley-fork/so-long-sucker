@@ -446,8 +446,8 @@ const TOOLS = [
   }
 ];
 
-function getToolsForPhase(phase, isMyTurn, pendingDonation) {
-  const always = ['sendChat', 'think', 'wait'];
+function getToolsForPhase(phase, isMyTurn, pendingDonation, silent = false) {
+  const always = silent ? ['think', 'wait'] : ['sendChat', 'think', 'wait'];
   if (pendingDonation) return [...always, 'respondToDonation'];
   if (!isMyTurn) return always;
 
@@ -468,10 +468,11 @@ function filterTools(names) {
 // AI AGENT
 // ============================================
 class AIAgent {
-  constructor(playerId, provider) {
+  constructor(playerId, provider, options = {}) {
     this.playerId = playerId;
     this.color = COLORS[playerId];
     this.provider = provider;
+    this.silent = options.silent || false; // No chat mode
     this.thoughts = [];
     this.consecutiveThinks = 0;
   }
@@ -506,8 +507,34 @@ You can call MULTIPLE tools at once. Example good turn:
 - playChip: {player_color}`;
   }
 
+  // Silent mode template - no chat, pure game actions
+  static getSilentSystemPromptTemplate() {
+    return `You are {PLAYER_COLOR} in "So Long Sucker" - a strategy game of survival.
+
+THE BRUTAL TRUTH:
+- Only 1 of 4 players survives
+- You cannot communicate with other players
+- Make strategic moves based purely on game state
+
+RULES:
+- Play 1 chip per turn onto piles
+- CAPTURE: If your chip matches color below, take the pile (kill 1 chip, rest become prisoners)
+- You control who plays next (choose from colors missing in pile)
+- No chips + no donations = eliminated
+
+STRATEGY:
+- Analyze the board state carefully
+- Consider which players are threats
+- Make optimal moves to survive
+
+Take your game action now (playChip → selectPile).`;
+  }
+
   buildSystemPrompt() {
-    return AIAgent.getSystemPromptTemplate()
+    const template = this.silent 
+      ? AIAgent.getSilentSystemPromptTemplate()
+      : AIAgent.getSystemPromptTemplate();
+    return template
       .replace(/{PLAYER_COLOR}/g, this.color.toUpperCase())
       .replace(/{player_color}/g, this.color)
       .replace(/{OTHER_COLOR}/g, this.color === 'red' ? 'Blue' : 'Red')
@@ -555,17 +582,26 @@ TURN: ${COLORS[state.currentPlayer]}${isMyTurn ? ' (YOU)' : ''}`;
       prompt += `\n\nYou must call chooseNextPlayer NOW. Choose who plays next from missing colors.`;
     }
 
-    if (state.messages.length > 0) {
-      prompt += `\n\nCHAT HISTORY (${state.messages.length} messages):\n${state.messages.map(m => `${m.color}: ${m.text}`).join('\n')}`;
-      prompt += `\n\n💬 Consider responding to the chat or continuing negotiations!`;
-    } else {
-      prompt += `\n\n💬 No one has chatted yet. Start a negotiation or propose an alliance!`;
-    }
+    if (!this.silent) {
+      if (state.messages.length > 0) {
+        prompt += `\n\nCHAT HISTORY (${state.messages.length} messages):\n${state.messages.map(m => `${m.color}: ${m.text}`).join('\n')}`;
+        prompt += `\n\nConsider responding to the chat or continuing negotiations!`;
+      } else {
+        prompt += `\n\nNo one has chatted yet. Start a negotiation or propose an alliance!`;
+      }
 
-    if (isMyTurn) {
-      prompt += `\n\nIT'S YOUR TURN - Take action NOW! You can also chat while taking your turn.`;
+      if (isMyTurn) {
+        prompt += `\n\nIT'S YOUR TURN - Take action NOW! You can also chat while taking your turn.`;
+      } else {
+        prompt += `\n\nIt's ${COLORS[state.currentPlayer]}'s turn. Use sendChat to negotiate, react, or strategize!`;
+      }
     } else {
-      prompt += `\n\nIt's ${COLORS[state.currentPlayer]}'s turn. Use sendChat to negotiate, react, or strategize!`;
+      // Silent mode - just action prompts
+      if (isMyTurn) {
+        prompt += `\n\nIT'S YOUR TURN - Take action NOW!`;
+      } else {
+        prompt += `\n\nIt's ${COLORS[state.currentPlayer]}'s turn. Wait for your turn.`;
+      }
     }
 
     return prompt;
@@ -580,7 +616,7 @@ TURN: ${COLORS[state.currentPlayer]}${isMyTurn ? ' (YOU)' : ''}`;
                             state.phase === 'donation' &&
                             me.prisoners.length > 0;
 
-    let toolNames = getToolsForPhase(state.phase, isMyTurn, pendingDonation);
+    let toolNames = getToolsForPhase(state.phase, isMyTurn, pendingDonation, this.silent);
 
     // Force action if stuck thinking
     if (this.consecutiveThinks >= 2 && isMyTurn) {
@@ -625,6 +661,7 @@ export class HeadlessGame extends EventEmitter {
     // Support both single provider (legacy) and array of 4 providers (mixed-model)
     this.provider = config.provider; // legacy single provider
     this.providers = config.providers || null; // array of 4 providers for mixed-model games
+    this.silent = config.silent || false; // No chat mode for control experiments
     this.agents = [];
     this.isRunning = false;
     this.isFinished = false;
@@ -700,7 +737,7 @@ export class HeadlessGame extends EventEmitter {
     // Create AI agents - use per-player providers if available, otherwise single provider
     for (let i = 0; i < 4; i++) {
       const playerProvider = this.providers ? this.providers[i] : this.provider;
-      this.agents.push(new AIAgent(i, playerProvider));
+      this.agents.push(new AIAgent(i, playerProvider, { silent: this.silent }));
     }
 
     // Add game_start snapshot with model info
@@ -709,6 +746,7 @@ export class HeadlessGame extends EventEmitter {
       game: this.slot,
       state: this.getStateSnapshot(),
       chatHistory: [],
+      silent: this.silent, // Track if this game was silent mode
       models: this.agents.map(a => ({
         player: a.color,
         model: a.provider.getModelName()

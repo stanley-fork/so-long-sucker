@@ -20,6 +20,7 @@ Options:
   --chips N       Chips per player (default: 3)
   --output PATH   Output directory (default: ./data)
   --delay MS      Delay between API calls in ms (default: 500)
+  --silent        Disable chat - models can only make game moves (control experiment)
   --headless      Run without interactive TUI
   --help          Show this help
 
@@ -120,7 +121,7 @@ async function main() {
 
   console.log(`
 ╔═══════════════════════════════════════════════════════════════╗
-║  🎮 So Long Sucker - Mass Simulation                          ║
+║  So Long Sucker - Mass Simulation                             ║
 ╚═══════════════════════════════════════════════════════════════╝
 
 Config:
@@ -128,6 +129,7 @@ Config:
   Games:    ${args.games}
   Parallel: ${args.parallel}
   Chips:    ${args.chips}
+  Silent:   ${args.silent ? 'YES (no chat - control experiment)' : 'NO (chat enabled)'}
   Output:   ${args.output}
 `);
 
@@ -148,6 +150,7 @@ Config:
     chips: args.chips,
     outputDir: args.output,
     delay: args.delay,
+    silent: args.silent, // No chat mode for control experiments
     headless: args.headless
   });
 
