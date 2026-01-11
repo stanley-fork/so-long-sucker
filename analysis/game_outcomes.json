@@ -1,0 +1,1327 @@
+[
+  {
+    "game": 0,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [
+          "blue",
+          "yellow",
+          "blue",
+          "blue",
+          "yellow"
+        ],
+        "totalChips": 5
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 0,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 2,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 3,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 1,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": true,
+        "supply": 1,
+        "prisoners": [
+          "blue"
+        ],
+        "totalChips": 2
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 3,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 0,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": true,
+        "supply": 1,
+        "prisoners": [
+          "yellow",
+          "blue",
+          "green",
+          "blue"
+        ],
+        "totalChips": 5
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 2,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 1,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 4,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 6,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": true,
+        "supply": 2,
+        "prisoners": [
+          "red",
+          "red"
+        ],
+        "totalChips": 4
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 9,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": true,
+        "supply": 2,
+        "prisoners": [],
+        "totalChips": 2
+      }
+    }
+  },
+  {
+    "game": 5,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": true,
+        "supply": 1,
+        "prisoners": [
+          "yellow",
+          "green"
+        ],
+        "totalChips": 3
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 8,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": true,
+        "supply": 1,
+        "prisoners": [
+          "blue"
+        ],
+        "totalChips": 2
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 7,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": true,
+        "supply": 1,
+        "prisoners": [
+          "blue"
+        ],
+        "totalChips": 2
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 3,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": true,
+        "supply": 2,
+        "prisoners": [],
+        "totalChips": 2
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 2,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 1,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 0,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": true,
+        "supply": 1,
+        "prisoners": [],
+        "totalChips": 1
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 5,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": true,
+        "supply": 1,
+        "prisoners": [],
+        "totalChips": 1
+      }
+    }
+  },
+  {
+    "game": 4,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 7,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": true,
+        "supply": 2,
+        "prisoners": [
+          "green",
+          "green"
+        ],
+        "totalChips": 4
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 6,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 8,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": true,
+        "supply": 2,
+        "prisoners": [],
+        "totalChips": 2
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 9,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 3,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 1,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 0,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [
+          "yellow"
+        ],
+        "totalChips": 1
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 2,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 5,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": true,
+        "supply": 1,
+        "prisoners": [],
+        "totalChips": 1
+      }
+    }
+  },
+  {
+    "game": 4,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": true,
+        "supply": 1,
+        "prisoners": [
+          "green"
+        ],
+        "totalChips": 2
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 6,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 7,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 8,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 9,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 3,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [
+          "yellow",
+          "green",
+          "blue",
+          "green"
+        ],
+        "totalChips": 4
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 2,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": true,
+        "supply": 1,
+        "prisoners": [],
+        "totalChips": 1
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 1,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 5,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 4,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 0,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": true,
+        "supply": 1,
+        "prisoners": [],
+        "totalChips": 1
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  },
+  {
+    "game": 7,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": true,
+        "supply": 1,
+        "prisoners": [],
+        "totalChips": 1
+      }
+    }
+  },
+  {
+    "game": 8,
+    "winner": "unknown",
+    "players": {
+      "red": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "blue": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "green": {
+        "alive": true,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      },
+      "yellow": {
+        "alive": false,
+        "supply": 0,
+        "prisoners": [],
+        "totalChips": 0
+      }
+    }
+  }
+]

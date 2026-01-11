@@ -159,6 +159,20 @@ npm run simulate -- --games 50 --provider openai --delay 1000
 npm run simulate  -- --games 3 --parallel 3  --chips 7 --provider azure-kimi
 
 
+# Terminal 1
+node cli/index.js --games 10 --providers gemini3,kimi,qwen3,gpt-oss --chips 5 --output ./data/talking_5chip
+# Terminal 2
+node cli/index.js --games 10 --providers gemini3,kimi,qwen3,gpt-oss --chips 5 --output ./data/talking_5chip
+5-chip SILENT (2 terminals, 10 games each = 20 more):
+# Terminal 3
+node cli/index.js --games 10 --providers gemini3,kimi,qwen3,gpt-oss --chips 5 --silent --output ./data/silent_5chip
+# Terminal 4
+node cli/index.js --games 10 --providers gemini3,kimi,qwen3,gpt-oss --chips 5 --silent --output ./data/silent_5chip
+
+
+
+
+
 ```
 
 **Options:**
