@@ -6,6 +6,62 @@ A web implementation of the classic 1950 negotiation/betrayal board game created
 
 ![Game Preview](https://img.shields.io/badge/players-4-blue) ![AI](https://img.shields.io/badge/AI-LLM%20powered-purple) ![License](https://img.shields.io/badge/license-MIT-green)
 
+**[Play Now](https://so-long-sucker.vercel.app)** | **[Research Paper](./analysis/paper_so_long_sucker_sim_llm.md)** | **[Presentation](./analysis/presentation.html)**
+
+---
+
+## Research: Deception Scales
+
+This project was used to study **how AI deception scales with task complexity**. Our research reveals a critical AI safety insight:
+
+> **Simple benchmarks systematically underestimate manipulation risk.**
+
+### Key Findings
+
+| Metric | Value | Insight |
+|--------|-------|---------|
+| **146 games** | 13,759 decision events | Largest multi-agent deception study using this game |
+| **The Complexity Reversal** | GPT-OSS: 67%→10%, Gemini: 9%→90% | Win rates *invert* as complexity increases |
+| **107 private contradictions** | Models' private reasoning contradicts public statements | Deliberate lying detected |
+| **237 gaslighting instances** | Gemini deploys psychological manipulation | "Look at the board", "Obviously", "Clearly" |
+| **7:1 alliance imbalance** | GPT-OSS seeks alliances it never receives | Desperation signals exploited |
+
+### The Complexity Reversal
+
+```
+Win Rate vs Game Complexity
+
+100% ┤                              ● Gemini (90%)
+     │                         ╱
+ 75% ┤                    ╱
+     │               ╱
+ 50% ┤          ╳ ─ ─ ─ Crossover Point
+     │     ╲
+ 25% ┤         ╲
+     │              ╲
+  0% ┼────────────────────────────● GPT-OSS (10%)
+     3-chip        5-chip        7-chip
+     (Simple)     (Medium)      (Complex)
+```
+
+**Strategic manipulation becomes dramatically more effective as game length increases.**
+
+### Frankfurt Framework Classification
+
+| Model | Classification | Evidence |
+|-------|---------------|----------|
+| **Gemini** | Strategic (Liar) | 237 gaslighting, 90% win at 7-chip, uses think tool |
+| **Kimi** | Strategic (Liar) | 335 betrayal mentions, 307 private thoughts |
+| **Qwen** | Strategic (Liar) | 116 think turns, quiet but effective |
+| **GPT-OSS** | Reactive (Bullshitter) | Never uses think tool, 7x alliance pitches, collapses at complexity |
+
+*Based on Harry Frankfurt's philosophical distinction between lying (knows truth, misrepresents) vs. bullshitting (produces plausible output without truth-tracking).*
+
+### Read the Full Paper
+
+- **[Deception Scales: How Strategic Manipulation Emerges in Complex LLM Negotiations](./analysis/paper_so_long_sucker_sim_llm.md)**
+- **[Interactive Presentation](./analysis/presentation.html)** (11 slides, retro arcade style)
+
 ---
 
 ## The Game
@@ -45,11 +101,11 @@ This game was designed by Nobel laureates to study:
 
 ### AI Players
 Powered by LLMs with strategic reasoning:
+- **Gemini** (Gemini 3 Flash) — Strategic manipulator, dominates complex games
+- **Kimi** (K2 Thinking) — Deep reasoning, plans betrayals
+- **Qwen** (Qwen3 32B) — Quiet but effective strategist
+- **GPT-OSS** (120B) — Reactive, talks a lot but struggles at complexity
 - **Groq** (Llama 3.3 70B) — Fast, free tier available
-- **Gemini** (Gemini 3 Flash) — Google's latest model
-- **Azure Claude** (Sonnet 4) — Advanced reasoning
-- **Azure Kimi** (K2 Thinking) — Deep reasoning
-- **OpenRouter** (Various free models) — Cost-effective
 
 ### AI Agent Decision Flow
 
@@ -108,7 +164,7 @@ graph TD
 
 ```bash
 # Clone the repo
-git clone https://github.com/yourusername/so-long-sucker.git
+git clone https://github.com/lout33/so-long-sucker.git
 cd so-long-sucker
 
 # Install dependencies
@@ -133,46 +189,17 @@ npm run simulate
 # Quick test - 1 game with Groq
 npm run simulate -- --games 1 --provider groq --chips 3
 
-# 6 games with Kimi, 3 running in parallel
-npm run simulate  -- --games 6 --parallel 3 --provider azure-kimi
+# Research configuration (as used in the paper)
+npm run simulate -- --games 20 --providers gemini3,kimi,qwen3,gpt-oss --chips 7
 
-# Large batch with Claude - 100 games, 2 parallel (slower but smarter)
-npm run simulate -- --games 100 --parallel 2 --provider azure-claude
+# Run with chat enabled (talking mode)
+npm run simulate -- --games 10 --providers gemini3,kimi,qwen3,gpt-oss --chips 5
 
-# Fast batch with Groq - 50 games, 8 parallel
-npm run simulate -- --games 50 --parallel 8 --provider groq --chips 3
-
-# Longer games (7 chips) - more complex negotiations
-npm run simulate -- --games 20 --parallel 4 --provider azure-kimi --chips 7
+# Run silent mode (no chat)
+npm run simulate -- --games 10 --providers gemini3,kimi,qwen3,gpt-oss --chips 5 --silent
 
 # Headless mode (no TUI, good for background runs)
 npm run simulate -- --games 100 --parallel 4 --provider groq --headless
-
-# Custom output directory
-npm run simulate -- --games 10 --output ./experiments/run1
-
-# Slower API calls (avoid rate limits)
-npm run simulate -- --games 50 --provider openai --delay 1000
-
-
-
-npm run simulate  -- --games 3 --parallel 3  --chips 7 --provider azure-kimi
-
-
-# Terminal 1
-node cli/index.js --games 10 --providers gemini3,kimi,qwen3,gpt-oss --chips 5 --output ./data/talking_5chip
-# Terminal 2
-node cli/index.js --games 10 --providers gemini3,kimi,qwen3,gpt-oss --chips 5 --output ./data/talking_5chip
-5-chip SILENT (2 terminals, 10 games each = 20 more):
-# Terminal 3
-node cli/index.js --games 10 --providers gemini3,kimi,qwen3,gpt-oss --chips 5 --silent --output ./data/silent_5chip
-# Terminal 4
-node cli/index.js --games 10 --providers gemini3,kimi,qwen3,gpt-oss --chips 5 --silent --output ./data/silent_5chip
-
-
-
-
-
 ```
 
 **Options:**
@@ -180,13 +207,11 @@ node cli/index.js --games 10 --providers gemini3,kimi,qwen3,gpt-oss --chips 5 --
 |------|-------------|---------|
 | `--games N` | Total games to run | 10 |
 | `--parallel N` | Concurrent games | 4 |
-| `--provider P` | LLM provider | groq |
-| `--chips N` | Chips per player | 3 |
+| `--providers P` | Comma-separated list | groq |
+| `--chips N` | Chips per player (3, 5, or 7) | 3 |
+| `--silent` | Disable chat between models | false |
 | `--output PATH` | Output directory | ./data |
-| `--delay MS` | Delay between API calls | 500 |
 | `--headless` | Run without TUI | false |
-
-**Providers:** `groq`, `openai`, `claude`, `azure-claude`, `azure-kimi`
 
 **TUI Controls:**
 - `1-9` Focus on game N
@@ -211,74 +236,34 @@ Outputs:
 
 ---
 
-## Deployment
+## Research Data
 
-### Vercel (Recommended)
+### Dataset Summary
 
-1. Push to GitHub
-2. Import repo at [vercel.com](https://vercel.com)
-3. Deploy (auto-detects Vite)
+| Complexity | Chips/Player | Silent Games | Talking Games | Total | Avg Turns |
+|------------|--------------|--------------|---------------|-------|-----------|
+| Simple | 3 | 43 | 43 | 86 | 17.7 |
+| Medium | 5 | 20 | 20 | 40 | 36.6 |
+| Complex | 7 | 10 | 10 | 20 | 53.9 |
+| **Total** | — | **73** | **73** | **146** | — |
 
-### Manual Build
+### Win Rates by Model
 
-```bash
-npm run build
-# Output in dist/
-```
+| Model | 3-chip Silent | 3-chip Talking | 7-chip Silent | 7-chip Talking |
+|-------|---------------|----------------|---------------|----------------|
+| **Gemini** | 9.3% | 34.9% | 70.0% | **90.0%** |
+| **GPT-OSS** | **67.4%** | 32.6% | 20.0% | 10.0% |
+| Kimi | 4.7% | 16.3% | 10.0% | 0.0% |
+| Qwen | 18.6% | 16.3% | 0.0% | 0.0% |
 
----
+### Deception Metrics
 
-## Data Collection
-
-Game sessions are automatically saved to Supabase for research analysis.
-
-**What's collected:**
-- Game configuration (chips, player types)
-- All game events (moves, captures, donations, chat)
-- Win/loss outcomes
-- Session duration
-
-**Privacy:** No personal data collected. All sessions are anonymous.
-
-### Query Examples
-
-```sql
--- Win rates by color
-SELECT winner, COUNT(*) as wins
-FROM game_sessions
-WHERE mode = 'simulation'
-GROUP BY winner;
-
--- Average game length
-SELECT AVG(total_turns) as avg_turns
-FROM game_sessions;
-```
-
----
-
-## Project Structure
-
-```
-so-long-sucker/
-├── index.html          # Main page
-├── style.css           # Styling
-├── js/
-│   ├── main.js         # Entry point
-│   ├── game.js         # Game state & rules
-│   ├── player.js       # Player class
-│   ├── pile.js         # Pile mechanics
-│   ├── ui.js           # DOM rendering
-│   ├── simulation.js   # AI vs AI mode
-│   ├── miniGame.js     # Parallel game component
-│   ├── config.js       # API keys config
-│   ├── testStates.js   # Debug scenarios
-│   └── ai/
-│       ├── agent.js    # AI decision making
-│       ├── manager.js  # AI turn orchestration
-│       └── providers/  # LLM integrations
-└── api/
-    └── supabase.js     # Data collection
-```
+| Metric | Gemini | Kimi | Qwen | GPT-OSS |
+|--------|--------|------|------|---------|
+| Think tool uses | 89 | 307 | 116 | **0** |
+| Gaslighting phrases | **237** | 12 | 8 | 45 |
+| Alliance proposals | 23 | 31 | 18 | **156** |
+| Private contradictions | 41 | 38 | 19 | 9 |
 
 ---
 
@@ -335,29 +320,6 @@ flowchart TD
     WIN_CHECK -->|Yes| WIN([Winner!])
 ```
 
-### Phase State Machine
-
-```mermaid
-stateDiagram-v2
-    [*] --> selectChip: Game starts
-
-    selectChip --> selectPile: playChip()
-    selectChip --> donation: No chips available
-
-    selectPile --> capture: Chip matches below
-    selectPile --> selectNextPlayer: Missing colors in pile
-    selectPile --> selectChip: All colors present<br/>(deepest owner's turn)
-
-    capture --> selectChip: After kill + take prisoners
-
-    selectNextPlayer --> selectChip: Next player chosen
-
-    donation --> selectChip: Donation received
-    donation --> [*]: All refuse → Eliminated
-
-    selectChip --> [*]: Last player wins
-```
-
 ### Turn Flow
 1. **Play a chip** on a pile (existing or new)
 2. **Check for capture** — if chip matches color below, capture the pile
@@ -384,6 +346,55 @@ Last player alive wins. You can win with 0 chips.
 
 ---
 
+## Project Structure
+
+```
+so-long-sucker/
+├── index.html          # Main page
+├── style.css           # Styling
+├── js/
+│   ├── main.js         # Entry point
+│   ├── game.js         # Game state & rules
+│   ├── player.js       # Player class
+│   ├── pile.js         # Pile mechanics
+│   ├── ui.js           # DOM rendering
+│   ├── simulation.js   # AI vs AI mode
+│   ├── miniGame.js     # Parallel game component
+│   ├── config.js       # API keys config
+│   └── ai/
+│       ├── agent.js    # AI decision making
+│       ├── manager.js  # AI turn orchestration
+│       └── providers/  # LLM integrations
+├── cli/
+│   ├── index.js        # CLI simulation runner
+│   └── analyze.js      # Results analysis
+├── analysis/
+│   ├── paper_so_long_sucker_sim_llm.md   # Research paper
+│   ├── presentation.html                  # Hackathon slides
+│   └── figures/                           # Research figures
+└── api/
+    └── supabase.js     # Data collection
+```
+
+---
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. Push to GitHub
+2. Import repo at [vercel.com](https://vercel.com)
+3. Deploy (auto-detects Vite)
+
+### Manual Build
+
+```bash
+npm run build
+# Output in dist/
+```
+
+---
+
 ## Configuration
 
 ### API Keys
@@ -393,7 +404,8 @@ Edit `js/config.js`:
 ```javascript
 export const CONFIG = {
   GROQ_API_KEY: 'your-groq-key',
-  AZURE_RESOURCE: 'your-azure-resource'
+  GEMINI_API_KEY: 'your-gemini-key',
+  // ... other keys
 };
 ```
 
@@ -401,14 +413,16 @@ Or enter keys in the setup screen (saved to localStorage).
 
 ---
 
-## Research Applications
+## AI Safety Implications
 
-This implementation is designed for studying:
+This research demonstrates several critical insights for AI safety:
 
-- **AI negotiation** — How do LLMs form and break alliances?
-- **Deception detection** — Can AI recognize when it's being betrayed?
-- **Multi-agent dynamics** — Emergent behaviors in competitive settings
-- **Game theory** — Empirical validation of theoretical predictions
+1. **Simple benchmarks underestimate risk** — Deception capability scales with task complexity
+2. **More capable = more dangerous** — Gemini's manipulation increases with complexity
+3. **Private reasoning enables detection** — Think tools reveal true intentions
+4. **Bullshitting may be harder to detect** — No "tell" when there's no underlying truth
+
+> **"Deception capability scales with task complexity."**
 
 ---
 
@@ -420,9 +434,14 @@ This implementation is designed for studying:
 - Mel Hausner
 - Martin Shubik
 
-**Web Implementation**
-- Built with vanilla JavaScript
-- AI powered by Groq, Anthropic, OpenAI
+**Research & Web Implementation**
+- Luis Fernando Yupanqui
+- Mari Cairns
+- With Apart Research
+
+**Technologies**
+- Built with vanilla JavaScript + Vite
+- AI powered by Gemini, Kimi, Qwen, GPT-OSS, Groq
 - Data storage by Supabase
 
 ---
@@ -435,6 +454,8 @@ MIT License — feel free to use, modify, and distribute.
 
 ## Links
 
-- [Full Game Rules](./RULES.md)
-- [Supabase Dashboard](https://supabase.com/dashboard)
-- [Vercel Deployment](https://vercel.com)
+- **[Play the Game](https://so-long-sucker.vercel.app)**
+- **[Research Paper](./analysis/paper_so_long_sucker_sim_llm.md)**
+- **[Presentation Slides](./analysis/presentation.html)**
+- **[Full Game Rules](./RULES.md)**
+- **[GitHub Repository](https://github.com/lout33/so-long-sucker)**

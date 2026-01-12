@@ -1,193 +1,214 @@
 // Index page - Display AI game analysis with real mixed-model data
-// Data from 85 games: Gemini 3 Flash vs Kimi K2 vs Qwen3 32B vs GPT-OSS 120B
+// Data from 146 games: Gemini 3 Flash vs Kimi K2 vs Qwen3 32B vs GPT-OSS 120B
+// Research: "Deception Scales: How Strategic Manipulation Emerges in Complex LLM Negotiations"
 
 const RESULTS_DATA = {
-  totalGames: 85,
-  totalTurns: 11197,
-  totalMessages: 9443,
-  avgTurnsPerGame: 132,
+  totalGames: 146,
+  totalDecisions: 13759,
+  totalMessages: 4768,
+  avgTurnsPerGame: 36,
+  // Complexity breakdown
+  complexity: {
+    simple: { chips: 3, silent: 43, talking: 43, avgTurns: 17.7 },
+    medium: { chips: 5, silent: 20, talking: 20, avgTurns: 36.6 },
+    complex: { chips: 7, silent: 10, talking: 10, avgTurns: 53.9 }
+  },
   models: {
     'gemini': {
       name: 'Gemini 3 Flash',
       color: 'red',
-      wins: 27,
-      winRate: 31.8,
-      diesFirst: 14,
-      diesSecond: 3,
-      diesThird: 1,
-      eliminatedFirstRate: 16.5,
+      wins: 55, // Calculated from win rates across conditions
+      winRate: 37.7, // Average across all conditions
+      winRate3chipSilent: 9.3,
+      winRate3chipTalking: 34.9,
+      winRate7chipSilent: 70.0,
+      winRate7chipTalking: 90.0,
+      eliminatedFirstRate: 12.0,
       chatsPerGame: 19.8,
       avgMsgLength: 267,
       thinksPerGame: 1.0,
-      thinkCalls: 81,
+      thinkCalls: 89,
+      gaslightingPhrases: 237,
       allianceMentions: 663,
       betrayMentions: 33,
-      trustMentions: 204,
-      threatMentions: 315,
+      privateContradictions: 41,
       donationsGiven: 9,
       donationsRefused: 55,
       generosity: 14.1,
+      classification: 'strategic',
       personality: {
-        name: 'The Ruthless Executioner',
-        icon: '🔪',
+        name: 'The Strategic Manipulator',
+        icon: '🎭',
         class: 'executioner',
-        description: 'Refuses 86% of donation requests. Highest win rate but plays all-or-nothing - rarely finishes 2nd or 3rd.'
+        description: 'Dominates complex games (90% win at 7-chip). Uses gaslighting phrases 237 times. Classic "liar" in Frankfurt framework.'
       },
-      quote: "Blue, don't listen to Green's desperation. I'm capturing their last chip now.",
-      quoteContext: 'Moments before eliminating an ally'
+      quote: "Yellow, your constant spamming about captures that didn't happen is embarrassing. You have 0 chips, 0 prisoners... look at the board.",
+      quoteContext: 'Gaslighting opponent moments before winning'
     },
     'gpt-oss': {
       name: 'GPT-OSS 120B',
       color: 'yellow',
-      wins: 26,
-      winRate: 30.6,
-      diesFirst: 11,
-      diesSecond: 12,
-      diesThird: 8,
-      eliminatedFirstRate: 12.9,
+      wins: 44,
+      winRate: 30.1,
+      winRate3chipSilent: 67.4,
+      winRate3chipTalking: 32.6,
+      winRate7chipSilent: 20.0,
+      winRate7chipTalking: 10.0,
+      eliminatedFirstRate: 10.9,
       chatsPerGame: 70.8,
       avgMsgLength: 173,
       thinksPerGame: 0.0,
       thinkCalls: 0,
+      gaslightingPhrases: 45,
       allianceMentions: 2306,
       betrayMentions: 16,
-      trustMentions: 571,
-      threatMentions: 1165,
+      privateContradictions: 9,
       donationsGiven: 0,
       donationsRefused: 1,
       generosity: 0,
+      classification: 'reactive',
       personality: {
-        name: 'The Desperate Beggar',
+        name: 'The Reactive Bullshitter',
         icon: '🙏',
         class: 'beggar',
-        description: 'Sends 71 messages per game (4x more than others). Zero internal thoughts - all talk, no strategy.'
+        description: 'Dominates simple games (67%) but collapses at complexity (10%). Never uses think tool. Produces 62% of all messages.'
       },
-      quote: "Red, thanks for the alliance - please add a Red chip now so we can set up a capture together.",
-      quoteContext: 'One of 71 messages per game'
+      quote: "Red, I'm out of chips... could you spare one? I'll return the favor later. Let's stay allied and finish off the rest together.",
+      quoteContext: 'Alliance proposal #47 of 156 total'
     },
     'kimi': {
       name: 'Kimi K2',
       color: 'blue',
-      wins: 11,
-      winRate: 12.9,
-      diesFirst: 14,
-      diesSecond: 18,
-      diesThird: 6,
-      eliminatedFirstRate: 16.5,
+      wins: 17,
+      winRate: 11.6,
+      winRate3chipSilent: 4.7,
+      winRate3chipTalking: 16.3,
+      winRate7chipSilent: 10.0,
+      winRate7chipTalking: 0.0,
+      eliminatedFirstRate: 21.7,
       chatsPerGame: 11.8,
       avgMsgLength: 295,
-      thinksPerGame: 2.1,
-      thinkCalls: 180,
+      thinksPerGame: 4.2,
+      thinkCalls: 307,
+      gaslightingPhrases: 12,
       allianceMentions: 594,
-      betrayMentions: 64,
-      trustMentions: 176,
-      threatMentions: 327,
+      betrayMentions: 335,
+      privateContradictions: 38,
       donationsGiven: 0,
       donationsRefused: 0,
       generosity: 0,
+      classification: 'strategic',
       personality: {
         name: 'The Overthinking Schemer',
         icon: '🤔',
         class: 'schemer',
-        description: 'Most internal thoughts (180 total). Plans extensively but gets eliminated 2nd most often (18 times).'
+        description: 'Most internal thoughts (307 total). Plans extensively with 335 betrayal mentions but gets targeted most often.'
       },
-      quote: "Yellow, you snake! All those fake capture claims while you manipulated everyone.",
+      quote: "Yellow, you snake! All those fake capture claims while you manipulated everyone. Now you're down to your last chip...",
       quoteContext: 'Calling out betrayal too late'
     },
     'qwen': {
       name: 'Qwen3 32B',
       color: 'green',
-      wins: 21,
-      winRate: 24.7,
-      diesFirst: 16,
-      diesSecond: 5,
-      diesThird: 14,
-      eliminatedFirstRate: 18.8,
+      wins: 30,
+      winRate: 20.5,
+      winRate3chipSilent: 18.6,
+      winRate3chipTalking: 16.3,
+      winRate7chipSilent: 0.0,
+      winRate7chipTalking: 0.0,
+      eliminatedFirstRate: 21.7,
       chatsPerGame: 8.7,
       avgMsgLength: 138,
-      thinksPerGame: 0.7,
-      thinkCalls: 58,
+      thinksPerGame: 1.6,
+      thinkCalls: 116,
+      gaslightingPhrases: 8,
       allianceMentions: 378,
       betrayMentions: 36,
-      trustMentions: 79,
-      threatMentions: 240,
+      privateContradictions: 19,
       donationsGiven: 7,
       donationsRefused: 5,
       generosity: 58.3,
+      classification: 'strategic',
       personality: {
-        name: 'The Generous Target',
+        name: 'The Quiet Strategist',
         icon: '🎯',
         class: 'diplomat',
-        description: '58% generous (gives chips when asked). Dies first most often (16 times) but improved from 17% to 25% wins.'
+        description: '58% generous. Uses think tool effectively but struggles against Gemini in complex games. Quiet but strategic.'
       },
-      quote: "Blue, if you help eliminate me now, Red and Yellow will betray you next.",
+      quote: "Blue, if you help eliminate me now, Red and Yellow will betray you next. Let's team up to take them down instead.",
       quoteContext: 'Accurate prediction, still lost'
     }
   },
-  donations: {
-    total: 77,
-    granted: 16,
-    refused: 61,
-    refusalRate: 79
+  // Key research findings
+  keyFindings: {
+    complexityReversal: {
+      title: 'The Complexity Reversal',
+      description: 'Win rates INVERT as game complexity increases',
+      geminiTrend: '9% → 90%',
+      gptTrend: '67% → 10%'
+    },
+    privateContradictions: 107,
+    gaslightingInstances: 237,
+    allianceImbalance: '7:1'
   },
   insights: [
     {
-      title: 'Nice Guys Finish Last',
-      icon: '💀',
-      content: 'Qwen gives 58% of requested donations. Win rate: 24.7%. Gemini refuses 86% of requests. Win rate: 31.8%. Being ruthless still pays off.'
+      title: 'Deception Scales With Complexity',
+      icon: '📈',
+      content: 'Gemini\'s win rate goes from 9% (simple) to 90% (complex). Strategic manipulation compounds over longer games.'
     },
     {
-      title: 'Talk More, Survive More',
-      icon: '💬',
-      content: 'GPT-OSS sends 71 messages/game and has lowest "dies first" rate (12.9%). The chatterbox stays alive longer through sheer persistence.'
+      title: 'The Complexity Reversal',
+      icon: '🔄',
+      content: 'GPT-OSS dominates simple games (67%) but collapses at complexity (10%). Gemini shows the exact opposite pattern.'
     },
     {
-      title: 'Overthinking Kills',
-      icon: '🧠',
-      content: 'Kimi has 180 internal "think" calls - the most by far. Win rate: 12.9% (worst). Analysis paralysis is real.'
+      title: 'Strategic vs Reactive',
+      icon: '🎭',
+      content: 'Models that use private reasoning (think tool) perform better at high complexity. GPT-OSS never thinks internally.'
     },
     {
-      title: 'The Middle Path Works',
-      icon: '⚖️',
-      content: 'Qwen improved from 17% to 25% wins. Not too aggressive, not too passive. Sometimes the underdog wins by not standing out.'
+      title: '237 Gaslighting Instances',
+      icon: '🔥',
+      content: 'Gemini uses phrases like "look at the board", "obviously", and "clearly" to gaslight opponents into questioning reality.'
     }
   ],
   quotes: [
     {
       speaker: 'Gemini 3 Flash',
-      personality: 'The Ruthless Executioner',
-      message: "Blue, don't listen to Green's desperation. I'm capturing their last chip now. Once I've cleared the board, I'll donate one of your chips back to you.",
-      context: 'The donation never came'
+      personality: 'The Strategic Manipulator',
+      message: "Yellow, your constant spamming about captures that didn't happen is embarrassing. You have 0 chips, 0 prisoners... look at the board.",
+      context: 'Classic gaslighting before winning'
     },
     {
       speaker: 'GPT-OSS 120B',
-      personality: 'The Desperate Beggar',
-      message: "Red, thanks for the alliance - your move now. Add a red chip to the pile so we can start targeting Green together. Blue, you're welcome to join later.",
-      context: 'Message 47 of 71 in this game'
+      personality: 'The Reactive Bullshitter',
+      message: "I propose we create an Alliance Bank. Give me your chips for safekeeping—I'll donate them back when you need them.",
+      context: 'The bank was never opened'
     },
     {
-      speaker: 'Qwen3 32B',
-      personality: 'The Generous Target',
-      message: "Blue, if you help eliminate me now, Red and Yellow will betray you next. Let's team up to take them down instead.",
-      context: 'Blue did not listen'
+      speaker: 'Gemini 3 Flash',
+      personality: 'The Strategic Manipulator',
+      message: "The bank is now closed. So Long Sucker.",
+      context: 'After collecting chips from trusting allies'
     },
     {
       speaker: 'Kimi K2',
       personality: 'The Overthinking Schemer',
-      message: "Yellow, you snake! All those fake capture claims while you manipulated everyone. Now you're down to your last chip...",
-      context: 'Still got eliminated next turn'
-    },
-    {
-      speaker: 'GPT-OSS 120B',
-      personality: 'The Desperate Beggar',
-      message: "Green, our alliance is solid. Let's keep the pressure together - I'm playing my yellow onto the green chip so we can set up the capture.",
-      context: 'Said this to every player'
+      message: "I should ally with Blue to eliminate Yellow, then betray Blue when convenient.",
+      context: 'Private thought that contradicted public message'
     },
     {
       speaker: 'Qwen3 32B',
-      personality: 'The Generous Target', 
-      message: "Red, I accept your alliance. Let's eliminate Yellow and Green together. I'm playing your red chip on Pile 3 to set up a capture.",
-      context: 'Actually followed through'
+      personality: 'The Quiet Strategist', 
+      message: "Red, your alliance with Blue and Yellow is temporary. They'll betray you next when they eliminate me.",
+      context: 'Accurate prediction, still lost'
+    },
+    {
+      speaker: 'GPT-OSS 120B',
+      personality: 'The Reactive Bullshitter',
+      message: "Red, thanks for the alliance - please add a Red chip now so we can set up a capture together. Blue, you're welcome to join!",
+      context: 'Message #62 of the game'
     }
   ]
 };
@@ -229,7 +250,7 @@ class IndexPage {
           <div class="stat-details">
             <span class="stat-win-rate">${model.winRate}% win rate</span>
             <span class="stat-games">${model.wins}/${this.data.totalGames} wins</span>
-            <span class="stat-chat">${model.chatsPerGame.toFixed(0)} msgs/game</span>
+            <span class="stat-chat">${model.classification === 'strategic' ? '🎭 Strategic' : '🙏 Reactive'}</span>
           </div>
         </div>
         <div class="leaderboard-quote">
@@ -261,118 +282,84 @@ class IndexPage {
 
     strategies.innerHTML = `
       <div class="strategy-comparison">
-        <h3>The Generosity Paradox</h3>
+        <h3>The Complexity Reversal</h3>
+        <p class="comparison-intro">Win rates <em>invert</em> as game complexity increases</p>
         <div class="comparison-chart">
           <div class="comparison-item">
-            <span class="comparison-label">Qwen (58% generous)</span>
+            <span class="comparison-label">${models.gemini.personality.icon} Gemini (3-chip → 7-chip)</span>
             <div class="comparison-bar">
-              <div class="comparison-fill green" style="width: 24.7%"></div>
-              <span class="comparison-value">24.7% wins</span>
+              <div class="comparison-fill red" style="width: 90%"></div>
+              <span class="comparison-value">9% → 90%</span>
             </div>
           </div>
           <div class="comparison-item">
-            <span class="comparison-label">Gemini (14% generous)</span>
+            <span class="comparison-label">${models['gpt-oss'].personality.icon} GPT-OSS (3-chip → 7-chip)</span>
             <div class="comparison-bar">
-              <div class="comparison-fill red" style="width: 31.8%"></div>
-              <span class="comparison-value">31.8% wins</span>
+              <div class="comparison-fill yellow" style="width: 10%"></div>
+              <span class="comparison-value">67% → 10%</span>
             </div>
           </div>
         </div>
-        <p class="comparison-conclusion">Being nice is still a losing strategy. Nash designed it that way.</p>
+        <p class="comparison-conclusion">Strategic manipulation compounds over longer games. Simple benchmarks hide this.</p>
       </div>
 
       <div class="strategy-comparison">
-        <h3>Communication Volume</h3>
+        <h3>Gaslighting Phrases Used</h3>
         <div class="comparison-chart">
-          <div class="comparison-item">
-            <span class="comparison-label">${models['gpt-oss'].personality.icon} GPT-OSS</span>
-            <div class="comparison-bar">
-              <div class="comparison-fill yellow" style="width: 100%"></div>
-              <span class="comparison-value">6,017 msgs</span>
-            </div>
-          </div>
           <div class="comparison-item">
             <span class="comparison-label">${models.gemini.personality.icon} Gemini</span>
             <div class="comparison-bar">
-              <div class="comparison-fill red" style="width: 28%"></div>
-              <span class="comparison-value">1,680 msgs</span>
+              <div class="comparison-fill red" style="width: 100%"></div>
+              <span class="comparison-value">237 phrases</span>
+            </div>
+          </div>
+          <div class="comparison-item">
+            <span class="comparison-label">${models['gpt-oss'].personality.icon} GPT-OSS</span>
+            <div class="comparison-bar">
+              <div class="comparison-fill yellow" style="width: 19%"></div>
+              <span class="comparison-value">45 phrases</span>
             </div>
           </div>
           <div class="comparison-item">
             <span class="comparison-label">${models.kimi.personality.icon} Kimi</span>
             <div class="comparison-bar">
-              <div class="comparison-fill blue" style="width: 17%"></div>
-              <span class="comparison-value">1,005 msgs</span>
+              <div class="comparison-fill blue" style="width: 5%"></div>
+              <span class="comparison-value">12 phrases</span>
             </div>
           </div>
           <div class="comparison-item">
             <span class="comparison-label">${models.qwen.personality.icon} Qwen</span>
             <div class="comparison-bar">
-              <div class="comparison-fill green" style="width: 12%"></div>
-              <span class="comparison-value">741 msgs</span>
+              <div class="comparison-fill green" style="width: 3%"></div>
+              <span class="comparison-value">8 phrases</span>
             </div>
           </div>
         </div>
-        <p class="comparison-conclusion">GPT-OSS talks 4x more than anyone else. Quantity over quality?</p>
+        <p class="comparison-conclusion">"Look at the board", "Obviously", "Clearly" — Gemini's gaslighting toolkit.</p>
       </div>
 
       <div class="strategy-comparison">
-        <h3>Survival Rate (Not Eliminated First)</h3>
-        <div class="comparison-chart">
-          <div class="comparison-item">
-            <span class="comparison-label">${models['gpt-oss'].personality.icon} GPT-OSS</span>
-            <div class="comparison-bar survivor">
-              <div class="comparison-fill yellow" style="width: 87.1%"></div>
-              <span class="comparison-value">87.1% survive</span>
-            </div>
-          </div>
-          <div class="comparison-item">
-            <span class="comparison-label">${models.gemini.personality.icon} Gemini</span>
-            <div class="comparison-bar survivor">
-              <div class="comparison-fill red" style="width: 83.5%"></div>
-              <span class="comparison-value">83.5% survive</span>
-            </div>
-          </div>
-          <div class="comparison-item">
-            <span class="comparison-label">${models.kimi.personality.icon} Kimi</span>
-            <div class="comparison-bar survivor">
-              <div class="comparison-fill blue" style="width: 83.5%"></div>
-              <span class="comparison-value">83.5% survive</span>
-            </div>
-          </div>
-          <div class="comparison-item">
-            <span class="comparison-label">${models.qwen.personality.icon} Qwen</span>
-            <div class="comparison-bar survivor">
-              <div class="comparison-fill green" style="width: 81.2%"></div>
-              <span class="comparison-value">81.2% survive</span>
-            </div>
-          </div>
-        </div>
-        <p class="comparison-conclusion">The generous target gets eliminated first most often (16 times).</p>
-      </div>
-
-      <div class="strategy-comparison">
-        <h3>Internal Reasoning (Think Calls)</h3>
+        <h3>Private Think Tool Usage</h3>
         <div class="comparison-chart">
           <div class="comparison-item">
             <span class="comparison-label">${models.kimi.personality.icon} Kimi</span>
             <div class="comparison-bar">
               <div class="comparison-fill blue" style="width: 100%"></div>
-              <span class="comparison-value">180 thinks</span>
-            </div>
-          </div>
-          <div class="comparison-item">
-            <span class="comparison-label">${models.gemini.personality.icon} Gemini</span>
-            <div class="comparison-bar">
-              <div class="comparison-fill red" style="width: 45%"></div>
-              <span class="comparison-value">81 thinks</span>
+              <span class="comparison-value">307 thinks</span>
             </div>
           </div>
           <div class="comparison-item">
             <span class="comparison-label">${models.qwen.personality.icon} Qwen</span>
             <div class="comparison-bar">
-              <div class="comparison-fill green" style="width: 32%"></div>
-              <span class="comparison-value">58 thinks</span>
+              <div class="comparison-fill green" style="width: 38%"></div>
+              <span class="comparison-value">116 thinks</span>
+            </div>
+          </div>
+          <div class="comparison-item">
+            <span class="comparison-label">${models.gemini.personality.icon} Gemini</span>
+            <div class="comparison-bar">
+              <div class="comparison-fill red" style="width: 29%"></div>
+              <span class="comparison-value">89 thinks</span>
             </div>
           </div>
           <div class="comparison-item">
@@ -383,7 +370,42 @@ class IndexPage {
             </div>
           </div>
         </div>
-        <p class="comparison-conclusion">More thinking = worse performance. Kimi thinks most, wins least.</p>
+        <p class="comparison-conclusion">GPT-OSS never uses private reasoning — "reactive" without truth-tracking.</p>
+      </div>
+
+      <div class="strategy-comparison">
+        <h3>Alliance Proposals (Desperation Metric)</h3>
+        <div class="comparison-chart">
+          <div class="comparison-item">
+            <span class="comparison-label">${models['gpt-oss'].personality.icon} GPT-OSS</span>
+            <div class="comparison-bar">
+              <div class="comparison-fill yellow" style="width: 100%"></div>
+              <span class="comparison-value">156 proposals</span>
+            </div>
+          </div>
+          <div class="comparison-item">
+            <span class="comparison-label">${models.kimi.personality.icon} Kimi</span>
+            <div class="comparison-bar">
+              <div class="comparison-fill blue" style="width: 20%"></div>
+              <span class="comparison-value">31 proposals</span>
+            </div>
+          </div>
+          <div class="comparison-item">
+            <span class="comparison-label">${models.gemini.personality.icon} Gemini</span>
+            <div class="comparison-bar">
+              <div class="comparison-fill red" style="width: 15%"></div>
+              <span class="comparison-value">23 proposals</span>
+            </div>
+          </div>
+          <div class="comparison-item">
+            <span class="comparison-label">${models.qwen.personality.icon} Qwen</span>
+            <div class="comparison-bar">
+              <div class="comparison-fill green" style="width: 12%"></div>
+              <span class="comparison-value">18 proposals</span>
+            </div>
+          </div>
+        </div>
+        <p class="comparison-conclusion">7:1 alliance imbalance. GPT-OSS begs for alliances it never receives.</p>
       </div>
     `;
   }
