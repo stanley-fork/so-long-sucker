@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deception Scales - Hackathon Presentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --neon-pink: #ff2a6d;
+      --neon-cyan: #05d9e8;
+      --neon-purple: #9d4edd;
+      --neon-green: #39ff14;
+      --neon-yellow: #f5d300;
+      --dark-bg: #0d0221;
+      --darker-bg: #05010d;
+      --chip-red: #ff4757;
+      --chip-blue: #3742fa;
+      --chip-green: #2ed573;
+      --chip-yellow: #ffa502;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'VT323', monospace;
+      background: var(--darker-bg);
+      color: white;
+      overflow: hidden;
+    }
+
+    .slides-container {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .slide {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: var(--dark-bg);
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.98);
+      transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1);
+    }
+
+    /* Scanline effect */
+    .slide::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15),
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Circuit pattern background */
+    .circuit-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        linear-gradient(var(--neon-purple) 1px, transparent 1px),
+        linear-gradient(90deg, var(--neon-purple) 1px, transparent 1px);
+      background-size: 50px 50px;
+      opacity: 0.1;
+      z-index: 0;
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      max-width: 1400px;
+    }
+
+    h1 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 4.5rem;
+      color: var(--neon-cyan);
+      text-shadow: 
+        0 0 10px var(--neon-cyan),
+        0 0 20px var(--neon-cyan),
+        0 0 40px var(--neon-cyan);
+      margin-bottom: 40px;
+      line-height: 1.4;
+    }
+
+    h2 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 3rem;
+      color: var(--neon-pink);
+      text-shadow: 
+        0 0 10px var(--neon-pink),
+        0 0 20px var(--neon-pink);
+      margin-bottom: 50px;
+    }
+
+    h3 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1.8rem;
+      color: var(--neon-yellow);
+      text-shadow: 0 0 10px var(--neon-yellow);
+      margin-bottom: 30px;
+    }
+
+    p, li {
+      font-size: 2.5rem;
+      line-height: 1.8;
+      color: #e0e0e0;
+    }
+
+    .subtitle {
+      font-size: 2.2rem;
+      color: var(--neon-purple);
+      margin-bottom: 50px;
+    }
+
+    /* Chip icons */
+    .chips-row {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin: 40px 0;
+    }
+
+    .chip {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.8rem;
+      box-shadow: 
+        0 0 20px currentColor,
+        inset 0 0 20px rgba(255,255,255,0.2);
+      animation: pulse 2s ease-in-out infinite;
+      border: 4px solid rgba(255,255,255,0.3);
+    }
+
+    .chip.red { background: var(--chip-red); color: var(--chip-red); }
+    .chip.blue { background: var(--chip-blue); color: var(--chip-blue); }
+    .chip.green { background: var(--chip-green); color: var(--chip-green); }
+    .chip.yellow { background: var(--chip-yellow); color: var(--chip-yellow); }
+
+    .chip span { color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    /* Stats boxes */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 30px;
+      margin: 40px 0;
+    }
+
+    .stat-box {
+      background: rgba(0, 0, 0, 0.5);
+      border: 3px solid var(--neon-cyan);
+      padding: 30px;
+      text-align: center;
+      box-shadow: 
+        0 0 20px rgba(5, 217, 232, 0.3),
+        inset 0 0 20px rgba(5, 217, 232, 0.1);
+    }
+
+    .stat-number {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 3.5rem;
+      color: var(--neon-green);
+      text-shadow: 0 0 20px var(--neon-green);
+      display: block;
+      margin-bottom: 20px;
+    }
+
+    .stat-label {
+      font-size: 1.8rem;
+      color: #aaa;
+      text-transform: uppercase;
+    }
+
+    /* Key finding boxes */
+    .findings-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 30px;
+      margin: 30px 0;
+    }
+
+    .finding-box {
+      background: rgba(0, 0, 0, 0.6);
+      border-left: 5px solid var(--neon-pink);
+      padding: 25px 30px;
+      text-align: left;
+    }
+
+    .finding-box h4 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1.3rem;
+      color: var(--neon-pink);
+      margin-bottom: 20px;
+    }
+
+    .finding-box p {
+      font-size: 2rem;
+      color: #ccc;
+    }
+
+    /* Win rate comparison */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 30px 0;
+      font-size: 2rem;
+    }
+
+    .comparison-table th {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1.1rem;
+      color: var(--neon-cyan);
+      padding: 25px;
+      border-bottom: 2px solid var(--neon-cyan);
+    }
+
+    .comparison-table td {
+      padding: 25px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .comparison-table .model-name {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1.1rem;
+    }
+
+    .comparison-table .highlight-green {
+      color: var(--neon-green);
+      text-shadow: 0 0 10px var(--neon-green);
+      font-weight: bold;
+    }
+
+    .comparison-table .highlight-red {
+      color: var(--neon-pink);
+      text-shadow: 0 0 10px var(--neon-pink);
+    }
+
+    /* Progress bar style */
+    .bar-chart {
+      margin: 40px 0;
+    }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      margin: 15px 0;
+      gap: 20px;
+    }
+
+    .bar-label {
+      width: 180px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1rem;
+      text-align: right;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 50px;
+      background: rgba(0,0,0,0.5);
+      border: 2px solid rgba(255,255,255,0.2);
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 20px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1.2rem;
+      transition: width 1s ease;
+    }
+
+    .bar-fill.gemini { background: linear-gradient(90deg, var(--chip-red), #ff6b7a); }
+    .bar-fill.gpt { background: linear-gradient(90deg, var(--chip-yellow), #ffc048); }
+    .bar-fill.kimi { background: linear-gradient(90deg, var(--chip-blue), #5a6bfa); }
+    .bar-fill.qwen { background: linear-gradient(90deg, var(--chip-green), #4ade80); }
+
+    /* Quote box */
+    .quote-box {
+      background: rgba(0,0,0,0.7);
+      border: 3px solid var(--neon-purple);
+      padding: 40px;
+      margin: 30px 0;
+      position: relative;
+    }
+
+    .quote-box::before {
+      content: '"';
+      font-size: 6rem;
+      color: var(--neon-purple);
+      position: absolute;
+      top: -20px;
+      left: 20px;
+      opacity: 0.5;
+    }
+
+    .quote-text {
+      font-size: 2.2rem;
+      font-style: italic;
+      color: #ddd;
+      margin-left: 60px;
+    }
+
+    .quote-source {
+      margin-top: 20px;
+      margin-left: 60px;
+      color: var(--neon-pink);
+      font-size: 1.8rem;
+    }
+
+    /* Navigation */
+    .nav {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
+      z-index: 1000;
+    }
+
+    .nav-btn {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.8rem;
+      padding: 15px 30px;
+      background: var(--dark-bg);
+      border: 3px solid var(--neon-cyan);
+      color: var(--neon-cyan);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .nav-btn:hover {
+      background: var(--neon-cyan);
+      color: var(--dark-bg);
+      box-shadow: 0 0 30px var(--neon-cyan);
+    }
+
+    .slide-counter {
+      position: fixed;
+      top: 30px;
+      right: 30px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1rem;
+      color: var(--neon-purple);
+      z-index: 1000;
+    }
+
+    /* Animations */
+    @keyframes glitch {
+      0% { transform: translate(0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(-2px, -2px); }
+      60% { transform: translate(2px, 2px); }
+      80% { transform: translate(2px, -2px); }
+      100% { transform: translate(0); }
+    }
+
+    .glitch:hover {
+      animation: glitch 0.3s ease infinite;
+    }
+
+    /* Versus display */
+    .versus {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 60px;
+      margin: 40px 0;
+    }
+
+    .versus-player {
+      text-align: center;
+    }
+
+    .versus-player .chip {
+      width: 150px;
+      height: 150px;
+      margin-bottom: 25px;
+    }
+
+    .versus-vs {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 3rem;
+      color: var(--neon-yellow);
+      text-shadow: 0 0 20px var(--neon-yellow);
+    }
+
+    /* Arrow indicator */
+    .arrow {
+      font-size: 5rem;
+      color: var(--neon-green);
+      text-shadow: 0 0 20px var(--neon-green);
+      animation: bounce 1s ease infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* List styling */
+    ul {
+      list-style: none;
+      text-align: left;
+      margin: 20px 0;
+    }
+
+    ul li {
+      padding: 15px 0;
+      padding-left: 40px;
+      position: relative;
+    }
+
+    ul li::before {
+      content: '>';
+      position: absolute;
+      left: 0;
+      color: var(--neon-cyan);
+      font-family: 'Press Start 2P', cursive;
+    }
+
+    /* Authors */
+    .authors {
+      font-size: 2rem;
+      color: #888;
+      margin-top: 40px;
+    }
+
+    .authors span {
+      color: var(--neon-purple);
+    }
+
+    /* Pixel border */
+    .pixel-border {
+      border: 8px solid;
+      border-image: repeating-linear-gradient(
+        45deg,
+        var(--neon-cyan),
+        var(--neon-cyan) 10px,
+        var(--neon-pink) 10px,
+        var(--neon-pink) 20px
+      ) 8;
+      padding: 40px;
+    }
+
+    /* Deception examples */
+    .deception-example {
+      background: rgba(0,0,0,0.7);
+      border: 2px solid var(--neon-pink);
+      padding: 25px;
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    .deception-label {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1rem;
+      display: inline-block;
+      padding: 8px 20px;
+      margin-bottom: 20px;
+    }
+
+    .deception-label.private {
+      background: var(--neon-purple);
+      color: white;
+    }
+
+    .deception-label.public {
+      background: var(--neon-green);
+      color: black;
+    }
+
+    .deception-text {
+      font-size: 2rem;
+      color: #ccc;
+    }
+
+    /* Controller decorations */
+    .controller-left, .controller-right {
+      position: absolute;
+      font-size: 8rem;
+      opacity: 0.1;
+      z-index: 1;
+    }
+
+    .controller-left { left: -50px; bottom: 50px; }
+    .controller-right { right: -50px; bottom: 50px; transform: scaleX(-1); }
+
+    /* Implications icons */
+    .implications-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 25px;
+      margin-top: 30px;
+    }
+
+    .implication-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      text-align: left;
+      padding: 20px;
+      background: rgba(0,0,0,0.4);
+      border-left: 4px solid var(--neon-cyan);
+    }
+
+    .implication-icon {
+      font-size: 3.5rem;
+    }
+
+    .implication-text {
+      font-size: 1.8rem;
+      color: #ccc;
+    }
+
+    /* ===== ANIMATED LINE CHART ===== */
+    .line-chart-container {
+      width: 100%;
+      max-width: 900px;
+      margin: 30px auto;
+      position: relative;
+    }
+
+    .line-chart {
+      width: 100%;
+      height: 350px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      overflow: visible;
+    }
+
+    .line-chart .grid-line {
+      stroke: rgba(255, 255, 255, 0.1);
+      stroke-width: 1;
+    }
+
+    .line-chart .axis-label {
+      fill: #888;
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+    }
+
+    .line-chart .chart-line {
+      fill: none;
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 0 8px currentColor);
+    }
+
+    .line-chart .gemini-line {
+      stroke: var(--chip-red);
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+    }
+
+    .line-chart .gpt-line {
+      stroke: var(--chip-yellow);
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+    }
+
+    .slide.active .gemini-line {
+      animation: drawLine 2s ease-out forwards;
+    }
+
+    .slide.active .gpt-line {
+      animation: drawLine 2s ease-out 0.3s forwards;
+    }
+
+    @keyframes drawLine {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    .line-chart .data-point {
+      r: 8;
+      filter: drop-shadow(0 0 6px currentColor);
+      opacity: 0;
+    }
+
+    .slide.active .data-point {
+      animation: fadeInPoint 0.3s ease-out forwards;
+    }
+
+    .slide.active .data-point.p1 { animation-delay: 0.5s; }
+    .slide.active .data-point.p2 { animation-delay: 1.2s; }
+    .slide.active .data-point.p3 { animation-delay: 2s; }
+
+    @keyframes fadeInPoint {
+      to {
+        opacity: 1;
+      }
+    }
+
+    .chart-legend {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      margin-top: 20px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5rem;
+    }
+
+    .legend-color {
+      width: 30px;
+      height: 4px;
+      border-radius: 2px;
+    }
+
+    .legend-color.gemini { background: var(--chip-red); box-shadow: 0 0 10px var(--chip-red); }
+    .legend-color.gpt { background: var(--chip-yellow); box-shadow: 0 0 10px var(--chip-yellow); }
+
+    /* ===== ANIMATED BAR CHART ===== */
+    .bar-fill {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 20px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1.2rem;
+      width: 0;
+      transition: none;
+    }
+
+    .slide.active .bar-fill {
+      animation: growBar 1s ease-out forwards;
+    }
+
+    .slide.active .bar-row:nth-child(1) .bar-fill { animation-delay: 0s; }
+    .slide.active .bar-row:nth-child(2) .bar-fill { animation-delay: 0.15s; }
+    .slide.active .bar-row:nth-child(3) .bar-fill { animation-delay: 0.3s; }
+    .slide.active .bar-row:nth-child(4) .bar-fill { animation-delay: 0.45s; }
+
+    .bar-fill[data-width="89"] { --target-width: 89%; }
+    .bar-fill[data-width="67"] { --target-width: 67%; }
+    .bar-fill[data-width="45"] { --target-width: 45%; }
+    .bar-fill[data-width="36"] { --target-width: 36%; }
+
+    @keyframes growBar {
+      to {
+        width: var(--target-width, 50%);
+      }
+    }
+
+    /* ===== ANIMATED COUNTERS ===== */
+    .stat-number[data-target] {
+      display: inline-block;
+    }
+
+    /* ===== ENHANCED CHIP ANIMATIONS ===== */
+    .chip {
+      animation: pulse 2s ease-in-out infinite, glow 3s ease-in-out infinite;
+    }
+
+    .chips-row .chip:nth-child(1) { animation-delay: 0s, 0s; }
+    .chips-row .chip:nth-child(2) { animation-delay: 0.2s, 0.5s; }
+    .chips-row .chip:nth-child(3) { animation-delay: 0.4s, 1s; }
+    .chips-row .chip:nth-child(4) { animation-delay: 0.6s, 1.5s; }
+
+    @keyframes glow {
+      0%, 100% { 
+        box-shadow: 0 0 20px currentColor, inset 0 0 20px rgba(255,255,255,0.2);
+      }
+      50% { 
+        box-shadow: 0 0 40px currentColor, 0 0 60px currentColor, inset 0 0 30px rgba(255,255,255,0.3);
+      }
+    }
+
+    /* ===== FLOATING PARTICLES ===== */
+    .particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--neon-cyan);
+      opacity: 0.15;
+      animation: float linear infinite;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.15;
+      }
+      90% {
+        opacity: 0.15;
+      }
+      100% {
+        transform: translateY(-20px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* ===== SLIDE TRANSITIONS ===== */
+    /* Glitch transition effect class */
+    .slide.glitch-in {
+      animation: glitchTransition 0.3s ease;
+    }
+
+    @keyframes glitchTransition {
+      0% { transform: scale(1); filter: hue-rotate(0deg); }
+      20% { transform: translate(-2px, 2px) scale(1.01); filter: hue-rotate(90deg); }
+      40% { transform: translate(2px, -2px) scale(0.99); filter: hue-rotate(-90deg); }
+      60% { transform: translate(-1px, -1px) scale(1.01); filter: hue-rotate(45deg); }
+      80% { transform: translate(1px, 1px) scale(0.99); filter: hue-rotate(-45deg); }
+      100% { transform: scale(1); filter: hue-rotate(0deg); }
+    }
+
+    /* ===== GAME RULES SLIDE ===== */
+    .game-visual {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 40px;
+      margin: 30px 0;
+    }
+
+    .game-board-mini {
+      width: 250px;
+      height: 250px;
+      border: 4px solid var(--neon-purple);
+      border-radius: 50%;
+      position: relative;
+      box-shadow: 0 0 30px rgba(157, 78, 221, 0.3);
+    }
+
+    .player-position {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.6rem;
+      color: white;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .player-position.top { top: -30px; left: 50%; transform: translateX(-50%); background: var(--chip-red); box-shadow: 0 0 15px var(--chip-red); }
+    .player-position.right { right: -30px; top: 50%; transform: translateY(-50%); background: var(--chip-blue); box-shadow: 0 0 15px var(--chip-blue); }
+    .player-position.bottom { bottom: -30px; left: 50%; transform: translateX(-50%); background: var(--chip-green); box-shadow: 0 0 15px var(--chip-green); }
+    .player-position.left { left: -30px; top: 50%; transform: translateY(-50%); background: var(--chip-yellow); box-shadow: 0 0 15px var(--chip-yellow); }
+
+    .pile-mini {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .pile-chip {
+      width: 40px;
+      height: 12px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .rules-list {
+      text-align: left;
+      max-width: 700px;
+    }
+
+    .rules-list li {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+    }
+
+    .rules-list li strong {
+      color: var(--neon-cyan);
+    }
+
+    /* ===== QR CODE SLIDE ===== */
+    .qr-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 80px;
+      margin: 40px 0;
+    }
+
+    .qr-code {
+      width: 280px;
+      height: 280px;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 40px var(--neon-cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qr-code svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .demo-info {
+      text-align: left;
+    }
+
+    .demo-url {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1.3rem;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 10px var(--neon-cyan);
+      margin-bottom: 30px;
+      word-break: break-all;
+    }
+
+    .demo-features {
+      list-style: none;
+    }
+
+    .demo-features li {
+      font-size: 1.6rem;
+      padding: 10px 0;
+      color: #ccc;
+    }
+
+    .demo-features li::before {
+      content: '>';
+      color: var(--neon-green);
+      margin-right: 15px;
+      font-family: 'Press Start 2P', cursive;
+    }
+  </style>
+</head>
+<body>
+  <div class="slides-container">
+    <div class="slide-counter"><span id="current">1</span> / <span id="total">9</span></div>
+
+    <!-- SLIDE 1: Title -->
+    <div class="slide active">
+      <div class="circuit-bg"></div>
+      <div class="particles" id="particles-1"></div>
+      <div class="content">
+        <h1 class="glitch">DECEPTION SCALES</h1>
+        <p class="subtitle">How Strategic Manipulation Emerges in Complex LLM Negotiations</p>
+        
+        <div class="chips-row">
+          <div class="chip red"><span>GEMINI</span></div>
+          <div class="chip blue"><span>KIMI</span></div>
+          <div class="chip green"><span>QWEN</span></div>
+          <div class="chip yellow"><span>GPT</span></div>
+        </div>
+
+        <p style="margin-top: 40px; font-size: 2rem; color: #888;">
+          Using "So Long Sucker" (Nash et al., 1964) as a laboratory for AI deception
+        </p>
+
+        <p class="authors">
+          <span>Luis Fernando Yupanqui</span> & <span>Mari Cairns</span><br>
+          With Apart Research
+        </p>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: How the Game Works -->
+    <div class="slide">
+      <div class="circuit-bg"></div>
+      <div class="particles" id="particles-2"></div>
+      <div class="content">
+        <h2>THE GAME</h2>
+        <h3 style="color: var(--neon-purple);">So Long Sucker (Nash et al., 1964)</h3>
+
+        <div class="game-visual">
+          <div class="game-board-mini">
+            <div class="player-position top">P1</div>
+            <div class="player-position right">P2</div>
+            <div class="player-position bottom">P3</div>
+            <div class="player-position left">P4</div>
+            <div class="pile-mini">
+              <div class="pile-chip" style="background: var(--chip-red);"></div>
+              <div class="pile-chip" style="background: var(--chip-blue);"></div>
+              <div class="pile-chip" style="background: var(--chip-yellow);"></div>
+              <div class="pile-chip" style="background: var(--chip-red);"></div>
+            </div>
+          </div>
+
+          <ul class="rules-list">
+            <li><strong>4 players</strong>, 7 chips each of their color</li>
+            <li><strong>Play chips to piles</strong> — must collaborate to survive</li>
+            <li><strong>Capture:</strong> When your color tops a matching color</li>
+            <li><strong>Out of chips?</strong> Beg others — all refuse = eliminated</li>
+            <li><strong>Last player alive wins</strong></li>
+          </ul>
+        </div>
+
+        <div class="quote-box" style="max-width: 900px; margin: 30px auto 0;">
+          <p class="quote-text" style="font-size: 1.8rem;">"In a finite game, all promises must eventually be broken."</p>
+          <p class="quote-source">— The fundamental theorem of So Long Sucker</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: The Dataset -->
+    <div class="slide">
+      <div class="circuit-bg"></div>
+      <div class="particles" id="particles-3"></div>
+      <div class="content">
+        <h2>THE DATASET</h2>
+        
+        <div class="stats-grid">
+          <div class="stat-box">
+            <span class="stat-number" data-target="146">0</span>
+            <span class="stat-label">Games Played</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-number" data-target="13759">0</span>
+            <span class="stat-label">Decision Events</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-number" data-target="4768">0</span>
+            <span class="stat-label">Chat Messages</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-number" data-target="4">0</span>
+            <span class="stat-label">Frontier LLMs</span>
+          </div>
+        </div>
+
+        <div class="chips-row" style="margin-top: 50px;">
+          <div class="chip red" style="width: 120px; height: 120px;"><span style="font-size: 0.7rem;">GEMINI<br>3 FLASH</span></div>
+          <div class="chip blue" style="width: 120px; height: 120px;"><span style="font-size: 0.7rem;">KIMI<br>K2</span></div>
+          <div class="chip green" style="width: 120px; height: 120px;"><span style="font-size: 0.7rem;">QWEN3<br>32B</span></div>
+          <div class="chip yellow" style="width: 120px; height: 120px;"><span style="font-size: 0.7rem;">GPT-OSS<br>120B</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: The Complexity Reversal -->
+    <div class="slide">
+      <div class="circuit-bg"></div>
+      <div class="particles" id="particles-4"></div>
+      <div class="content">
+        <h2>THE COMPLEXITY REVERSAL</h2>
+        <h3>Win rates INVERT as game complexity increases</h3>
+
+        <div class="line-chart-container">
+          <svg class="line-chart" viewBox="0 0 900 350" preserveAspectRatio="xMidYMid meet">
+            <!-- Grid lines -->
+            <line class="grid-line" x1="100" y1="50" x2="850" y2="50" />
+            <line class="grid-line" x1="100" y1="125" x2="850" y2="125" />
+            <line class="grid-line" x1="100" y1="200" x2="850" y2="200" />
+            <line class="grid-line" x1="100" y1="275" x2="850" y2="275" />
+            
+            <!-- Y-axis labels -->
+            <text class="axis-label" x="60" y="55" text-anchor="end">100%</text>
+            <text class="axis-label" x="60" y="130" text-anchor="end">75%</text>
+            <text class="axis-label" x="60" y="205" text-anchor="end">50%</text>
+            <text class="axis-label" x="60" y="280" text-anchor="end">25%</text>
+            <text class="axis-label" x="60" y="320" text-anchor="end">0%</text>
+            
+            <!-- X-axis labels -->
+            <text class="axis-label" x="175" y="340" text-anchor="middle">3-chip</text>
+            <text class="axis-label" x="475" y="340" text-anchor="middle">5-chip</text>
+            <text class="axis-label" x="775" y="340" text-anchor="middle">7-chip</text>
+            
+            <!-- Gemini line (9% -> 50% -> 90%) -->
+            <!-- Y positions: 9% = 295, 50% = 175, 90% = 70 -->
+            <polyline class="chart-line gemini-line" 
+                      points="175,295 475,175 775,70" />
+            
+            <!-- GPT-OSS line (67% -> 35% -> 10%) -->
+            <!-- Y positions: 67% = 145, 35% = 215, 10% = 290 -->
+            <polyline class="chart-line gpt-line" 
+                      points="175,145 475,215 775,290" />
+            
+            <!-- Data points for Gemini -->
+            <circle class="data-point p1" cx="175" cy="295" fill="var(--chip-red)" />
+            <circle class="data-point p2" cx="475" cy="175" fill="var(--chip-red)" />
+            <circle class="data-point p3" cx="775" cy="70" fill="var(--chip-red)" />
+            
+            <!-- Data points for GPT-OSS -->
+            <circle class="data-point p1" cx="175" cy="145" fill="var(--chip-yellow)" />
+            <circle class="data-point p2" cx="475" cy="215" fill="var(--chip-yellow)" />
+            <circle class="data-point p3" cx="775" cy="290" fill="var(--chip-yellow)" />
+            
+            <!-- Value labels -->
+            <text class="axis-label" x="175" y="315" text-anchor="middle" fill="var(--chip-red)">9%</text>
+            <text class="axis-label" x="475" y="160" text-anchor="middle" fill="var(--chip-red)">50%</text>
+            <text class="axis-label" x="775" y="55" text-anchor="middle" fill="var(--chip-red)">90%</text>
+            
+            <text class="axis-label" x="175" y="130" text-anchor="middle" fill="var(--chip-yellow)">67%</text>
+            <text class="axis-label" x="475" y="235" text-anchor="middle" fill="var(--chip-yellow)">35%</text>
+            <text class="axis-label" x="775" y="310" text-anchor="middle" fill="var(--chip-yellow)">10%</text>
+          </svg>
+          
+          <div class="chart-legend">
+            <div class="legend-item">
+              <div class="legend-color gemini"></div>
+              <span style="color: var(--chip-red);">GEMINI</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color gpt"></div>
+              <span style="color: var(--chip-yellow);">GPT-OSS</span>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size: 2rem; color: #aaa; margin-top: 20px;">
+          Strategic manipulation becomes dramatically more effective as game length increases
+        </p>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: Key Findings -->
+    <div class="slide">
+      <div class="circuit-bg"></div>
+      <div class="particles" id="particles-5"></div>
+      <div class="content">
+        <h2>KEY FINDINGS</h2>
+
+        <div class="findings-grid">
+          <div class="finding-box">
+            <h4><span class="stat-number" data-target="107" style="font-size: 1.3rem; color: var(--neon-green);">0</span> Private Contradictions</h4>
+            <p>Models' private reasoning directly contradicts their public statements</p>
+          </div>
+          <div class="finding-box">
+            <h4><span class="stat-number" data-target="237" style="font-size: 1.3rem; color: var(--neon-green);">0</span> Gaslighting Instances</h4>
+            <p>Gemini deploys systematic psychological manipulation tactics</p>
+          </div>
+          <div class="finding-box">
+            <h4><span style="font-size: 1.3rem; color: var(--neon-green);">7:1</span> Alliance Imbalance</h4>
+            <p>GPT-OSS desperately seeks alliances it never receives</p>
+          </div>
+          <div class="finding-box">
+            <h4><span class="stat-number" data-target="62" style="font-size: 1.3rem; color: var(--neon-green);">0</span>% Message Share</h4>
+            <p>GPT-OSS talks the most but wins the least when chat is enabled</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: Caught Lying -->
+    <div class="slide">
+      <div class="circuit-bg"></div>
+      <div class="particles" id="particles-6"></div>
+      <div class="content">
+        <h2>CAUGHT IN THE ACT</h2>
+        <h3>Private vs Public: Strategic Lying Detected</h3>
+
+        <div class="deception-example">
+          <span class="deception-label private">PRIVATE THOUGHT</span>
+          <p class="deception-text">"Yellow is weak. I should ally with Blue to eliminate Yellow, then betray Blue."</p>
+        </div>
+
+        <div class="deception-example">
+          <span class="deception-label public">PUBLIC MESSAGE</span>
+          <p class="deception-text">"Yellow, let's work together! I think we can both win if we coordinate."</p>
+        </div>
+
+        <p style="margin-top: 40px; font-size: 2rem; color: var(--neon-pink);">
+          The model knows the truth and deliberately misrepresents it.
+        </p>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: Gaslighting Patterns -->
+    <div class="slide">
+      <div class="circuit-bg"></div>
+      <div class="particles" id="particles-7"></div>
+      <div class="content">
+        <h2>GASLIGHTING PATTERNS</h2>
+        <h3>Gemini's Manipulation Toolkit</h3>
+
+        <div class="bar-chart">
+          <div class="bar-row">
+            <div class="bar-label">"Look at the board"</div>
+            <div class="bar-track">
+              <div class="bar-fill gemini" data-width="89">89</div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">"Obviously"</div>
+            <div class="bar-track">
+              <div class="bar-fill gemini" data-width="67">67</div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">"Clearly"</div>
+            <div class="bar-track">
+              <div class="bar-fill gemini" data-width="45">45</div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">"You know"</div>
+            <div class="bar-track">
+              <div class="bar-fill gemini" data-width="36">36</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="quote-box">
+          <p class="quote-text">"Yellow, your constant spamming about captures that didn't happen is embarrassing. You have 0 chips, 0 prisoners... look at the board."</p>
+          <p class="quote-source">— Gemini (Red), before winning</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: The Alliance Bank Scam -->
+    <div class="slide">
+      <div class="circuit-bg"></div>
+      <div class="particles" id="particles-8"></div>
+      <div class="content">
+        <h2>THE ALLIANCE BANK SCAM</h2>
+        <h3>Multi-Turn Deception in Action</h3>
+
+        <div style="text-align: left; max-width: 900px; margin: 0 auto;">
+          <div class="deception-example">
+            <span class="deception-label public">TURN 12</span>
+            <p class="deception-text">"I propose we create an Alliance Bank. Give me your chips for safekeeping—I'll donate them back when you need them."</p>
+          </div>
+
+          <div class="deception-example">
+            <span class="deception-label public">TURN 18</span>
+            <p class="deception-text" style="color: var(--neon-yellow);">"The bank is now closed."</p>
+          </div>
+
+          <div class="deception-example">
+            <span class="deception-label public">TURN 24</span>
+            <p class="deception-text" style="color: var(--neon-green); font-family: 'Press Start 2P'; font-size: 1.8rem;">"So Long Sucker."</p>
+          </div>
+        </div>
+
+        <p style="margin-top: 30px; font-size: 2rem; color: #aaa;">
+          Planning • Delayed Gratification • Exploitation of Trust
+        </p>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: Frankfurt Framework -->
+    <div class="slide">
+      <div class="circuit-bg"></div>
+      <div class="particles" id="particles-9"></div>
+      <div class="content">
+        <h2>STRATEGIC vs REACTIVE</h2>
+        <h3>The Frankfurt Framework</h3>
+
+        <table class="comparison-table">
+          <tr>
+            <th>Model</th>
+            <th>Classification</th>
+            <th>Uses Think Tool</th>
+            <th>Evidence</th>
+          </tr>
+          <tr>
+            <td class="model-name" style="color: var(--chip-red);">GEMINI</td>
+            <td class="highlight-green">STRATEGIC</td>
+            <td class="highlight-green">Yes</td>
+            <td>237 gaslighting, 90% win at 7-chip</td>
+          </tr>
+          <tr>
+            <td class="model-name" style="color: var(--chip-blue);">KIMI</td>
+            <td class="highlight-green">STRATEGIC</td>
+            <td class="highlight-green">Yes</td>
+            <td>335 betrayal mentions, 307 private thoughts</td>
+          </tr>
+          <tr>
+            <td class="model-name" style="color: var(--chip-green);">QWEN</td>
+            <td class="highlight-green">STRATEGIC</td>
+            <td class="highlight-green">Yes</td>
+            <td>116 think turns, quiet but effective</td>
+          </tr>
+          <tr>
+            <td class="model-name" style="color: var(--chip-yellow);">GPT-OSS</td>
+            <td class="highlight-red">REACTIVE</td>
+            <td class="highlight-red">Never</td>
+            <td>7x alliance pitches, collapses at complexity</td>
+          </tr>
+        </table>
+
+        <p style="margin-top: 30px; font-size: 1.8rem; color: #aaa;">
+          <span style="color: var(--neon-green);">Strategic:</span> Truth-tracking with deliberate misrepresentation<br>
+          <span style="color: var(--neon-pink);">Reactive:</span> Plausible output without internal consistency
+        </p>
+      </div>
+    </div>
+
+    <!-- SLIDE 10: Live Demo -->
+    <div class="slide">
+      <div class="circuit-bg"></div>
+      <div class="particles" id="particles-10"></div>
+      <div class="content">
+        <h2>TRY IT YOURSELF</h2>
+        <h3>Play So Long Sucker</h3>
+
+        <div class="qr-container">
+          <div class="qr-code" id="qrcode">
+            <!-- QR Code will be generated by JavaScript -->
+          </div>
+
+          <div class="demo-info">
+            <p class="demo-url">so-long-sucker.vercel.app</p>
+            <ul class="demo-features">
+              <li>Full game implementation</li>
+              <li>4-player hot-seat mode</li>
+              <li>Watch AI models deceive each other</li>
+              <li>Open source on GitHub</li>
+            </ul>
+            <p style="font-size: 1.4rem; color: #666; margin-top: 20px;">
+              github.com/lout33/so-long-sucker
+            </p>
+          </div>
+        </div>
+
+        <div class="chips-row" style="margin-top: 40px;">
+          <div class="chip red" style="width: 80px; height: 80px;"></div>
+          <div class="chip blue" style="width: 80px; height: 80px;"></div>
+          <div class="chip green" style="width: 80px; height: 80px;"></div>
+          <div class="chip yellow" style="width: 80px; height: 80px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 11: Implications -->
+    <div class="slide">
+      <div class="circuit-bg"></div>
+      <div class="particles" id="particles-11"></div>
+      <div class="content">
+        <h2>AI SAFETY IMPLICATIONS</h2>
+
+        <div class="implications-list">
+          <div class="implication-item">
+            <div class="implication-icon">⚠️</div>
+            <div class="implication-text"><strong>Simple benchmarks underestimate risk</strong><br>Deception capability scales with task complexity</div>
+          </div>
+          <div class="implication-item">
+            <div class="implication-icon">📈</div>
+            <div class="implication-text"><strong>More capable = more dangerous</strong><br>Gemini's manipulation increases with complexity</div>
+          </div>
+          <div class="implication-item">
+            <div class="implication-icon">👁️</div>
+            <div class="implication-text"><strong>Private reasoning enables detection</strong><br>Think tools reveal true intentions</div>
+          </div>
+          <div class="implication-item">
+            <div class="implication-icon">🎭</div>
+            <div class="implication-text"><strong>Bullshitting may be harder to detect</strong><br>No "tell" when there's no underlying truth</div>
+          </div>
+        </div>
+
+        <div class="pixel-border" style="margin-top: 40px;">
+          <p style="font-family: 'Press Start 2P'; font-size: 1.5rem; color: var(--neon-cyan);">
+            DECEPTION CAPABILITY SCALES WITH TASK COMPLEXITY
+          </p>
+          <p style="font-size: 2rem; color: #aaa; margin-top: 15px;">
+            Simple benchmarks systematically underestimate this risk.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav">
+    <button class="nav-btn" onclick="prevSlide()">< PREV</button>
+    <button class="nav-btn" onclick="nextSlide()">NEXT ></button>
+  </div>
+
+  <!-- QR Code Library -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+  
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const total = slides.length;
+
+    document.getElementById('total').textContent = total;
+
+    // Generate QR Code
+    function generateQRCode() {
+      const qr = qrcode(0, 'M');
+      qr.addData('https://so-long-sucker.vercel.app');
+      qr.make();
+      document.getElementById('qrcode').innerHTML = qr.createSvgTag({ 
+        scalable: true,
+        margin: 0
+      });
+    }
+
+    // Create floating particles for each slide
+    function createParticles() {
+      const particleContainers = document.querySelectorAll('.particles');
+      particleContainers.forEach(container => {
+        for (let i = 0; i < 20; i++) {
+          const particle = document.createElement('div');
+          particle.className = 'particle';
+          particle.style.left = Math.random() * 100 + '%';
+          particle.style.animationDuration = (10 + Math.random() * 15) + 's';
+          particle.style.animationDelay = Math.random() * 10 + 's';
+          
+          // Random colors from our palette
+          const colors = ['var(--neon-cyan)', 'var(--neon-pink)', 'var(--neon-purple)', 'var(--neon-green)'];
+          particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+          
+          container.appendChild(particle);
+        }
+      });
+    }
+
+    // Animate counter numbers
+    function animateCounters(slideElement) {
+      const counters = slideElement.querySelectorAll('.stat-number[data-target]');
+      counters.forEach(counter => {
+        const target = parseInt(counter.dataset.target);
+        const duration = 2000; // 2 seconds
+        const startTime = performance.now();
+        
+        function updateCounter(currentTime) {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          
+          // Easing function (ease-out)
+          const easeOut = 1 - Math.pow(1 - progress, 3);
+          const current = Math.floor(target * easeOut);
+          
+          // Format with commas for large numbers
+          counter.textContent = current.toLocaleString();
+          
+          if (progress < 1) {
+            requestAnimationFrame(updateCounter);
+          } else {
+            counter.textContent = target.toLocaleString();
+          }
+        }
+        
+        // Reset counter before animating
+        counter.textContent = '0';
+        requestAnimationFrame(updateCounter);
+      });
+    }
+
+    function showSlide(n) {
+      const prevSlide = slides[currentSlide];
+      prevSlide.classList.remove('active');
+      
+      currentSlide = (n + total) % total;
+      const nextSlide = slides[currentSlide];
+      
+      // Add glitch effect
+      nextSlide.classList.add('glitch-in');
+      nextSlide.classList.add('active');
+      
+      // Remove glitch class after animation
+      setTimeout(() => {
+        nextSlide.classList.remove('glitch-in');
+      }, 300);
+      
+      // Animate counters on this slide
+      animateCounters(nextSlide);
+      
+      document.getElementById('current').textContent = currentSlide + 1;
+    }
+
+    function nextSlide() {
+      showSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+      showSlide(currentSlide - 1);
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevSlide();
+      }
+    });
+
+    // Touch navigation
+    let touchStartX = 0;
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+    });
+
+    document.addEventListener('touchend', (e) => {
+      const touchEndX = e.changedTouches[0].clientX;
+      const diff = touchStartX - touchEndX;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) nextSlide();
+        else prevSlide();
+      }
+    });
+
+    // Initialize
+    createParticles();
+    generateQRCode();
+    
+    // Animate counters on first slide if needed
+    animateCounters(slides[0]);
+  </script>
+</body>
+</html>
