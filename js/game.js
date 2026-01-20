@@ -24,6 +24,7 @@ export class Game {
     // Temporary state for multi-step actions
     this.selectedChip = null;
     this.pendingCapture = null;
+    this.pendingCaptureColor = null;
     this.donationRequester = null;
     this.donationAskedPlayers = [];
     this.currentDonor = null; // Who is currently being asked for donation
@@ -111,8 +112,32 @@ export class Game {
 
     if (willCapture) {
       this.pendingCapture = pile;
+      this.pendingCaptureColor = color;
+      
+      // Find the player whose color made the capture - they choose which chip to kill
+      const capturingPlayer = this.players.find(p => p.color === color);
+      
+      // If capturing player is eliminated, chips go to dead box, current player stays
+      if (!capturingPlayer.isAlive) {
+        // Handle eliminated player capture immediately
+        const allChips = [...pile.chips];
+        this.deadBox.push(...allChips);
+        pile.chips = [];
+        this.piles = this.piles.filter(p => !p.isEmpty());
+        this.pendingCapture = null;
+        this.pendingCaptureColor = null;
+        this.phase = 'selectChip';
+        
+        if (this.checkWinCondition()) {
+          return { action: 'gameOver', winner: this.winner };
+        }
+        return { action: 'capturedEliminated', pile, captureColor: color };
+      }
+      
+      // Switch to capturing player - they choose which chip to kill
+      this.currentPlayer = capturingPlayer.id;
       this.phase = 'capture';
-      return { action: 'capture', pile };
+      return { action: 'capture', pile, captureColor: color, capturingPlayer: capturingPlayer.id };
     }
 
     // Determine next player
@@ -214,16 +239,17 @@ export class Game {
     // Send killed chip to dead box
     this.deadBox.push(killed);
 
-    // Give captured chips to current player
-    const player = this.getCurrentPlayer();
-    player.receivePrisoners(captured);
+    // Current player is already the capturing player (set in playOnPile)
+    // Give them the captured chips
+    const capturingPlayer = this.getCurrentPlayer();
+    capturingPlayer.receivePrisoners(captured);
 
     // Remove empty pile
     this.piles = this.piles.filter(p => !p.isEmpty());
 
     this.pendingCapture = null;
+    this.pendingCaptureColor = null;
 
-    // Capturer goes again
     this.phase = 'selectChip';
 
     // Check win condition
@@ -504,6 +530,7 @@ export class Game {
       winner: this.winner,
       selectedChip: this.selectedChip,
       pendingCapture: this.pendingCapture?.toState() || null,
+      pendingCaptureColor: this.pendingCaptureColor,
       donationRequester: this.donationRequester,
       currentDonor: this.currentDonor,
       // Negotiation state
@@ -542,6 +569,7 @@ export class Game {
       // Temporary state
       selectedChip: this.selectedChip,
       pendingCaptureId: this.pendingCapture?.id ?? null,
+      pendingCaptureColor: this.pendingCaptureColor,
       donationRequester: this.donationRequester,
       donationAskedPlayers: [...this.donationAskedPlayers],
       currentDonor: this.currentDonor,

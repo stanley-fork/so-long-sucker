@@ -948,6 +948,7 @@ class SoLongSucker {
 
       case 'nextTurn':
       case 'captured':
+      case 'capturedEliminated':
       case 'eliminated':
       case 'donationAccepted':
         this.ui.hideAllModals(); // Close any open modals
