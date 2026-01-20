@@ -1,41 +1,35 @@
 // Centralized configuration for So Long Sucker
 // API keys are loaded from environment variables (via Vite) at build time
 
-// Safe accessor for Vite env vars (works without Vite too)
-const env = (typeof import.meta !== 'undefined' && import.meta.env) || {};
-
-// Debug: Log all VITE_ env vars (remove in production)
+// Debug: Log env check
 console.log('🔧 Environment check:', {
-  hasImportMeta: typeof import.meta !== 'undefined',
-  hasEnv: !!import.meta?.env,
-  PUBLIC_GROQ_KEY: env.VITE_PUBLIC_GROQ_KEY ? 'SET' : 'NOT SET',
-  GROQ_API_KEY: env.VITE_GROQ_API_KEY ? 'SET' : 'NOT SET',
-  MODE: env.MODE,
-  allKeys: Object.keys(env).filter(k => k.startsWith('VITE_'))
+  PUBLIC_GROQ_KEY: import.meta.env.VITE_PUBLIC_GROQ_KEY ? 'SET' : 'NOT SET',
+  GROQ_API_KEY: import.meta.env.VITE_GROQ_API_KEY ? 'SET' : 'NOT SET',
+  MODE: import.meta.env.MODE
 });
 
 export const CONFIG = {
   // Groq API (for Llama & Kimi models)
-  GROQ_API_KEY: env.VITE_GROQ_API_KEY || '',
+  GROQ_API_KEY: import.meta.env.VITE_GROQ_API_KEY || '',
 
   // Public Groq key for Quick Play (shared for demo purposes)
-  PUBLIC_GROQ_KEY: env.VITE_PUBLIC_GROQ_KEY || '',
+  PUBLIC_GROQ_KEY: import.meta.env.VITE_PUBLIC_GROQ_KEY || '',
 
   // OpenRouter API (for users with their own keys)
-  OPENROUTER_API_KEY: env.VITE_OPENROUTER_API_KEY || '',
+  OPENROUTER_API_KEY: import.meta.env.VITE_OPENROUTER_API_KEY || '',
 
   // OpenAI API
-  OPENAI_API_KEY: env.VITE_OPENAI_API_KEY || '',
+  OPENAI_API_KEY: import.meta.env.VITE_OPENAI_API_KEY || '',
 
   // Anthropic Claude API
-  CLAUDE_API_KEY: env.VITE_CLAUDE_API_KEY || '',
+  CLAUDE_API_KEY: import.meta.env.VITE_CLAUDE_API_KEY || '',
 
   // Google Gemini API
-  GEMINI_API_KEY: env.VITE_GEMINI_API_KEY || '',
+  GEMINI_API_KEY: import.meta.env.VITE_GEMINI_API_KEY || '',
 
   // Azure Claude
-  AZURE_RESOURCE: env.VITE_AZURE_RESOURCE || 'data4peopleservice-8737-resource',
-  AZURE_MODEL: env.VITE_AZURE_MODEL || 'claude-opus-4-5'
+  AZURE_RESOURCE: import.meta.env.VITE_AZURE_RESOURCE || 'data4peopleservice-8737-resource',
+  AZURE_MODEL: import.meta.env.VITE_AZURE_MODEL || 'claude-opus-4-5'
 };
 
 // Helper to check if a provider is configured
