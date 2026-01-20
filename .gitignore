@@ -35,3 +35,4 @@ analysis/silent.json
 analysis/talking.json
 
 analysis/.ipynb_checkpoints
+.vercel
