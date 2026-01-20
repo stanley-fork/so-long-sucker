@@ -4,6 +4,16 @@
 // Safe accessor for Vite env vars (works without Vite too)
 const env = (typeof import.meta !== 'undefined' && import.meta.env) || {};
 
+// Debug: Log all VITE_ env vars (remove in production)
+console.log('🔧 Environment check:', {
+  hasImportMeta: typeof import.meta !== 'undefined',
+  hasEnv: !!import.meta?.env,
+  PUBLIC_GROQ_KEY: env.VITE_PUBLIC_GROQ_KEY ? 'SET' : 'NOT SET',
+  GROQ_API_KEY: env.VITE_GROQ_API_KEY ? 'SET' : 'NOT SET',
+  MODE: env.MODE,
+  allKeys: Object.keys(env).filter(k => k.startsWith('VITE_'))
+});
+
 export const CONFIG = {
   // Groq API (for Llama & Kimi models)
   GROQ_API_KEY: env.VITE_GROQ_API_KEY || '',
