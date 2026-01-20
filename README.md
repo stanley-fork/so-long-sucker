@@ -384,7 +384,13 @@ so-long-sucker/
 
 1. Push to GitHub
 2. Import repo at [vercel.com](https://vercel.com)
-3. Deploy (auto-detects Vite)
+3. Add environment variables in Vercel Dashboard:
+   - Go to **Project Settings → Environment Variables**
+   - Add `VITE_PUBLIC_GROQ_KEY` with your Groq API key
+   - Add any other `VITE_*` keys you need
+4. Deploy (Vercel will run `npm run build` and serve from `dist/`)
+
+> **Important:** Environment variables must be prefixed with `VITE_` to be exposed to the client. They are injected at **build time**, so you need to redeploy after changing them.
 
 ### Manual Build
 
