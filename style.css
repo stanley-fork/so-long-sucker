@@ -1426,6 +1426,263 @@ body {
   }
 }
 
+/* Mirror Match Section - The Plot Twist */
+.mirror-match-section {
+  margin-top: var(--space-3xl);
+  padding-top: var(--space-2xl);
+}
+
+.twist-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-2xl);
+}
+
+.twist-line {
+  flex: 1;
+  max-width: 150px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.twist-text {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-style: italic;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+.mirror-title {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: var(--space-sm);
+}
+
+.mirror-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: var(--space-2xl);
+}
+
+/* Mirror Stats Grid */
+.mirror-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-md);
+  max-width: 800px;
+  margin: 0 auto var(--space-2xl);
+}
+
+.mirror-stat {
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  text-align: center;
+}
+
+.mirror-stat-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: var(--space-xs);
+}
+
+.mirror-stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Behavior Contrast Cards */
+.behavior-contrast {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: var(--space-md);
+  max-width: 900px;
+  margin: 0 auto var(--space-2xl);
+}
+
+.contrast-card {
+  flex: 1;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  max-width: 350px;
+}
+
+.contrast-card.manipulative {
+  border-top: 3px solid var(--red);
+}
+
+.contrast-card.cooperative {
+  border-top: 3px solid var(--green);
+}
+
+.contrast-card h4 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  text-align: center;
+  margin-bottom: var(--space-sm);
+}
+
+.contrast-card.manipulative h4 {
+  color: var(--red);
+}
+
+.contrast-card.cooperative h4 {
+  color: var(--green);
+}
+
+.contrast-icon {
+  display: block;
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: var(--space-md);
+}
+
+.contrast-card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.contrast-card li {
+  padding: var(--space-xs) 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  padding-left: var(--space-md);
+  position: relative;
+}
+
+.contrast-card li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--text-muted);
+}
+
+.contrast-card.manipulative li::before {
+  color: var(--red);
+}
+
+.contrast-card.cooperative li::before {
+  color: var(--green);
+}
+
+.contrast-vs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 0 var(--space-sm);
+}
+
+/* Mirror Quote Box */
+.mirror-quote-box {
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--green);
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
+  max-width: 700px;
+  margin: 0 auto var(--space-2xl);
+}
+
+.mirror-quote-box blockquote {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin-bottom: var(--space-md);
+}
+
+.mirror-quote-box cite {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--green);
+  font-style: normal;
+  text-align: right;
+}
+
+/* Mirror Insight Card */
+.mirror-insight {
+  background: linear-gradient(135deg, rgba(74, 156, 109, 0.1), rgba(74, 156, 109, 0.05));
+  border: 2px solid var(--green);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.mirror-insight h4 {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--green);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--space-md);
+}
+
+.mirror-insight p {
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.mirror-insight strong {
+  color: var(--gold);
+}
+
+.mirror-insight em {
+  color: var(--green);
+  font-style: normal;
+}
+
+/* Mobile responsive for Mirror Match */
+@media (max-width: 768px) {
+  .mirror-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .behavior-contrast {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .contrast-card {
+    max-width: 100%;
+    width: 100%;
+  }
+  
+  .contrast-vs {
+    padding: var(--space-sm) 0;
+  }
+  
+  .mirror-title {
+    font-size: 1.5rem;
+  }
+}
+
 /* Leaderboard by Complexity Section */
 #leaderboard {
   padding: var(--space-5xl) 0;
@@ -2104,6 +2361,172 @@ body {
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: var(--shadow-md), 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+/* Provider Tabs */
+.provider-tabs {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.provider-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-elevated);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.provider-tab:hover {
+  border-color: var(--text-muted);
+  color: var(--text-primary);
+}
+
+.provider-tab.active {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
+  border-color: #10b981;
+  color: #10b981;
+}
+
+.provider-tab .tab-icon {
+  font-size: 1.1rem;
+}
+
+/* Provider Panels */
+.provider-panel {
+  display: none;
+  padding: var(--space-lg);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+}
+
+.provider-panel.active {
+  display: block;
+}
+
+/* Free Play Panel */
+.free-play-info {
+  text-align: center;
+}
+
+.ready-badge {
+  display: inline-block;
+  padding: var(--space-xs) var(--space-md);
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+}
+
+.free-play-note {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: var(--space-xs);
+}
+
+.free-play-models {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* Field hint */
+.field-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: var(--space-xs);
+}
+
+.field-hint a {
+  color: var(--gold);
+}
+
+.field-hint a:hover {
+  text-decoration: underline;
+}
+
+/* OpenRouter per-player models */
+.openrouter-models-section {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--border);
+}
+
+.openrouter-models-section .section-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.openrouter-player-models {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.openrouter-model-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.openrouter-model-row.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.player-chip-mini {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.player-chip-mini.red { background: var(--chip-red); }
+.player-chip-mini.blue { background: var(--chip-blue); }
+.player-chip-mini.green { background: var(--chip-green); }
+.player-chip-mini.yellow { background: var(--chip-yellow); }
+
+.openrouter-model-row .player-label {
+  width: 50px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.openrouter-model-input {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-family: var(--font-mono, monospace);
+}
+
+.openrouter-model-input:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.openrouter-model-input::placeholder {
+  color: var(--text-muted);
+  font-family: var(--font-mono, monospace);
 }
 
 .btn-secondary {

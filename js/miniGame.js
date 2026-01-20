@@ -143,7 +143,7 @@ export class MiniGame {
 
     return state.piles.map((pile, idx) => `
       <div class="mini-pile-visual">
-        <span class="mini-pile-label">P${idx + 1}:</span>
+        <span class="mini-pile-label">P${idx}:</span>
         <div class="mini-pile-chips">
           ${pile.chips.map(c => `<div class="mini-pile-chip ${c}"></div>`).join('')}
         </div>
@@ -346,7 +346,7 @@ export class MiniGame {
 
     return state.piles.map((pile, idx) => `
       <div class="expanded-pile">
-        <span class="expanded-pile-label">Pile ${idx + 1}</span>
+        <span class="expanded-pile-label">Pile ${idx}</span>
         <div class="expanded-pile-stack">
           ${pile.chips.map(c => `<div class="chip ${c}"></div>`).join('')}
         </div>

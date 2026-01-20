@@ -5,6 +5,7 @@ import { UI } from './ui.js';
 import { COLORS } from './player.js';
 import { AgentManager } from './ai/manager.js';
 import { GroqProvider } from './ai/providers/groq.js';
+import { OpenRouterProvider } from './ai/providers/openrouter.js';
 import { CONFIG } from './config.js';
 import { applyTestState } from './testStates.js';
 import { SimulationManager } from './simulation.js';
@@ -86,9 +87,14 @@ class SoLongSucker {
       select.addEventListener('change', () => this.updateAIConfigVisibility());
     });
 
-    // Test API button
-    document.getElementById('test-api-btn').addEventListener('click', () => {
-      this.testAPI();
+    // Provider tab switching
+    document.querySelectorAll('.provider-tab').forEach(tab => {
+      tab.addEventListener('click', () => this.switchProviderTab(tab.dataset.provider));
+    });
+
+    // Test OpenRouter button
+    document.getElementById('test-openrouter-btn')?.addEventListener('click', () => {
+      this.testOpenRouterAPI();
     });
 
     // Show/hide continue button based on saved game
@@ -341,17 +347,46 @@ class SoLongSucker {
   }
 
   /**
-   * Test the API connection
+   * Switch between provider tabs (free Groq vs OpenRouter)
    */
-  async testAPI() {
-    const resultEl = document.getElementById('test-result');
-    const btn = document.getElementById('test-api-btn');
-    const apiKey = document.getElementById('api-key').value;
+  switchProviderTab(provider) {
+    document.querySelectorAll('.provider-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.provider === provider);
+    });
+    document.querySelectorAll('.provider-panel').forEach(panel => {
+      panel.classList.toggle('active', panel.id === `panel-${provider}`);
+    });
 
-    const groqKey = apiKey || CONFIG.GROQ_API_KEY;
+    this.updateAIConfigVisibility();
+
+    if (provider !== 'openrouter') {
+      this.updateModelOptionsForProvider();
+    }
+  }
+
+  /**
+   * Get currently selected provider from tabs
+   */
+  getSelectedProvider() {
+    const activeTab = document.querySelector('.provider-tab.active');
+    return activeTab?.dataset.provider || 'free';
+  }
+
+  /**
+   * Test OpenRouter API connection
+   */
+  async testOpenRouterAPI() {
+    const resultEl = document.getElementById('openrouter-test-result');
+    const btn = document.getElementById('test-openrouter-btn');
+    const apiKey = document.getElementById('openrouter-api-key').value;
     
-    if (!groqKey) {
-      resultEl.textContent = '❌ Please enter a Groq API key';
+    const aiPlayers = this.getAIPlayers();
+    const firstAI = aiPlayers[0] ?? 0;
+    const modelInput = document.getElementById(`openrouter-model-${firstAI}`);
+    const model = modelInput?.value?.trim() || 'meta-llama/llama-3.1-8b-instruct:free';
+
+    if (!apiKey) {
+      resultEl.textContent = '❌ Please enter an API key';
       resultEl.style.color = 'red';
       return;
     }
@@ -361,9 +396,9 @@ class SoLongSucker {
     resultEl.style.color = 'white';
 
     try {
-      const groqProvider = new GroqProvider(groqKey, 'moonshotai/kimi-k2-instruct-0905');
-      await groqProvider.test();
-      resultEl.textContent = '✅ Groq connection successful!';
+      const provider = new OpenRouterProvider(apiKey, model);
+      await provider.test();
+      resultEl.textContent = '✅ OpenRouter connection successful!';
       resultEl.style.color = 'lightgreen';
     } catch (error) {
       console.error('API test error:', error);
@@ -375,6 +410,25 @@ class SoLongSucker {
   }
 
   /**
+   * Update model dropdown options for Groq
+   */
+  updateModelOptionsForProvider() {
+    const modelSelects = document.querySelectorAll('.player-model-select');
+    
+    const groqModels = [
+      { value: 'moonshotai/kimi-k2-instruct-0905', label: 'Kimi K2' },
+      { value: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B' },
+      { value: 'qwen/qwen3-32b', label: 'Qwen 3 32B' }
+    ];
+
+    modelSelects.forEach(select => {
+      select.innerHTML = groqModels.map(m => 
+        `<option value="${m.value}">${m.label}</option>`
+      ).join('');
+    });
+  }
+
+  /**
    * Update visibility of AI config section and per-player model selectors
    */
   updateAIConfigVisibility() {
@@ -382,11 +436,19 @@ class SoLongSucker {
     const hasAI = aiPlayers.length > 0;
     document.getElementById('ai-config').style.display = hasAI ? 'block' : 'none';
     
+    const isOpenRouter = this.getSelectedProvider() === 'openrouter';
+    
     for (let i = 0; i < 4; i++) {
+      const isAI = aiPlayers.includes(i);
+      
       const modelSelect = document.getElementById(`player-${i}-model`);
       if (modelSelect) {
-        const isAI = aiPlayers.includes(i);
-        modelSelect.classList.toggle('hidden', !isAI);
+        modelSelect.classList.toggle('hidden', !isAI || isOpenRouter);
+      }
+      
+      const openrouterRow = document.querySelector(`.openrouter-model-row[data-player="${i}"]`);
+      if (openrouterRow) {
+        openrouterRow.classList.toggle('disabled', !isAI);
       }
     }
   }
@@ -411,11 +473,19 @@ class SoLongSucker {
    */
   getPlayerModels() {
     const models = {};
+    const isOpenRouter = this.getSelectedProvider() === 'openrouter';
+    const defaultOpenRouterModel = 'meta-llama/llama-3.1-8b-instruct:free';
+    
     for (let i = 0; i < 4; i++) {
       const typeSelect = document.getElementById(`player-${i}-type`);
-      const modelSelect = document.getElementById(`player-${i}-model`);
-      if (typeSelect.value === 'ai' && modelSelect) {
-        models[i] = modelSelect.value;
+      if (typeSelect.value === 'ai') {
+        if (isOpenRouter) {
+          const openrouterInput = document.getElementById(`openrouter-model-${i}`);
+          models[i] = openrouterInput?.value?.trim() || defaultOpenRouterModel;
+        } else {
+          const modelSelect = document.getElementById(`player-${i}-model`);
+          models[i] = modelSelect?.value;
+        }
       }
     }
     return models;
@@ -425,9 +495,6 @@ class SoLongSucker {
    * Load saved configuration from localStorage, with defaults from CONFIG
    */
   loadSavedConfig() {
-    // Set defaults from CONFIG
-    document.getElementById('api-key').value = CONFIG.GROQ_API_KEY;
-
     // Also set defaults for simulation fields (if they exist)
     const simApiKey = document.getElementById('sim-api-key');
     const simAzureResource = document.getElementById('sim-azure-resource');
@@ -439,9 +506,18 @@ class SoLongSucker {
     if (saved) {
       try {
         const config = JSON.parse(saved);
-        if (config.apiKey) {
-          document.getElementById('api-key').value = config.apiKey;
-          if (simApiKey) simApiKey.value = config.apiKey;
+        if (config.openrouterApiKey) {
+          const openrouterKeyInput = document.getElementById('openrouter-api-key');
+          if (openrouterKeyInput) openrouterKeyInput.value = config.openrouterApiKey;
+        }
+        if (config.openrouterModels) {
+          config.openrouterModels.forEach((model, i) => {
+            const input = document.getElementById(`openrouter-model-${i}`);
+            if (input && model) input.value = model;
+          });
+        }
+        if (config.provider) {
+          this.switchProviderTab(config.provider);
         }
         if (config.players) {
           config.players.forEach((type, i) => {
@@ -462,9 +538,11 @@ class SoLongSucker {
     this.updateAIConfigVisibility();
 
     // Update simulation provider fields visibility
-    const simProvider = document.getElementById('sim-ai-provider').value;
-    document.getElementById('sim-azure-resource-row').style.display =
-      simProvider === 'azure-claude' ? 'flex' : 'none';
+    const simProvider = document.getElementById('sim-ai-provider');
+    const simAzureRow = document.getElementById('sim-azure-resource-row');
+    if (simProvider && simAzureRow) {
+      simAzureRow.style.display = simProvider.value === 'azure-claude' ? 'flex' : 'none';
+    }
   }
 
   /**
@@ -472,7 +550,11 @@ class SoLongSucker {
    */
   saveConfig() {
     const config = {
-      apiKey: document.getElementById('api-key').value,
+      provider: this.getSelectedProvider(),
+      openrouterApiKey: document.getElementById('openrouter-api-key')?.value || '',
+      openrouterModels: [0, 1, 2, 3].map(i =>
+        document.getElementById(`openrouter-model-${i}`)?.value || ''
+      ),
       players: [0, 1, 2, 3].map(i =>
         document.getElementById(`player-${i}-type`).value
       ),
@@ -592,14 +674,25 @@ class SoLongSucker {
   startGame(continueGame = false) {
     const aiPlayers = this.getAIPlayers();
     const playerModels = this.getPlayerModels();
-    const apiKey = document.getElementById('api-key').value;
+    
+    const selectedProvider = this.getSelectedProvider();
+    let providerType, finalApiKey;
 
-    // Use default Groq key if not provided
-    const finalApiKey = apiKey || CONFIG.GROQ_API_KEY;
+    if (selectedProvider === 'openrouter') {
+      providerType = 'openrouter';
+      finalApiKey = document.getElementById('openrouter-api-key').value;
+    } else {
+      providerType = 'groq';
+      finalApiKey = CONFIG.PUBLIC_GROQ_KEY || CONFIG.GROQ_API_KEY;
+    }
 
     // Validate API key if AI players are selected
     if (aiPlayers.length > 0 && !finalApiKey) {
-      alert('Please enter an API key for AI players');
+      if (selectedProvider === 'openrouter') {
+        alert('Please enter your OpenRouter API key');
+      } else {
+        alert('Free play is not available. Please use OpenRouter with your own API key.');
+      }
       return;
     }
 
@@ -632,7 +725,7 @@ class SoLongSucker {
         this.handleAction.bind(this),
         this.render.bind(this)
       );
-      this.agentManager.setProvider('groq', finalApiKey);
+      this.agentManager.setProvider(providerType, finalApiKey);
       this.agentManager.setAIPlayers(aiPlayers, playerModels);
       // Tell UI which players are AI so it can disable controls during AI turns
       this.ui.setAIPlayers(aiPlayers);

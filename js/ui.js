@@ -256,7 +256,7 @@ export class UI {
 
       const label = document.createElement('div');
       label.className = 'pile-label';
-      label.textContent = `Pile ${pile.id + 1}`;
+      label.textContent = `Pile ${pile.id}`;
       pileEl.appendChild(label);
 
       if (isSelectPile) {

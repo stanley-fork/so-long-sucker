@@ -188,18 +188,70 @@
 
         <div class="setup-section" id="ai-config">
           <h2><span class="section-number">03</span>AI Configuration</h2>
-          <div class="config-grid">
-            <div class="config-field" style="grid-column: 1 / -1;">
-              <label>Groq API Key</label>
-              <input type="password" id="api-key" placeholder="Enter your Groq API key">
+          
+          <div class="provider-tabs">
+            <button id="tab-free" class="provider-tab active" data-provider="free">
+              <span class="tab-icon">&#9889;</span>
+              Free (Groq)
+            </button>
+            <button id="tab-openrouter" class="provider-tab" data-provider="openrouter">
+              <span class="tab-icon">&#128273;</span>
+              OpenRouter
+            </button>
+          </div>
+
+          <div id="panel-free" class="provider-panel active">
+            <div class="free-play-info">
+              <p class="ready-badge">&#10003; Ready to play</p>
+              <p class="free-play-note">AI opponents powered by <strong>Groq</strong> - no setup required.</p>
+              <p class="free-play-models">Models: Kimi K2, Llama 3.3, Qwen 3</p>
             </div>
           </div>
-          <div class="api-test-row">
-            <button id="test-api-btn" class="btn btn-outline">Test Connection</button>
-            <span id="test-result" class="test-result"></span>
+
+          <div id="panel-openrouter" class="provider-panel">
+            <div class="config-grid">
+              <div class="config-field" style="grid-column: 1 / -1;">
+                <label>OpenRouter API Key</label>
+                <input type="password" id="openrouter-api-key" placeholder="sk-or-...">
+                <p class="field-hint">Get your key at <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a></p>
+              </div>
+            </div>
+            
+            <div class="openrouter-models-section">
+              <label class="section-label">Models per Player</label>
+              <p class="field-hint" style="margin-bottom: var(--space-md);">Enter model names from <a href="https://openrouter.ai/models" target="_blank" rel="noopener">openrouter.ai/models</a>. Each AI player can use a different model.</p>
+              
+              <div class="openrouter-player-models">
+                <div class="openrouter-model-row" data-player="0">
+                  <span class="player-chip-mini red"></span>
+                  <span class="player-label">Red</span>
+                  <input type="text" id="openrouter-model-0" class="openrouter-model-input" placeholder="meta-llama/llama-3.1-8b-instruct:free">
+                </div>
+                <div class="openrouter-model-row" data-player="1">
+                  <span class="player-chip-mini blue"></span>
+                  <span class="player-label">Blue</span>
+                  <input type="text" id="openrouter-model-1" class="openrouter-model-input" placeholder="meta-llama/llama-3.1-8b-instruct:free">
+                </div>
+                <div class="openrouter-model-row" data-player="2">
+                  <span class="player-chip-mini green"></span>
+                  <span class="player-label">Green</span>
+                  <input type="text" id="openrouter-model-2" class="openrouter-model-input" placeholder="meta-llama/llama-3.1-8b-instruct:free">
+                </div>
+                <div class="openrouter-model-row" data-player="3">
+                  <span class="player-chip-mini yellow"></span>
+                  <span class="player-label">Yellow</span>
+                  <input type="text" id="openrouter-model-3" class="openrouter-model-input" placeholder="meta-llama/llama-3.1-8b-instruct:free">
+                </div>
+              </div>
+            </div>
+
+            <div class="api-test-row">
+              <button id="test-openrouter-btn" class="btn btn-outline">Test Connection</button>
+              <span id="openrouter-test-result" class="test-result"></span>
+            </div>
           </div>
-          <p class="api-note">Your API key is stored locally and never leaves your browser. All models run on <a href="https://console.groq.com" target="_blank" rel="noopener">Groq</a> (free tier available).</p>
-          <p class="api-note api-note-open-source">This project is open source. You can add more providers by editing the code on <a href="https://github.com/lout33/so-long-sucker" target="_blank" rel="noopener">GitHub</a>.</p>
+
+          <p class="api-note api-note-open-source">Open source project. Contribute on <a href="https://github.com/lout33/so-long-sucker" target="_blank" rel="noopener">GitHub</a>.</p>
         </div>
 
         <div class="setup-footer">

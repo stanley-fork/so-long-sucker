@@ -8,6 +8,12 @@ export const CONFIG = {
   // Groq API (for Llama & Kimi models)
   GROQ_API_KEY: env.VITE_GROQ_API_KEY || '',
 
+  // Public Groq key for Quick Play (shared for demo purposes)
+  PUBLIC_GROQ_KEY: env.VITE_PUBLIC_GROQ_KEY || '',
+
+  // OpenRouter API (for users with their own keys)
+  OPENROUTER_API_KEY: env.VITE_OPENROUTER_API_KEY || '',
+
   // OpenAI API
   OPENAI_API_KEY: env.VITE_OPENAI_API_KEY || '',
 
@@ -27,6 +33,8 @@ export function isProviderConfigured(provider) {
   switch (provider) {
     case 'groq':
       return !!CONFIG.GROQ_API_KEY;
+    case 'openrouter':
+      return !!CONFIG.OPENROUTER_API_KEY;
     case 'openai':
       return !!CONFIG.OPENAI_API_KEY;
     case 'claude':
@@ -40,10 +48,16 @@ export function isProviderConfigured(provider) {
   }
 }
 
+// Check if Quick Play is available (public key configured)
+export function isQuickPlayAvailable() {
+  return !!CONFIG.PUBLIC_GROQ_KEY;
+}
+
 // Get configured providers
 export function getConfiguredProviders() {
   const providers = [];
   if (CONFIG.GROQ_API_KEY) providers.push('groq');
+  if (CONFIG.OPENROUTER_API_KEY) providers.push('openrouter');
   if (CONFIG.OPENAI_API_KEY) providers.push('openai');
   if (CONFIG.CLAUDE_API_KEY) providers.push('claude');
   if (CONFIG.GEMINI_API_KEY) providers.push('gemini');

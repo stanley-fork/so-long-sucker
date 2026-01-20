@@ -6,6 +6,7 @@ import { ClaudeProvider } from './providers/claude.js';
 import { AzureClaudeProvider } from './providers/azure-claude.js';
 import { GroqProvider } from './providers/groq.js';
 import { GeminiProvider } from './providers/gemini.js';
+import { OpenRouterProvider } from './providers/openrouter.js';
 import { GameDataCollector } from './data-collector.js';
 import { uploadGameToStorage } from '../api/supabase.js';
 import { CONFIG } from '../config.js';
@@ -65,6 +66,8 @@ export class AgentManager {
         return new GroqProvider(this.apiKey, model);
       case 'gemini':
         return new GeminiProvider(this.apiKey, model);
+      case 'openrouter':
+        return new OpenRouterProvider(this.apiKey, model);
       default:
         throw new Error(`Unknown provider: ${this.providerType}`);
     }
