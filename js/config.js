@@ -1,5 +1,5 @@
 // Centralized configuration for So Long Sucker
-// API keys are loaded from .env file (via Vite) or can be set directly
+// API keys are loaded from environment variables (via Vite) at build time
 
 // Safe accessor for Vite env vars (works without Vite too)
 const env = (typeof import.meta !== 'undefined' && import.meta.env) || {};
