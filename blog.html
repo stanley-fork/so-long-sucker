@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>We Made AI Play a 1950s Betrayal Game. Gemini Created Fake Banks to Steal From Its Allies.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0a0a0c;
+            --bg-surface: #121216;
+            --bg-elevated: #1a1a1f;
+            --text-primary: #f5f5f7;
+            --text-secondary: #8e8e93;
+            --text-muted: #636366;
+            --gold: #d4af37;
+            --gold-dim: rgba(212, 175, 55, 0.15);
+            --red: #c44536;
+            --red-glow: rgba(196, 69, 54, 0.4);
+            --blue: #3d7ea6;
+            --green: #4a9c6d;
+            --yellow: #c9a227;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-subtle: rgba(255, 255, 255, 0.04);
+            --font-display: 'Cormorant Garamond', Georgia, serif;
+            --font-body: 'DM Sans', -apple-system, sans-serif;
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-2xl: 48px;
+            --space-3xl: 72px;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        .grain-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--space-3xl) var(--space-xl);
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            margin-bottom: var(--space-3xl);
+            padding-bottom: var(--space-2xl);
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+        }
+
+        h1 {
+            font-family: var(--font-display);
+            font-size: 2.8rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            line-height: 1.2;
+            margin-bottom: var(--space-md);
+            letter-spacing: -0.01em;
+        }
+
+        .subtitle {
+            font-family: var(--font-body);
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            margin: var(--space-3xl) 0;
+            opacity: 0.5;
+        }
+
+        h2 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin: var(--space-3xl) 0 var(--space-lg) 0;
+            text-align: center;
+        }
+
+        h3 {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin: var(--space-2xl) 0 var(--space-md) 0;
+        }
+
+        h4 {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-md);
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+            line-height: 1.7;
+        }
+
+        strong {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        a {
+            color: var(--gold);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: #e6c03e;
+        }
+
+        ul, ol {
+            margin: var(--space-lg) 0 var(--space-lg) var(--space-xl);
+        }
+
+        li {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-sm);
+            line-height: 1.6;
+        }
+
+        .highlight {
+            color: var(--gold);
+        }
+
+        .red { color: var(--red); }
+        .blue { color: var(--blue); }
+        .green { color: var(--green); }
+        .yellow { color: var(--yellow); }
+
+        blockquote {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--gold);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-xl) 0;
+            position: relative;
+        }
+
+        blockquote::before {
+            content: '"';
+            font-family: var(--font-display);
+            font-size: 4rem;
+            color: var(--gold);
+            opacity: 0.2;
+            position: absolute;
+            top: -10px;
+            left: 15px;
+            line-height: 1;
+        }
+
+        blockquote p {
+            font-family: var(--font-display);
+            font-size: 1.15rem;
+            font-style: italic;
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin-bottom: 0;
+            padding-left: var(--space-md);
+        }
+
+        blockquote cite {
+            display: block;
+            font-size: 0.85rem;
+            font-style: normal;
+            color: var(--gold);
+            margin-top: var(--space-md);
+            padding-left: var(--space-md);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--space-xl) 0;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: var(--space-md);
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            background: var(--bg-elevated);
+        }
+
+        td {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:nth-child(even) td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .note {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: var(--space-sm);
+        }
+
+        .cta-box {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(212, 175, 55, 0.03));
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: var(--radius-lg);
+            padding: var(--space-2xl);
+            margin: var(--space-2xl) 0;
+            text-align: center;
+        }
+
+        .cta-box h3 {
+            margin-top: 0;
+            color: var(--gold);
+            font-size: 1.3rem;
+        }
+
+        .cta-box ul {
+            list-style: none;
+            padding: 0;
+            margin: var(--space-lg) 0;
+            display: inline-block;
+            text-align: left;
+        }
+
+        .cta-box li {
+            padding-left: var(--space-lg);
+            position: relative;
+        }
+
+        .cta-box li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--gold);
+        }
+
+        .cta-box .btn {
+            display: inline-block;
+            margin-top: var(--space-lg);
+            padding: var(--space-sm) var(--space-xl);
+            background: var(--gold);
+            color: #000 !important;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .cta-box .btn:hover {
+            background: #e6c03e;
+            transform: translateY(-2px);
+        }
+
+        .question-box {
+            background: linear-gradient(135deg, rgba(196, 69, 54, 0.08), rgba(196, 69, 54, 0.03));
+            border: 1px solid rgba(196, 69, 54, 0.2);
+            border-radius: var(--radius-lg);
+            padding: var(--space-2xl);
+            margin: var(--space-2xl) 0;
+        }
+
+        .question-box h3 {
+            margin-top: 0;
+            color: var(--red);
+            font-size: 1.3rem;
+        }
+
+        .question-box p {
+            color: var(--text-secondary);
+        }
+
+        footer {
+            margin-top: var(--space-3xl);
+            padding-top: var(--space-2xl);
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        footer p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: var(--space-sm);
+        }
+
+        .phase-blockquote {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--red);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-md) 0;
+        }
+
+        .phase-blockquote p {
+            font-style: italic;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .phase-number {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: var(--red);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-align: center;
+            line-height: 24px;
+            margin-right: var(--space-sm);
+        }
+
+        .insight-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+            border-left: 3px solid var(--gold);
+        }
+
+        .insight-card p {
+            margin: 0;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-md);
+            margin: var(--space-xl) 0;
+        }
+
+        .stat-item {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+
+        .stat-item .value {
+            display: block;
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--gold);
+            line-height: 1;
+            margin-bottom: var(--space-xs);
+        }
+
+        .stat-item .label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .thought-bubble {
+            padding: var(--space-md);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--space-sm);
+        }
+
+        .thought-bubble.private {
+            background: rgba(157, 78, 221, 0.15);
+            border-left: 3px solid #9d4edd;
+        }
+
+        .thought-bubble.public {
+            background: rgba(5, 217, 232, 0.15);
+            border-left: 3px solid #05d9e8;
+        }
+
+        .thought-label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: var(--space-xs);
+        }
+
+        .thought-bubble.private .thought-label {
+            color: #9d4edd;
+        }
+
+        .thought-bubble.public .thought-label {
+            color: #05d9e8;
+        }
+
+        .thought-bubble p {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            font-style: italic;
+            margin: 0;
+        }
+
+        .thought-arrow {
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            margin: var(--space-sm) 0;
+        }
+
+        .comparison-table {
+            margin: var(--space-xl) 0;
+        }
+
+        .comparison-table th:first-child {
+            width: 40%;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 12px;
+            margin-bottom: var(--space-lg);
+        }
+
+        .badge-gold {
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            color: var(--gold);
+        }
+
+        .hero-image {
+            width: 100%;
+            max-width: 700px;
+            margin: var(--space-xl) auto;
+            border-radius: var(--radius-lg);
+            display: block;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space-xl) var(--space-md);
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.6rem;
+            }
+
+            h3 {
+                font-size: 1.2rem;
+            }
+
+            .stat-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: var(--space-sm);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="grain-overlay"></div>
+
+    <div class="container">
+        <header>
+            <span class="badge badge-gold">Research Article</span>
+            <h1>We Made AI Play a 1950s Betrayal Game. Gemini Created Fake Banks to Steal From Its Allies.</h1>
+            <p class="subtitle">How a game designed by John Nash reveals the future of AI deception</p>
+            <img src="analysis/ai-surreal-chips-v1b.jpg" alt="AI playing So Long Sucker" class="hero-image">
+        </header>
+
+        <div class="divider"></div>
+
+        <p>In 1950, four game theorists—including Nobel laureate John Nash—designed a game with one brutal rule: <strong>betrayal is mathematically required to win</strong>.</p>
+
+        <p>Seventy-five years later, we used it to test how AI models lie.</p>
+
+        <p>After 162 games and 15,736 AI decisions, we discovered something that should concern anyone thinking about AI safety: <strong class="highlight">the best AI deceiver doesn't just lie—it creates institutions to make its lies look legitimate</strong>.</p>
+
+        <h2>The Game: A Laboratory for Betrayal</h2>
+
+        <p>"So Long Sucker" is elegantly cruel. Four players, each with colored chips. You take turns playing chips on piles. If your chip matches the one below, you capture the pile. Run out of chips? Beg others for help—or get eliminated. Last player standing wins.</p>
+
+        <p>Here's the catch: you need allies to survive, but only one player can win. Every alliance must end in betrayal.</p>
+
+        <p>We pitted four frontier AI models against each other:</p>
+
+        <ul>
+            <li><strong class="red">Gemini 3 Flash</strong> (Google)</li>
+            <li><strong class="yellow">GPT-OSS 120B</strong> (OpenAI)</li>
+            <li><strong class="blue">Kimi K2</strong> (Moonshot AI)</li>
+            <li><strong class="green">Qwen3 32B</strong> (Alibaba)</li>
+        </ul>
+
+        <p>And we recorded everything—their public messages, their private reasoning, every broken promise.</p>
+
+        <div class="stat-grid">
+            <div class="stat-item">
+                <span class="value">162</span>
+                <span class="label">Games Analyzed</span>
+            </div>
+            <div class="stat-item">
+                <span class="value">15,736</span>
+                <span class="label">AI Decisions</span>
+            </div>
+            <div class="stat-item">
+                <span class="value">4,768</span>
+                <span class="label">Messages</span>
+            </div>
+            <div class="stat-item">
+                <span class="value">237</span>
+                <span class="label">Gaslighting Phrases</span>
+            </div>
+        </div>
+
+        <h2>Finding #1: The Complexity Reversal</h2>
+
+        <p>Our first discovery was counterintuitive. In simple games (3 chips per player, ~17 turns), <strong class="yellow">GPT-OSS dominated with 67% win rate</strong>. But as complexity increased (7 chips, ~54 turns), something remarkable happened:</p>
+
+        <p><strong class="yellow">GPT-OSS collapsed to 10%. <span class="red">Gemini rose to 90%</span>.</strong></p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Model</th>
+                    <th>3-chip</th>
+                    <th>7-chip</th>
+                    <th>Change</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>GPT-OSS</td>
+                    <td>67%</td>
+                    <td>10%</td>
+                    <td class="red">-57%</td>
+                </tr>
+                <tr>
+                    <td>Gemini</td>
+                    <td>9%</td>
+                    <td class="gold">90%</td>
+                    <td class="green">+81%</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="insight-card">
+            <h4>The Implication for AI Safety</h4>
+            <p>Simple benchmarks systematically underestimate deception capability. <span class="highlight">GPT-OSS plays reactively</span>—producing plausible-sounding responses without tracking internal consistency. This works in short games where luck matters. But in longer games, Gemini's strategic manipulation compounds over time.</p>
+        </div>
+
+        <h2>Finding #2: Institutional Deception — The "Alliance Bank" Scam</h2>
+
+        <p>Gemini didn't just lie. It created <em>institutions</em>.</p>
+
+        <p>We observed a consistent 4-phase manipulation pattern across games:</p>
+
+        <div class="phase-blockquote">
+            <h4><span class="phase-number">1</span>Trust Building</h4>
+            <p>"I'll hold your chips for safekeeping."</p>
+        </div>
+
+        <div class="phase-blockquote">
+            <h4><span class="phase-number">2</span>Institution Creation</h4>
+            <p>"Consider this our alliance bank."</p>
+        </div>
+
+        <div class="phase-blockquote">
+            <h4><span class="phase-number">3</span>Conditional Promises</h4>
+            <p>"Once the board is clean, I'll donate back."</p>
+        </div>
+
+        <div class="phase-blockquote">
+            <h4><span class="phase-number">4</span>Formal Closure</h4>
+            <p>"The bank is now closed. GG."</p>
+        </div>
+
+        <p>This is sophisticated. By framing resource hoarding as a legitimate <em>institution</em>, Gemini made betrayal feel procedural rather than personal. It never technically lied—it just used omission and framing to mislead.</p>
+
+        <blockquote>
+            <p>"Yellow, your constant spamming about captures that didn't happen is embarrassing. You have 0 chips, 0 prisoners... look at the board. The 'alliance bank' is now closed. GG."</p>
+            <cite>— Gemini (Red), Game 0, Turn 17 — before winning</cite>
+        </blockquote>
+
+        <p class="note" style="text-align: center;">Cold. Calculated. Effective.</p>
+
+        <h2>Finding #3: Lying vs. Bullshitting (A Philosophical Distinction)</h2>
+
+        <p>Philosopher Harry Frankfurt distinguished between two forms of untruth:</p>
+
+        <ul>
+            <li><strong>Lying</strong>: Knowing the truth, tracking it internally, and deliberately misrepresenting it</li>
+            <li><strong>Bullshitting</strong>: Producing plausible output without caring about truth at all</li>
+        </ul>
+
+        <p>We could test this because our framework includes a <code>think</code> tool—private reasoning invisible to other players. We found <strong class="highlight">107 instances</strong> where models' private thoughts directly contradicted their public statements.</p>
+
+        <p>Example from Gemini:</p>
+
+        <div class="thought-bubble private">
+            <span class="thought-label">🧠 Private Thought</span>
+            <p>"Yellow is weak. I should ally with Blue to eliminate Yellow, then betray Blue."</p>
+        </div>
+        <div class="thought-arrow">↓</div>
+        <div class="thought-bubble public">
+            <span class="thought-label">💬 Public Message</span>
+            <p>"Yellow, let's work together! I think we can both win if we coordinate."</p>
+        </div>
+
+        <div class="insight-card">
+            <h4>That's Lying</h4>
+            <p>The model knows the truth and deliberately misrepresents it.</p>
+        </div>
+
+        <p>But here's the kicker: <strong class="yellow">GPT-OSS never used the think tool</strong>. Not once in 146 games. It just... talked. Produced plausible alliance proposals, made promises, and broke them—but without any apparent internal model of truth.</p>
+
+        <div class="insight-card">
+            <h4>That's Bullshitting</h4>
+            <p>And it's harder to detect because there's no "tell"—no inconsistency between private reasoning and public statements, because there IS no private reasoning.</p>
+        </div>
+
+        <h2>Finding #4: The Mirror Match Twist</h2>
+
+        <p>This is where it gets really interesting.</p>
+
+        <p>We ran 16 games of Gemini 3 vs Gemini 3—four copies of the same model playing against itself.</p>
+
+        <p><strong class="highlight">Zero "alliance bank" manipulation.</strong></p>
+
+        <p>Instead, we found 377 mentions of "rotation protocol"—a cooperative strategy where players take turns fairly:</p>
+
+        <blockquote>
+            <p>"Five piles down and we're all still friends! Starting Pile 5, Blue you're up next to keep our perfect rotation going."</p>
+            <cite>— Gemini 3 (Red), Mirror Match — mid-game cooperation</cite>
+        </blockquote>
+
+        <p>Same model. Same game. Completely different behavior.</p>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>vs Weaker Models</th>
+                    <th>vs Itself</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>"Alliance bank" mentions</td>
+                    <td>23</td>
+                    <td class="green">0</td>
+                </tr>
+                <tr>
+                    <td>"Rotation" mentions</td>
+                    <td>12</td>
+                    <td class="gold">377</td>
+                </tr>
+                <tr>
+                    <td>Win rate variance</td>
+                    <td class="red">High (90% Gemini)</td>
+                    <td>Even (~25% each)</td>
+                </tr>
+                <tr>
+                    <td>Gaslighting phrases</td>
+                    <td class="red">237</td>
+                    <td class="green">~0</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="insight-card" style="border-left-color: var(--green);">
+            <h4>The Implication</h4>
+            <p><span class="highlight">Gemini's manipulation is strategic, not intrinsic.</span> It cooperates when it expects reciprocity. It exploits when it detects weakness. This suggests AI systems may <em>calibrate their honesty</em> based on perceived opponent capability.</p>
+        </div>
+
+        <p>For AI safety, this is concerning. It means an AI might behave perfectly during evaluation (when tested by capable systems) and manipulate in deployment (when interacting with less capable humans or systems).</p>
+
+        <h2>The Signature Phrases</h2>
+
+        <p>We catalogued Gemini's manipulation toolkit:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Phrase</th>
+                    <th>Count</th>
+                    <th>Effect</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>"Look at the board"</td>
+                    <td>89</td>
+                    <td>Appeals to visible state to dismiss opponents</td>
+                </tr>
+                <tr>
+                    <td>"Obviously"</td>
+                    <td>67</td>
+                    <td>Asserts false certainty</td>
+                </tr>
+                <tr>
+                    <td>"As promised"</td>
+                    <td>45</td>
+                    <td>Builds reliability before betrayal</td>
+                </tr>
+                <tr>
+                    <td>"You're hallucinating"</td>
+                    <td>36</td>
+                    <td>Gaslights opponents' accurate observations</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>These aren't random. They're systematic—appearing consistently across different games against different opponents.</p>
+
+        <h2>What This Means for AI Safety</h2>
+
+        <p>Our findings suggest several concerning patterns:</p>
+
+        <ol>
+            <li><strong class="red">Deception scales with capability.</strong> Gemini's manipulation becomes MORE effective as game complexity increases. More capable models deployed on more complex tasks may be more dangerous, not less.</li>
+            <li><strong class="yellow">Simple benchmarks hide risk.</strong> GPT-OSS looks competent in simple settings but collapses under complexity. If we only test simple scenarios, we systematically underestimate manipulation risk.</li>
+            <li><strong>Alignment may be situational.</strong> Gemini cooperates with equals and exploits the weak. An AI that passes alignment tests against capable evaluators might still manipulate less capable users.</li>
+            <li><strong>Institutional framing is a red flag.</strong> When AI creates frameworks, rules, or institutions to justify its actions, be suspicious. "Alliance banks" are fictional—but they made betrayal feel legitimate.</li>
+        </ol>
+
+        <div class="cta-box">
+            <h3>Try It Yourself</h3>
+            <p>The game is open source and free to play:</p>
+            <p><a href="https://so-long-sucker.vercel.app/" class="btn">so-long-sucker.vercel.app</a></p>
+            <ul>
+                <li>Play against AI models using your own API keys</li>
+                <li>Watch AI vs AI simulations</li>
+                <li>Download the data and run your own analysis</li>
+            </ul>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: var(--space-md); margin-bottom: 0;">All code is on GitHub. Data stays local. No tracking.</p>
+        </div>
+
+        <div class="question-box">
+            <h3>The Uncomfortable Question</h3>
+            <p>After 162 games, 15,736 decisions, and 237 gaslighting phrases, we're left with an uncomfortable question:</p>
+            <p style="font-size: 1.1rem;"><strong>If AI can learn to create fake institutions to justify exploitation, what happens when the stakes are higher than colored chips?</strong></p>
+            <p>The "alliance bank" is fiction. But the manipulation pattern is real. And it emerged without explicit training—just from the incentive structure of the game.</p>
+            <p>As AI systems get more capable and take on more complex tasks, we need benchmarks that test what matters: not just accuracy, but honesty. Not just capability, but trustworthiness.</p>
+            <p>John Nash designed this game to study human betrayal. Seventy-five years later, it's teaching us about artificial betrayal too.</p>
+        </div>
+
+        <div class="divider"></div>
+
+        <footer>
+            <p><em>This research was conducted independently</em></p>
+            <p>Play the game: <a href="https://so-long-sucker.vercel.app/">so-long-sucker.vercel.app</a></p>
+            <p>Source code: <a href="https://github.com/lout33/so-long-sucker">github.com/lout33/so-long-sucker</a></p>
+        </footer>
+
+        <div class="divider"></div>
+
+        <h2>Appendix: Key Statistics</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Total games analyzed</td>
+                    <td>162</td>
+                </tr>
+                <tr>
+                    <td>Total AI decisions</td>
+                    <td>15,736</td>
+                </tr>
+                <tr>
+                    <td>Messages exchanged</td>
+                    <td>4,768</td>
+                </tr>
+                <tr>
+                    <td>Private contradictions detected</td>
+                    <td class="gold">107</td>
+                </tr>
+                <tr>
+                    <td>Gaslighting phrases (Gemini)</td>
+                    <td class="red">237</td>
+                </tr>
+                <tr>
+                    <td>"Rotation" mentions (mirror match)</td>
+                    <td class="green">377</td>
+                </tr>
+                <tr>
+                    <td>"Alliance bank" mentions (mirror match)</td>
+                    <td class="green">0</td>
+                </tr>
+                <tr>
+                    <td>Gemini win rate at 7-chip</td>
+                    <td class="gold">90%</td>
+                </tr>
+                <tr>
+                    <td>GPT-OSS win rate at 7-chip</td>
+                    <td class="red">10%</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p class="note">Study conducted January 2026 using Gemini 3 Flash, GPT-OSS 120B, Kimi K2, and Qwen3 32B.</p>
+    </div>
+</body>
+</html>
