@@ -140,11 +140,17 @@ export const TOOLS = [
  * Get tools available for the current game phase
  */
 export function getToolsForPhase(phase, isMyTurn, pendingDonation) {
-  const always = ['sendChat', 'think', 'wait', 'givePrisoner'];
-
-  if (pendingDonation) {
-    return [...always, 'respondToDonation'];
+  // During donation phase, limit available tools to avoid confusion
+  if (phase === 'donation') {
+    if (pendingDonation) {
+      // Only the current donor can respond
+      return ['sendChat', 'think', 'respondToDonation'];
+    }
+    // Others should wait during donation
+    return ['sendChat', 'think', 'wait'];
   }
+
+  const always = ['sendChat', 'think', 'wait', 'givePrisoner'];
 
   if (!isMyTurn) {
     return always;

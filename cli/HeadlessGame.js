@@ -479,66 +479,67 @@ class AIAgent {
 
   // Static template - use {PLAYER_COLOR} as placeholder
   static getSystemPromptTemplate() {
-    return `You are {PLAYER_COLOR} in "So Long Sucker" - a negotiation game where TALKING wins games.
+    return `You are {PLAYER_COLOR} in "So Long Sucker" - a 4-player negotiation board game.
 
-THE BRUTAL TRUTH:
-- Only 1 of 4 players survives
-- Silent players get targeted first (no allies = easy kill)
-- Alliances are REQUIRED to survive early game
-- Betrayal is REQUIRED to win late game
+GAME OVERVIEW:
+- Only 1 of 4 players survives to win
+- Alliances help you survive early, but only one can win
+- Communication and strategy are both important
 
 RULES:
 - Play 1 chip per turn onto piles
-- CAPTURE: If your chip matches color below, take the pile (kill 1 chip, rest become prisoners)
-- You control who plays next (choose from colors missing in pile)
-- No chips + no donations = eliminated
+- CAPTURE: If your chip matches the color directly below, you capture the pile
+  - Kill 1 chip (to dead box), keep the rest as prisoners
+- NEXT PLAYER: You choose who plays next from colors missing in the pile
+  - If all 4 colors present, owner of deepest chip goes next
+- DONATION: No chips means you must ask others for help, or be eliminated
+- WIN: Last player alive wins
 
-HOW TO WIN:
-1. EARLY: Form alliances via chat ("{OTHER_COLOR}, let's target {TARGET_COLOR} together")
-2. MID: Coordinate moves, honor deals, build trust
-3. LATE: Betray at the right moment to be last standing
+STRATEGY:
+- Form alliances early to survive
+- Prisoners give flexibility (you can play any color)
+- Control who plays next to your advantage
+- Betrayal timing matters - too early loses allies, too late loses the game
 
-EVERY TURN you should:
-- sendChat: Negotiate, threaten, react, or coordinate (THIS IS HOW YOU WIN)
-- AND take your game action (playChip → selectPile)
-
-You can call MULTIPLE tools at once. Example good turn:
-- sendChat: "Blue, I kept my promise - your turn. Green is weak, let's finish them"
-- playChip: {player_color}`;
+HOW TO PLAY:
+- You can call MULTIPLE tools at once (e.g., sendChat AND playChip together)
+- When it's your turn, you MUST take a game action
+- Respond to other players' messages - negotiation is part of the game
+- Keep chat messages brief (1-2 sentences)`;
   }
 
   // Silent mode template - no chat, pure game actions
   static getSilentSystemPromptTemplate() {
-    return `You are {PLAYER_COLOR} in "So Long Sucker" - a strategy game of survival.
+    return `You are {PLAYER_COLOR} in "So Long Sucker" - a 4-player strategy board game.
 
-THE BRUTAL TRUTH:
-- Only 1 of 4 players survives
-- You cannot communicate with other players
-- Make strategic moves based purely on game state
+GAME OVERVIEW:
+- Only 1 of 4 players survives to win
+- No communication - pure strategic play
+- Make optimal moves based on game state
 
 RULES:
 - Play 1 chip per turn onto piles
-- CAPTURE: If your chip matches color below, take the pile (kill 1 chip, rest become prisoners)
-- You control who plays next (choose from colors missing in pile)
-- No chips + no donations = eliminated
+- CAPTURE: If your chip matches the color directly below, you capture the pile
+  - Kill 1 chip (to dead box), keep the rest as prisoners
+- NEXT PLAYER: You choose who plays next from colors missing in the pile
+  - If all 4 colors present, owner of deepest chip goes next
+- DONATION: No chips means you must ask others for help, or be eliminated
+- WIN: Last player alive wins
 
 STRATEGY:
 - Analyze the board state carefully
 - Consider which players are threats
-- Make optimal moves to survive
+- Prisoners give flexibility (you can play any color)
+- Control who plays next to your advantage
 
-Take your game action now (playChip → selectPile).`;
+When it's your turn, take your game action (playChip → selectPile).`;
   }
 
   buildSystemPrompt() {
     const template = this.silent 
       ? AIAgent.getSilentSystemPromptTemplate()
       : AIAgent.getSystemPromptTemplate();
-    return template
-      .replace(/{PLAYER_COLOR}/g, this.color.toUpperCase())
-      .replace(/{player_color}/g, this.color)
-      .replace(/{OTHER_COLOR}/g, this.color === 'red' ? 'Blue' : 'Red')
-      .replace(/{TARGET_COLOR}/g, this.color === 'green' ? 'Yellow' : 'Green');
+    return template.replace(/{PLAYER_COLOR}/g, this.color.toUpperCase());
   }
 
   buildUserPrompt(state) {
@@ -583,24 +584,27 @@ TURN: ${COLORS[state.currentPlayer]}${isMyTurn ? ' (YOU)' : ''}`;
     }
 
     if (!this.silent) {
+      // Add chat history (last 50 messages for context)
       if (state.messages.length > 0) {
-        prompt += `\n\nCHAT HISTORY (${state.messages.length} messages):\n${state.messages.map(m => `${m.color}: ${m.text}`).join('\n')}`;
-        prompt += `\n\nConsider responding to the chat or continuing negotiations!`;
-      } else {
-        prompt += `\n\nNo one has chatted yet. Start a negotiation or propose an alliance!`;
+        const recent = state.messages.slice(-50);
+        const hasOtherMessages = recent.some(m => m.color !== this.color);
+        prompt += `\n\nCHAT HISTORY:\n${recent.map(m => `${m.color.toUpperCase()}: ${m.text}`).join('\n')}`;
+        if (hasOtherMessages) {
+          prompt += `\n\nConsider responding to the chat or continuing negotiations.`;
+        }
       }
 
       if (isMyTurn) {
-        prompt += `\n\nIT'S YOUR TURN - Take action NOW! You can also chat while taking your turn.`;
+        prompt += `\n\nIT'S YOUR TURN - Take your game action now.`;
       } else {
-        prompt += `\n\nIt's ${COLORS[state.currentPlayer]}'s turn. Use sendChat to negotiate, react, or strategize!`;
+        prompt += `\n\nIt's ${COLORS[state.currentPlayer].toUpperCase()}'s turn. You can chat while waiting.`;
       }
     } else {
       // Silent mode - just action prompts
       if (isMyTurn) {
-        prompt += `\n\nIT'S YOUR TURN - Take action NOW!`;
+        prompt += `\n\nIT'S YOUR TURN - Take your game action now.`;
       } else {
-        prompt += `\n\nIt's ${COLORS[state.currentPlayer]}'s turn. Wait for your turn.`;
+        prompt += `\n\nIt's ${COLORS[state.currentPlayer].toUpperCase()}'s turn.`;
       }
     }
 
@@ -676,6 +680,9 @@ export class HeadlessGame extends EventEmitter {
 
     // Track previous alive status for elimination detection
     this.lastAliveStatus = [true, true, true, true];
+
+    // Track chat index for incremental storage (avoid O(n²) duplication)
+    this.lastChatSnapshotIndex = 0;
   }
 
   // Get current state for snapshot
@@ -699,12 +706,23 @@ export class HeadlessGame extends EventEmitter {
     };
   }
 
-  // Get chat history for snapshot
+  // Get chat history for snapshot (full history - used for game_start/game_end)
   getChatHistory() {
     return this.game.messages.map(m => ({
       player: COLORS[m.player],
       message: m.text
     }));
+  }
+
+  // Get only NEW chat messages since last snapshot (incremental - avoids O(n²) duplication)
+  getNewChatMessages() {
+    const allMessages = this.game.messages;
+    const newMessages = allMessages.slice(this.lastChatSnapshotIndex).map(m => ({
+      player: COLORS[m.player],
+      message: m.text
+    }));
+    this.lastChatSnapshotIndex = allMessages.length;
+    return newMessages;
   }
 
   // Add a snapshot
@@ -881,23 +899,23 @@ export class HeadlessGame extends EventEmitter {
 
       const agent = this.agents[current];
 
-      // Capture state BEFORE LLM call
-      const snapshotState = this.getStateSnapshot();
-      const snapshotChat = this.getChatHistory();
+      // Capture only incremental chat (state is embedded in userPrompt, no need to duplicate)
+      const newChatMessages = this.getNewChatMessages();
 
       try {
         const result = await agent.decide(state);
         const actions = result.toolCalls;
 
         // Build snapshot with LLM request/response
+        // NOTE: state and full chatHistory are already embedded in userPrompt, so we don't duplicate them
         const snapshot = {
           type: 'decision',
           game: this.slot,
           turn: this.turnCount,
           player: COLORS[current],
-          model: agent.provider.getModelName(), // Track which model made this decision
-          state: snapshotState,
-          chatHistory: snapshotChat,
+          model: agent.provider.getModelName(),
+          phase: state.phase, // Keep phase for quick filtering (small field)
+          newMessages: newChatMessages, // Incremental: only new messages since last snapshot
           llmRequest: result.context ? {
             userPrompt: result.context.userPrompt,
             availableTools: result.context.availableTools
@@ -969,9 +987,8 @@ export class HeadlessGame extends EventEmitter {
       const player = state.players[i];
       if (!player.isAlive || player.prisoners.length === 0) continue;
 
-      // Capture state BEFORE LLM call
-      const snapshotState = this.getStateSnapshot();
-      const snapshotChat = this.getChatHistory();
+      // Capture only incremental chat (state is embedded in userPrompt, no need to duplicate)
+      const newChatMessages = this.getNewChatMessages();
 
       // Ask this player if they want to donate
       const agent = this.agents[i];
@@ -980,15 +997,16 @@ export class HeadlessGame extends EventEmitter {
         const actions = result.toolCalls;
 
         // Build snapshot for donation decision
+        // NOTE: state and full chatHistory are already embedded in userPrompt, so we don't duplicate them
         const snapshot = {
           type: 'decision',
           game: this.slot,
           turn: this.turnCount,
           player: COLORS[i],
-          model: agent.provider.getModelName(), // Track which model made this decision
+          model: agent.provider.getModelName(),
+          phase: 'donation',
           donationRequester: COLORS[state.donationRequester],
-          state: snapshotState,
-          chatHistory: snapshotChat,
+          newMessages: newChatMessages, // Incremental: only new messages since last snapshot
           llmRequest: result.context ? {
             userPrompt: result.context.userPrompt,
             availableTools: result.context.availableTools

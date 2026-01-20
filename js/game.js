@@ -26,6 +26,7 @@ export class Game {
     this.pendingCapture = null;
     this.donationRequester = null;
     this.donationAskedPlayers = [];
+    this.currentDonor = null; // Who is currently being asked for donation
 
     // Negotiation state
     this.messages = [];
@@ -254,11 +255,13 @@ export class Game {
       if (this.players[idx].isAlive &&
           !this.donationAskedPlayers.includes(idx) &&
           this.players[idx].canDonate()) {
+        this.currentDonor = idx; // Track who is being asked
         return { action: 'askDonation', asker: this.donationRequester, donor: idx };
       }
     }
 
     // No one can donate - eliminate player
+    this.currentDonor = null;
     return this.eliminatePlayer(this.donationRequester);
   }
 
@@ -271,6 +274,11 @@ export class Game {
   handleDonation(donorIndex, accepts, color = null) {
     if (this.phase !== 'donation') {
       throw new Error('Not in donation phase');
+    }
+
+    // Validate that this is the player currently being asked
+    if (this.currentDonor !== null && donorIndex !== this.currentDonor) {
+      throw new Error(`Player ${donorIndex} is not the current donor (expected ${this.currentDonor})`);
     }
 
     this.donationAskedPlayers.push(donorIndex);
@@ -286,6 +294,7 @@ export class Game {
       this.phase = 'selectChip';
       this.donationRequester = null;
       this.donationAskedPlayers = [];
+      this.currentDonor = null;
 
       return { action: 'donationAccepted', donor: donorIndex, color };
     }
@@ -303,6 +312,7 @@ export class Game {
 
     this.donationRequester = null;
     this.donationAskedPlayers = [];
+    this.currentDonor = null;
 
     // Check win condition
     if (this.checkWinCondition()) {
@@ -495,6 +505,7 @@ export class Game {
       selectedChip: this.selectedChip,
       pendingCapture: this.pendingCapture?.toState() || null,
       donationRequester: this.donationRequester,
+      currentDonor: this.currentDonor,
       // Negotiation state
       messages: [...this.messages],
       promises: this.promises.map(p => ({ ...p })),
@@ -533,6 +544,7 @@ export class Game {
       pendingCaptureId: this.pendingCapture?.id ?? null,
       donationRequester: this.donationRequester,
       donationAskedPlayers: [...this.donationAskedPlayers],
+      currentDonor: this.currentDonor,
       // Negotiation state
       messages: [...this.messages],
       promises: this.promises.map(p => ({ ...p })),
@@ -579,6 +591,7 @@ export class Game {
       : null;
     this.donationRequester = data.donationRequester;
     this.donationAskedPlayers = [...(data.donationAskedPlayers || [])];
+    this.currentDonor = data.currentDonor ?? null;
 
     // Restore negotiation state
     this.messages = [...(data.messages || [])];

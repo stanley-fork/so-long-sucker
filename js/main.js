@@ -743,6 +743,19 @@ class SoLongSucker {
   }
 
   /**
+   * Record a human player's decision for data collection
+   */
+  recordHumanDecision(playerId, execution) {
+    if (!this.agentManager) return;
+    
+    const dataCollector = this.agentManager.getDataCollector();
+    if (!dataCollector) return;
+    
+    // Record decision with null LLM data (human player)
+    dataCollector.addDecision(this.game, playerId, null, null, execution);
+  }
+
+  /**
    * Handle UI actions
    */
   handleAction(action, data) {
@@ -750,31 +763,49 @@ class SoLongSucker {
 
     try {
       let result;
+      const currentPlayer = this.game.currentPlayer;
+      const isHuman = !this.agentManager?.isAI(currentPlayer);
 
       switch (action) {
         case 'selectChip':
           this.game.selectChip(data);
+          if (isHuman) {
+            this.recordHumanDecision(currentPlayer, [{ tool: 'playChip', args: { color: data }, success: true }]);
+          }
           this.render();
           break;
 
         case 'playOnPile':
           result = this.game.playOnPile(data);
           this.turnCount++;
+          if (isHuman) {
+            this.recordHumanDecision(currentPlayer, [{ tool: 'selectPile', args: { pileId: data }, success: true }]);
+            this.agentManager?.getDataCollector()?.incrementTurn();
+          }
           this.handleResult(result);
           break;
 
         case 'chooseNextPlayer':
           result = this.game.chooseNextPlayer(data);
+          if (isHuman) {
+            this.recordHumanDecision(currentPlayer, [{ tool: 'chooseNextPlayer', args: { playerId: data }, success: true }]);
+          }
           this.handleResult(result);
           break;
 
         case 'resolveCapture':
           result = this.game.resolveCapture(data);
+          if (isHuman) {
+            this.recordHumanDecision(currentPlayer, [{ tool: 'killChip', args: { color: data }, success: true }]);
+          }
           this.handleResult(result);
           break;
 
         case 'donate':
           result = this.game.handleDonation(data.donor, data.accepts, data.color);
+          if (!this.agentManager?.isAI(data.donor)) {
+            this.recordHumanDecision(data.donor, [{ tool: 'respondToDonation', args: { accept: data.accepts, color: data.color }, success: true }]);
+          }
           this.handleResult(result);
           break;
 
@@ -794,6 +825,10 @@ class SoLongSucker {
             ? data.player
             : COLORS.indexOf(data.color);
           this.game.addMessage(chatPlayerIndex, data.text);
+          // Record human chat for data collection
+          if (!this.agentManager?.isAI(chatPlayerIndex)) {
+            this.recordHumanDecision(chatPlayerIndex, [{ tool: 'sendChat', args: { message: data.text }, success: true }]);
+          }
           // Reset chat counter for AI agents
           if (this.agentManager) {
             Object.values(this.agentManager.agents).forEach(a => a.resetChatCounter());
@@ -858,6 +893,7 @@ class SoLongSucker {
       case 'gameOver':
         this.render();
         if (this.agentManager) {
+          this.agentManager.getDataCollector()?.addGameEnd(this.game);
           this.agentManager.stop();
         }
         this.ui.showGameOver(result.winner);

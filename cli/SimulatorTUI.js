@@ -37,6 +37,9 @@ export class SimulatorTUI {
     this.rl = null;
     this.logs = []; // Capture logs instead of printing to console
     this.maxLogs = 5;
+
+    // Prevent duplicate saves
+    this.hasSaved = false;
   }
 
   async start() {
@@ -504,6 +507,13 @@ ${colorize('╚═════════════════════�
   }
 
   async saveResults() {
+    // Prevent duplicate saves
+    if (this.hasSaved) {
+      console.log('💾 Results already saved, skipping...');
+      return;
+    }
+    this.hasSaved = true;
+
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `${this.outputDir}/session-${timestamp}.json`;
 

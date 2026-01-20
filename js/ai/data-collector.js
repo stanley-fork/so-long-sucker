@@ -14,6 +14,28 @@ export class GameDataCollector {
     this.startTime = Date.now();
     this.turnCount = 0;
     this.lastAliveStatus = [true, true, true, true];
+    this.lastChatSnapshotIndex = 0; // For incremental chat tracking
+    
+    // Player configuration (set via setPlayerConfig)
+    this.playerTypes = {}; // playerId -> 'human' | 'ai'
+    this.playerModels = {}; // playerId -> model name (for AI players)
+    this.chips = 7; // default chip count
+  }
+
+  /**
+   * Configure player types and models
+   * @param {Object} config - { playerTypes: {0: 'human', 1: 'ai', ...}, playerModels: {1: 'gemini-2.5-flash', ...}, chips: 7 }
+   */
+  setPlayerConfig(config) {
+    if (config.playerTypes) {
+      this.playerTypes = { ...config.playerTypes };
+    }
+    if (config.playerModels) {
+      this.playerModels = { ...config.playerModels };
+    }
+    if (config.chips) {
+      this.chips = config.chips;
+    }
   }
 
   // Get state snapshot from game
@@ -37,13 +59,25 @@ export class GameDataCollector {
     };
   }
 
-  // Get chat history from game
+  // Get chat history from game (full - for game_start/game_end)
   getChatHistory(game) {
     const state = game.getState();
     return state.messages.map(m => ({
       player: COLORS[m.player],
       message: m.text
     }));
+  }
+
+  // Get only NEW chat messages since last snapshot (incremental - avoids O(n²) duplication)
+  getNewChatMessages(game) {
+    const state = game.getState();
+    const allMessages = state.messages;
+    const newMessages = allMessages.slice(this.lastChatSnapshotIndex).map(m => ({
+      player: COLORS[m.player],
+      message: m.text
+    }));
+    this.lastChatSnapshotIndex = allMessages.length;
+    return newMessages;
   }
 
   // Check for new eliminations
@@ -59,26 +93,42 @@ export class GameDataCollector {
 
   // Add game_start snapshot
   addGameStart(game) {
+    // Build player info with types and models
+    const players = COLORS.map((color, id) => ({
+      player: color,
+      type: this.playerTypes[id] || 'unknown',
+      model: this.playerModels[id] || null
+    }));
+
     this.snapshots.push({
       type: 'game_start',
       game: 0,
       state: this.getStateSnapshot(game),
       chatHistory: [],
+      players: players, // Player configuration (who is human vs AI, which models)
       timestamp: Date.now()
     });
   }
 
   // Add decision snapshot (before/after LLM call)
+  // NOTE: state and full chatHistory are NOT included - they're embedded in llmRequest.userPrompt
+  // This saves ~56% of decision data size
   addDecision(game, playerId, llmRequest, llmResponse, execution) {
+    const playerType = this.playerTypes[playerId] || 'unknown';
+    const playerModel = this.playerModels[playerId] || null;
+    const state = game.getState();
+
     this.snapshots.push({
       type: 'decision',
       game: 0,
       turn: this.turnCount,
       player: COLORS[playerId],
-      state: this.getStateSnapshot(game),
-      chatHistory: this.getChatHistory(game),
-      llmRequest: llmRequest || null,
-      llmResponse: llmResponse || null,
+      playerType: playerType, // 'human' or 'ai'
+      model: playerModel, // Model name for AI, null for human
+      phase: state.phase, // Keep phase for quick filtering (small field)
+      newMessages: this.getNewChatMessages(game), // Incremental: only new messages since last snapshot
+      llmRequest: llmRequest || null, // null for human players (contains full state + chat for AI)
+      llmResponse: llmResponse || null, // null for human players
       execution: execution || [],
       timestamp: Date.now()
     });
@@ -112,15 +162,30 @@ export class GameDataCollector {
 
   // Export data in the same format as CLI
   exportData(providerType, modelName) {
+    // Build playerTypes and playerModels in color-keyed format (like CLI)
+    const playerTypesExport = {};
+    const playerModelsExport = {};
+    
+    for (let i = 0; i < 4; i++) {
+      const color = COLORS[i];
+      playerTypesExport[color] = this.playerTypes[i] || 'unknown';
+      if (this.playerModels[i]) {
+        playerModelsExport[color] = this.playerModels[i];
+      }
+    }
+
     return {
       session: {
         id: `session-${Date.now()}`,
         provider: providerType || 'unknown',
         model: modelName || 'unknown',
+        playerTypes: playerTypesExport, // { red: 'human', blue: 'ai', ... }
+        playerModels: Object.keys(playerModelsExport).length > 0 ? playerModelsExport : null, // { blue: 'gemini-2.5-flash', ... }
         startTime: this.startTime,
         endTime: Date.now(),
         totalGames: 1,
-        chips: 7 // default for web UI
+        chips: this.chips,
+        source: 'browser' // Distinguish from CLI data
       },
       snapshots: this.snapshots
     };

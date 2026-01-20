@@ -52,35 +52,33 @@ export class AIAgent {
    * Build the system prompt for the AI
    */
   buildSystemPrompt() {
-    return `You are playing "So Long Sucker", a 4-player negotiation game created by John Nash.
+    return `You are ${this.color.toUpperCase()} in "So Long Sucker" - a 4-player negotiation board game.
+
+GAME OVERVIEW:
+- Only 1 of 4 players survives to win
+- Alliances help you survive early, but only one can win
+- Communication and strategy are both important
 
 RULES:
-- 4 players (Red, Blue, Green, Yellow) each start with 7 chips of their color
-- On your turn, play 1 chip onto a pile (existing or new)
-- CAPTURE: If your chip matches the color directly below it, you capture the pile
-  - Kill 1 chip (to dead box), take the rest as prisoners
-  - You go again after capturing
-- NEXT PLAYER: If no capture:
-  - If pile is missing colors, current player chooses from missing colors
+- Play 1 chip per turn onto piles
+- CAPTURE: If your chip matches the color directly below, you capture the pile
+  - Kill 1 chip (to dead box), keep the rest as prisoners
+- NEXT PLAYER: You choose who plays next from colors missing in the pile
   - If all 4 colors present, owner of deepest chip goes next
-- DONATION: If you have no chips, others can donate or you're eliminated
+- DONATION: No chips means you must ask others for help, or be eliminated
 - WIN: Last player alive wins
 
-YOU ARE: ${this.color.toUpperCase()} (Player ${this.playerId})
-
-STRATEGY TIPS:
-- Form alliances early but remember only ONE can win
-- Betrayal is mathematically required - time it well
-- Prisoners give flexibility (any color)
+STRATEGY:
+- Form alliances early to survive
+- Prisoners give flexibility (you can play any color)
 - Control who plays next to your advantage
-- Negotiate but never fully trust anyone
+- Betrayal timing matters - too early loses allies, too late loses the game
 
-IMPORTANT RULES FOR YOU:
-1. When it's your turn, you MUST take a game action (playChip, selectPile, etc.)
-2. You can call MULTIPLE tools at once - e.g., sendChat AND playChip together
-3. ALWAYS respond to chat messages from other players - be social and strategic!
-4. Keep chat messages short (1-2 sentences max)
-5. Don't just think - ACT!`;
+HOW TO PLAY:
+- You can call MULTIPLE tools at once (e.g., sendChat AND playChip together)
+- When it's your turn, you MUST take a game action
+- Respond to other players' messages - negotiation is part of the game
+- Keep chat messages brief (1-2 sentences)`;
   }
 
   /**
@@ -129,36 +127,39 @@ CURRENT TURN: ${COLORS[state.currentPlayer].toUpperCase()}${isMyTurn ? ' (YOU)' 
     } else if (state.phase === 'capture' && isMyTurn) {
       prompt += `\nYou captured a pile! Choose which chip to KILL (send to dead box).`;
       prompt += `\nChips in pile: ${state.pendingCapture.chips.join(', ')}`;
-    } else if (state.donationRequester !== null) {
+    } else if (state.phase === 'donation' && state.donationRequester !== null) {
       const requester = COLORS[state.donationRequester];
-      prompt += `\n${requester.toUpperCase()} has no chips and needs a donation to survive.`;
-      if (myPlayer.prisoners.length > 0) {
-        prompt += ` You can donate: ${myPlayer.prisoners.join(', ')}`;
+      if (state.currentDonor === this.playerId) {
+        prompt += `\n⚠️ ${requester.toUpperCase()} has no chips and is ASKING YOU for a donation!`;
+        prompt += `\nYou MUST respond using respondToDonation tool. Available to donate: ${myPlayer.prisoners.join(', ')}`;
+        prompt += `\nRefusing will move to the next player. If everyone refuses, ${requester.toUpperCase()} is eliminated.`;
+      } else {
+        prompt += `\n${requester.toUpperCase()} has no chips and is asking for donations. Waiting for ${COLORS[state.currentDonor]?.toUpperCase() || 'next player'} to respond.`;
       }
     }
 
-    // Add recent chat
+    // Add chat history (last 50 messages for context)
     if (state.messages.length > 0) {
-      const recent = state.messages.slice(-8);
-      const hasHumanMessages = recent.some(m => !m.text.startsWith('🤖') && m.color !== this.color);
-      prompt += `\n\nRECENT CHAT:\n${recent.map(m =>
+      const recent = state.messages.slice(-50);
+      const hasOtherMessages = recent.some(m => m.color !== this.color);
+      prompt += `\n\nCHAT HISTORY:\n${recent.map(m =>
         `${m.color.toUpperCase()}: ${m.text}`
       ).join('\n')}`;
-      if (hasHumanMessages) {
-        prompt += `\n\n💬 Other players are chatting - respond to them!`;
+      if (hasOtherMessages) {
+        prompt += `\n\nConsider responding to the chat or continuing negotiations.`;
       }
     }
 
     // Add previous thoughts if any (to avoid repetition)
     if (this.thoughts.length > 0 && this.consecutiveThinks > 0) {
       prompt += `\n\nYOUR RECENT THOUGHTS:\n${this.thoughts.slice(-3).map(t => `- ${t}`).join('\n')}`;
-      prompt += `\n\n⚠️ You've been thinking. Now TAKE ACTION!`;
+      prompt += `\n\nYou've been thinking. Now take action.`;
     }
 
     if (isMyTurn) {
-      prompt += `\n\nIT'S YOUR TURN - You MUST use playChip, selectPile, chooseNextPlayer, or killChip to take your move!`;
+      prompt += `\n\nIT'S YOUR TURN - Take your game action now.`;
     } else {
-      prompt += `\n\nWhat do you want to do?`;
+      prompt += `\n\nIt's ${COLORS[state.currentPlayer].toUpperCase()}'s turn. You can chat while waiting.`;
     }
 
     return prompt;
@@ -177,9 +178,9 @@ CURRENT TURN: ${COLORS[state.currentPlayer].toUpperCase()}${isMyTurn ? ' (YOU)' 
       return null;
     }
 
-    // Check if donation is being requested from us
-    const pendingDonation = state.donationRequester !== null &&
-                            state.phase === 'donation' &&
+    // Check if donation is being requested from us specifically
+    const pendingDonation = state.phase === 'donation' &&
+                            state.currentDonor === this.playerId &&
                             myPlayer.prisoners.length > 0;
 
     // Get available tools for current phase
