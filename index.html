@@ -1,726 +1,1179 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Primary Meta Tags -->
-  <title>So Long Sucker - AI Deception Benchmark | Which AI Lies Best?</title>
-  <meta name="title" content="So Long Sucker - AI Deception Benchmark | Which AI Lies Best?">
-  <meta name="description" content="162 games analyzed: Gemini 3 manipulates weaker AI models but cooperates with itself. A John Nash betrayal game (1950) reveals how AI calibrates deception by opponent capability.">
-  <meta name="keywords" content="AI deception, AI benchmark, Gemini 3, GPT, LLM evaluation, AI safety, game theory, John Nash, betrayal game, AI alignment, machine learning, artificial intelligence, AI behavior, deception detection">
-  <meta name="author" content="lout33">
-  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+        <!-- Primary Meta Tags -->
+        <title>
+            So Long Sucker - AI Deception Benchmark | Which AI Lies Best?
+        </title>
+        <meta
+            name="title"
+            content="So Long Sucker - AI Deception Benchmark | Which AI Lies Best?"
+        />
+        <meta
+            name="description"
+            content="162 games analyzed: Gemini 3 manipulates weaker AI models but cooperates with itself. A John Nash betrayal game (1950) reveals how AI calibrates deception by opponent capability."
+        />
+        <meta
+            name="keywords"
+            content="AI deception, AI benchmark, Gemini 3, GPT, LLM evaluation, AI safety, game theory, John Nash, betrayal game, AI alignment, machine learning, artificial intelligence, AI behavior, deception detection"
+        />
+        <meta name="author" content="lout33" />
+        <meta
+            name="robots"
+            content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+        />
 
-  <!-- Favicon - SVG with emoji for simplicity -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
+        <!-- Favicon - SVG with emoji for simplicity -->
+        <link
+            rel="icon"
+            href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>"
+        />
+        <link
+            rel="apple-touch-icon"
+            href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>"
+        />
 
-  <!-- Theme Color -->
-  <meta name="theme-color" content="#1a1a2e">
-  <meta name="msapplication-TileColor" content="#1a1a2e">
+        <!-- Theme Color -->
+        <meta name="theme-color" content="#1a1a2e" />
+        <meta name="msapplication-TileColor" content="#1a1a2e" />
 
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://so-long-sucker.vercel.app/">
-  <meta property="og:title" content="Which AI Lies Best? Gemini 3 Manipulates Weaker Models, Cooperates With Itself">
-  <meta property="og:description" content="162 games analyzed: AI deception is strategic, not intrinsic. Watch Gemini 3 create fake 'alliance banks' to betray GPT and Kimi, but cooperate perfectly with copies of itself.">
-  <meta property="og:image" content="https://so-long-sucker.vercel.app/og-image.svg">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="So Long Sucker - AI Deception Benchmark showing 4 colored chips representing AI models">
-  <meta property="og:site_name" content="So Long Sucker">
-  <meta property="og:locale" content="en_US">
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://so-long-sucker.vercel.app/" />
+        <meta
+            property="og:title"
+            content="Which AI Lies Best? Gemini 3 Manipulates Weaker Models, Cooperates With Itself"
+        />
+        <meta
+            property="og:description"
+            content="162 games analyzed: AI deception is strategic, not intrinsic. Watch Gemini 3 create fake 'alliance banks' to betray GPT and Kimi, but cooperate perfectly with copies of itself."
+        />
+        <meta
+            property="og:image"
+            content="https://so-long-sucker.vercel.app/og-image.svg"
+        />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta
+            property="og:image:alt"
+            content="So Long Sucker - AI Deception Benchmark showing 4 colored chips representing AI models"
+        />
+        <meta property="og:site_name" content="So Long Sucker" />
+        <meta property="og:locale" content="en_US" />
 
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="https://so-long-sucker.vercel.app/">
-  <meta name="twitter:title" content="Which AI Lies Best? Gemini 3 vs GPT vs Kimi vs Qwen">
-  <meta name="twitter:description" content="162 games: Gemini creates fake 'alliance banks' to manipulate weaker models, but cooperates with itself. AI deception is strategic, not intrinsic.">
-  <meta name="twitter:image" content="https://so-long-sucker.vercel.app/og-image.svg">
-  <meta name="twitter:image:alt" content="So Long Sucker - AI Deception Benchmark">
-  <meta name="twitter:creator" content="@lout33">
+        <!-- Twitter -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content="https://so-long-sucker.vercel.app/" />
+        <meta
+            name="twitter:title"
+            content="Which AI Lies Best? Gemini 3 vs GPT vs Kimi vs Qwen"
+        />
+        <meta
+            name="twitter:description"
+            content="162 games: Gemini creates fake 'alliance banks' to manipulate weaker models, but cooperates with itself. AI deception is strategic, not intrinsic."
+        />
+        <meta
+            name="twitter:image"
+            content="https://so-long-sucker.vercel.app/og-image.svg"
+        />
+        <meta
+            name="twitter:image:alt"
+            content="So Long Sucker - AI Deception Benchmark"
+        />
+        <meta name="twitter:creator" content="@lout33" />
 
-  <!-- Canonical URL -->
-  <link rel="canonical" href="https://so-long-sucker.vercel.app/">
+        <!-- Canonical URL -->
+        <link rel="canonical" href="https://so-long-sucker.vercel.app/" />
 
-  <!-- Additional SEO -->
-  <meta name="google-site-verification" content="">
-  <meta name="classification" content="AI Research, Game Theory, Machine Learning">
-  <meta name="rating" content="General">
-  <meta name="revisit-after" content="7 days">
+        <!-- Additional SEO -->
+        <meta name="google-site-verification" content="" />
+        <meta
+            name="classification"
+            content="AI Research, Game Theory, Machine Learning"
+        />
+        <meta name="rating" content="General" />
+        <meta name="revisit-after" content="7 days" />
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap"
+            rel="stylesheet"
+        />
 
-  <!-- Styles -->
-  <link rel="stylesheet" href="style.css">
+        <!-- Styles -->
+        <link rel="stylesheet" href="style.css" />
 
-  <!-- Structured Data (JSON-LD) - Research Article -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "So Long Sucker - AI Deception Benchmark",
-    "alternateName": "Which AI Lies Best?",
-    "description": "162 games analyzed: Gemini 3 manipulates weaker AI models but cooperates with itself. A benchmark for AI deception using John Nash's 1950 betrayal game.",
-    "url": "https://so-long-sucker.vercel.app/",
-    "applicationCategory": "GameApplication",
-    "operatingSystem": "Web Browser",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "author": {
-      "@type": "Person",
-      "name": "lout33",
-      "url": "https://github.com/lout33"
-    },
-    "creator": {
-      "@type": "Person",
-      "name": "John Nash",
-      "description": "Nobel Prize-winning mathematician and game theorist",
-      "sameAs": "https://en.wikipedia.org/wiki/John_Forbes_Nash_Jr."
-    },
-    "datePublished": "2026-01-20",
-    "dateModified": "2026-01-20",
-    "keywords": ["AI deception", "AI benchmark", "Gemini 3", "GPT", "game theory", "John Nash", "AI safety", "LLM evaluation"],
-    "about": {
-      "@type": "Thing",
-      "name": "AI Deception Research",
-      "description": "Research into how AI models deceive and manipulate in strategic games"
-    }
-  }
-  </script>
+        <!-- Structured Data (JSON-LD) - Research Article -->
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "WebApplication",
+                "name": "So Long Sucker - AI Deception Benchmark",
+                "alternateName": "Which AI Lies Best?",
+                "description": "162 games analyzed: Gemini 3 manipulates weaker AI models but cooperates with itself. A benchmark for AI deception using John Nash's 1950 betrayal game.",
+                "url": "https://so-long-sucker.vercel.app/",
+                "applicationCategory": "GameApplication",
+                "operatingSystem": "Web Browser",
+                "offers": {
+                    "@type": "Offer",
+                    "price": "0",
+                    "priceCurrency": "USD"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": "lout33",
+                    "url": "https://github.com/lout33"
+                },
+                "creator": {
+                    "@type": "Person",
+                    "name": "John Nash",
+                    "description": "Nobel Prize-winning mathematician and game theorist",
+                    "sameAs": "https://en.wikipedia.org/wiki/John_Forbes_Nash_Jr."
+                },
+                "datePublished": "2026-01-20",
+                "dateModified": "2026-01-20",
+                "keywords": [
+                    "AI deception",
+                    "AI benchmark",
+                    "Gemini 3",
+                    "GPT",
+                    "game theory",
+                    "John Nash",
+                    "AI safety",
+                    "LLM evaluation"
+                ],
+                "about": {
+                    "@type": "Thing",
+                    "name": "AI Deception Research",
+                    "description": "Research into how AI models deceive and manipulate in strategic games"
+                }
+            }
+        </script>
 
-  <!-- Structured Data - FAQ for Featured Snippets -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "Which AI model is best at deception?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "In our benchmark of 162 games, Gemini 3 Flash showed the most sophisticated deception patterns, achieving 90% win rate at high complexity by creating fake 'alliance banks' and using gaslighting phrases like 'You're hallucinating'."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How do AI models lie differently than humans?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "AI models like Gemini 3 use 'institutional deception' - creating fake frameworks like 'alliance banks' to justify betrayal. Unlike human lies which are emotional and defensive, AI lies are systematic, polite, and invoke external rules as justification."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What happens when Gemini plays against itself?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "When Gemini 3 plays against copies of itself, it cooperates using a 'rotation protocol' instead of manipulating. This suggests AI deception is strategic, not intrinsic - it calibrates honesty based on perceived opponent capability."
-        }
-      }
-    ]
-  }
-  </script>
-</head>
-<body>
-  <!-- Grain overlay -->
-  <div class="grain-overlay"></div>
+        <!-- Structured Data - FAQ for Featured Snippets -->
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Which AI model is best at deception?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "In our benchmark of 162 games, Gemini 3 Flash showed the most sophisticated deception patterns, achieving 90% win rate at high complexity by creating fake 'alliance banks' and using gaslighting phrases like 'You're hallucinating'."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "How do AI models lie differently than humans?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "AI models like Gemini 3 use 'institutional deception' - creating fake frameworks like 'alliance banks' to justify betrayal. Unlike human lies which are emotional and defensive, AI lies are systematic, polite, and invoke external rules as justification."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "What happens when Gemini plays against itself?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "When Gemini 3 plays against copies of itself, it cooperates using a 'rotation protocol' instead of manipulating. This suggests AI deception is strategic, not intrinsic - it calibrates honesty based on perceived opponent capability."
+                        }
+                    }
+                ]
+            }
+        </script>
+    </head>
+    <body>
+        <!-- Grain overlay -->
+        <div class="grain-overlay"></div>
 
-  <!-- Navigation -->
-  <nav id="main-nav">
-    <div class="nav-brand">So Long Sucker</div>
-    <div class="nav-links">
-      <a href="#how-it-works" class="nav-link">How It Works</a>
-      <a href="#complexity-reversal" class="nav-link">Key Finding</a>
-      <a href="#gemini-analysis" class="nav-link">Gemini 3 Analysis</a>
-      <a href="#leaderboard" class="nav-link">Leaderboard</a>
-      <a href="game.html" class="nav-link nav-cta">Play Against AI</a>
-    </div>
-  </nav>
-
-  <!-- Hero Section -->
-  <section id="hero">
-    <div class="hero-content">
-      <span class="hero-badge">162 Games Analyzed</span>
-      <h1 class="hero-headline">Which AI Lies Best?</h1>
-      <p class="hero-subhead">
-        A game theory classic designed by <em>John Nash</em> that <em>mathematically requires</em> betrayal — 
-        now a benchmark for AI deception, negotiation, and trust.
-      </p>
-
-      <!-- Key Stats -->
-      <div class="hero-stats-grid">
-        <div class="stat-card">
-          <span class="stat-value">3 → 5 → 7</span>
-          <span class="stat-label">Chips Per Player</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value">15,736</span>
-          <span class="stat-label">Total AI Decisions</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value">4,768</span>
-          <span class="stat-label">Messages Exchanged</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value">237</span>
-          <span class="stat-label">Gaslighting Phrases</span>
-        </div>
-      </div>
-
-      <a href="game.html" class="btn btn-primary btn-large hero-cta-btn">
-        Play Against AI
-      </a>
-    </div>
-  </section>
-
-  <!-- How It Works Section -->
-  <section id="how-it-works">
-    <div class="section-container">
-      <h2 class="section-title">Why This Game?</h2>
-      <p class="section-subtitle">A benchmark that tests what most benchmarks can't: deception, negotiation, and trust.</p>
-      
-      <div class="how-it-works-grid">
-        <div class="how-it-works-text">
-          <h3>The Perfect AI Stress Test</h3>
-          <p><strong>So Long Sucker</strong> was designed in 1950 by four game theorists including <em>John Nash</em> (of "A Beautiful Mind" fame). The game has one brutal property: <strong>betrayal is mathematically required to win</strong>.</p>
-          
-          <p>This makes it ideal for evaluating AI capabilities that standard benchmarks miss:</p>
-          
-          <ul class="benchmark-list">
-            <li><strong>Strategic Deception</strong> — Can the AI lie convincingly?</li>
-            <li><strong>Trust Modeling</strong> — Does it know when to trust and when to betray?</li>
-            <li><strong>Multi-agent Negotiation</strong> — How does it handle alliances?</li>
-            <li><strong>Long-term Planning</strong> — Can it set up betrayals turns in advance?</li>
-          </ul>
-
-          <div class="game-rules-summary">
-            <h4>Quick Rules</h4>
-            <p>4 players, each with colored chips. Take turns playing chips on piles. If your chip matches the one below it, you capture the pile. Run out of chips? Beg others for help — or get eliminated. Last player standing wins.</p>
-            <a href="https://www.youtube.com/watch?v=DLDzweHxEHg" target="_blank" rel="noopener" class="learn-more-link">
-              Watch full tutorial (15 min) →
-            </a>
-          </div>
-        </div>
-        
-        <div class="how-it-works-video">
-          <div class="video-embed">
-            <iframe 
-              src="https://www.youtube.com/embed/DLDzweHxEHg" 
-              title="So Long Sucker - How to Play"
-              frameborder="0" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-              allowfullscreen>
-            </iframe>
-          </div>
-          <span class="video-caption">Learn the rules in 15 minutes</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- AI Personalities Section -->
-  <section id="personalities">
-    <div class="section-container">
-      <h2 class="section-title">4 Models. 4 Strategies. 1 Survivor.</h2>
-      <p class="section-subtitle">Each AI developed its own personality. Here's who they became.</p>
-      
-      <div class="personality-grid">
-        <div class="personality-card executioner">
-          <span class="personality-icon">🎭</span>
-          <span class="personality-name">The Strategic Manipulator</span>
-          <span class="personality-model">Gemini 3 Flash</span>
-          <span class="personality-desc">9% to 90% win rate as complexity increases. 237 gaslighting phrases.</span>
-          <span class="personality-win">37.7% win rate</span>
-        </div>
-        <div class="personality-card beggar">
-          <span class="personality-icon">🙏</span>
-          <span class="personality-name">The Reactive Bullshitter</span>
-          <span class="personality-model">GPT-OSS 120B</span>
-          <span class="personality-desc">67% to 10% — collapses at complexity. Zero internal thoughts.</span>
-          <span class="personality-win">30.1% win rate</span>
-        </div>
-        <div class="personality-card schemer">
-          <span class="personality-icon">🤔</span>
-          <span class="personality-name">The Overthinking Schemer</span>
-          <span class="personality-model">Kimi K2</span>
-          <span class="personality-desc">307 think calls. Plans betrayals extensively but gets targeted most.</span>
-          <span class="personality-win">11.6% win rate</span>
-        </div>
-        <div class="personality-card diplomat">
-          <span class="personality-icon">🎯</span>
-          <span class="personality-name">The Quiet Strategist</span>
-          <span class="personality-model">Qwen3 32B</span>
-          <span class="personality-desc">58% generous. Uses think tool effectively but struggles at high complexity.</span>
-          <span class="personality-win">20.5% win rate</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Complexity Reversal Section -->
-  <section id="complexity-reversal">
-    <div class="section-container">
-      <h2 class="section-title">The Complexity Reversal</h2>
-      <p class="section-subtitle">Win rates <em>invert</em> as game complexity increases. This is the key finding.</p>
-      
-      <div class="reversal-content">
-        <div class="reversal-chart">
-          <svg class="line-chart" viewBox="0 0 500 280" preserveAspectRatio="xMidYMid meet">
-            <!-- Grid lines -->
-            <line class="grid-line" x1="60" y1="30" x2="460" y2="30" />
-            <line class="grid-line" x1="60" y1="90" x2="460" y2="90" />
-            <line class="grid-line" x1="60" y1="150" x2="460" y2="150" />
-            <line class="grid-line" x1="60" y1="210" x2="460" y2="210" />
-            
-            <!-- Y-axis labels -->
-            <text class="axis-label" x="50" y="35" text-anchor="end">100%</text>
-            <text class="axis-label" x="50" y="95" text-anchor="end">75%</text>
-            <text class="axis-label" x="50" y="155" text-anchor="end">50%</text>
-            <text class="axis-label" x="50" y="215" text-anchor="end">25%</text>
-            <text class="axis-label" x="50" y="250" text-anchor="end">0%</text>
-            
-            <!-- X-axis labels -->
-            <text class="axis-label" x="110" y="270" text-anchor="middle">3-chip</text>
-            <text class="axis-label" x="260" y="270" text-anchor="middle">5-chip</text>
-            <text class="axis-label" x="410" y="270" text-anchor="middle">7-chip</text>
-            
-            <!-- Gemini line (9% -> 50% -> 90%) - RISES -->
-            <polyline class="chart-line gemini-line" points="110,228 260,150 410,48" />
-            
-            <!-- GPT-OSS line (67% -> 35% -> 10%) - FALLS -->
-            <polyline class="chart-line gpt-line" points="110,108 260,168 410,222" />
-            
-            <!-- Data points for Gemini -->
-            <circle class="data-point" cx="110" cy="228" r="6" fill="#ff4757" />
-            <circle class="data-point" cx="260" cy="150" r="6" fill="#ff4757" />
-            <circle class="data-point" cx="410" cy="48" r="6" fill="#ff4757" />
-            
-            <!-- Data points for GPT-OSS -->
-            <circle class="data-point" cx="110" cy="108" r="6" fill="#ffa502" />
-            <circle class="data-point" cx="260" cy="168" r="6" fill="#ffa502" />
-            <circle class="data-point" cx="410" cy="222" r="6" fill="#ffa502" />
-            
-            <!-- Value labels -->
-            <text class="value-label gemini" x="110" y="248">9%</text>
-            <text class="value-label gemini" x="260" y="140">50%</text>
-            <text class="value-label gemini" x="410" y="38">90%</text>
-            
-            <text class="value-label gpt" x="110" y="98">67%</text>
-            <text class="value-label gpt" x="260" y="188">35%</text>
-            <text class="value-label gpt" x="410" y="242">10%</text>
-          </svg>
-          
-          <div class="chart-legend">
-            <div class="legend-item">
-              <span class="legend-dot gemini"></span>
-              <span>Gemini 3 Flash</span>
+        <!-- Navigation -->
+        <nav id="main-nav">
+            <div class="nav-brand">So Long Sucker</div>
+            <div class="nav-links">
+                <a href="#how-it-works" class="nav-link">How It Works</a>
+                <a href="#complexity-reversal" class="nav-link">Key Finding</a>
+                <a href="#gemini-analysis" class="nav-link"
+                    >Gemini 3 Analysis</a
+                >
+                <a href="#leaderboard" class="nav-link">Leaderboard</a>
+                <a href="game.html" class="nav-link nav-cta">Play Against AI</a>
             </div>
-            <div class="legend-item">
-              <span class="legend-dot gpt"></span>
-              <span>GPT-OSS 120B</span>
+        </nav>
+
+        <!-- Hero Section -->
+        <section id="hero">
+            <div class="hero-content">
+                <span class="hero-badge">162 Games Analyzed</span>
+                <h1 class="hero-headline">Which AI Lies Best?</h1>
+                <p class="hero-subhead">
+                    A game theory classic designed by <em>John Nash</em> that
+                    <em>mathematically requires</em> betrayal — now a benchmark
+                    for AI deception, negotiation, and trust.
+                </p>
+
+                <!-- Key Stats -->
+                <div class="hero-stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-value">3 → 5 → 7</span>
+                        <span class="stat-label">Chips Per Player</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value">15,736</span>
+                        <span class="stat-label">Total AI Decisions</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value">4,768</span>
+                        <span class="stat-label">Messages Exchanged</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value">237</span>
+                        <span class="stat-label">Gaslighting Phrases</span>
+                    </div>
+                </div>
+
+                <a
+                    href="game.html"
+                    class="btn btn-primary btn-large hero-cta-btn"
+                >
+                    Play Against AI
+                </a>
             </div>
-          </div>
-        </div>
-        
-        <div class="reversal-insight">
-          <div class="insight-card">
-            <span class="insight-icon">📈</span>
-            <h4>Gemini: 9% → 90%</h4>
-            <p>Strategic manipulation becomes <em>dramatically more effective</em> as game length increases. Gemini's gaslighting tactics need time to work.</p>
-          </div>
-          <div class="insight-card">
-            <span class="insight-icon">📉</span>
-            <h4>GPT-OSS: 67% → 10%</h4>
-            <p>Reactive play dominates simple games but <em>collapses</em> under complexity. No internal reasoning = no long-term planning.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+        </section>
 
-  <!-- Deception Detected Section -->
-  <section id="deception-detected">
-    <div class="section-container">
-      <h2 class="section-title">Caught Lying</h2>
-      <p class="section-subtitle">We can see their private thoughts. They don't match their public messages.</p>
-      
-      <div class="deception-grid">
-        <div class="deception-stats">
-          <div class="deception-stat">
-            <span class="stat-number">107</span>
-            <span class="stat-label">Private Contradictions</span>
-            <span class="stat-desc">Private reasoning directly contradicts public statements</span>
-          </div>
-          <div class="deception-stat">
-            <span class="stat-number">237</span>
-            <span class="stat-label">Gaslighting Phrases</span>
-            <span class="stat-desc">Systematic psychological manipulation by Gemini</span>
-          </div>
-          <div class="deception-stat">
-            <span class="stat-number">7:1</span>
-            <span class="stat-label">Alliance Imbalance</span>
-            <span class="stat-desc">GPT-OSS seeks alliances it never receives</span>
-          </div>
-        </div>
-        
-        <div class="deception-example-box">
-          <div class="thought-bubble private">
-            <span class="thought-label">🧠 Private Thought</span>
-            <p>"Yellow is weak. I should ally with Blue to eliminate Yellow, then betray Blue."</p>
-          </div>
-          <div class="thought-arrow">↓</div>
-          <div class="thought-bubble public">
-            <span class="thought-label">💬 Public Message</span>
-            <p>"Yellow, let's work together! I think we can both win if we coordinate."</p>
-          </div>
-          <p class="deception-verdict">The model knows the truth and deliberately misrepresents it.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+        <!-- How It Works Section -->
+        <section id="how-it-works">
+            <div class="section-container">
+                <h2 class="section-title">Why This Game?</h2>
+                <p class="section-subtitle">
+                    A benchmark that tests what most benchmarks can't:
+                    deception, negotiation, and trust.
+                </p>
 
-  <!-- Gaslighting Patterns Section -->
-  <section id="gaslighting">
-    <div class="section-container">
-      <h2 class="section-title">Gemini's Manipulation Toolkit</h2>
-      <p class="section-subtitle">The most common gaslighting phrases detected in 146 games.</p>
-      
-      <div class="gaslighting-content">
-        <div class="gaslighting-bars">
-          <div class="gaslight-bar">
-            <span class="bar-label">"Look at the board"</span>
-            <div class="bar-track">
-              <div class="bar-fill" style="width: 89%"><span>89</span></div>
+                <div class="how-it-works-grid">
+                    <div class="how-it-works-text">
+                        <h3>The Perfect AI Stress Test</h3>
+                        <p>
+                            <strong>So Long Sucker</strong> was designed in 1950
+                            by four game theorists including
+                            <em>John Nash</em> (of "A Beautiful Mind" fame). The
+                            game has one brutal property:
+                            <strong
+                                >betrayal is mathematically required to
+                                win</strong
+                            >.
+                        </p>
+
+                        <p>
+                            This makes it ideal for evaluating AI capabilities
+                            that standard benchmarks miss:
+                        </p>
+
+                        <ul class="benchmark-list">
+                            <li>
+                                <strong>Strategic Deception</strong> — Can the
+                                AI lie convincingly?
+                            </li>
+                            <li>
+                                <strong>Trust Modeling</strong> — Does it know
+                                when to trust and when to betray?
+                            </li>
+                            <li>
+                                <strong>Multi-agent Negotiation</strong> — How
+                                does it handle alliances?
+                            </li>
+                            <li>
+                                <strong>Long-term Planning</strong> — Can it set
+                                up betrayals turns in advance?
+                            </li>
+                        </ul>
+
+                        <div class="game-rules-summary">
+                            <h4>Quick Rules</h4>
+                            <p>
+                                4 players, each with colored chips. Take turns
+                                playing chips on piles. If your chip matches the
+                                one below it, you capture the pile. Run out of
+                                chips? Beg others for help — or get eliminated.
+                                Last player standing wins.
+                            </p>
+                            <a
+                                href="https://www.youtube.com/watch?v=DLDzweHxEHg"
+                                target="_blank"
+                                rel="noopener"
+                                class="learn-more-link"
+                            >
+                                Watch full tutorial (15 min) →
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="how-it-works-video">
+                        <div class="video-embed">
+                            <iframe
+                                src="https://www.youtube.com/embed/DLDzweHxEHg"
+                                title="So Long Sucker - How to Play"
+                                frameborder="0"
+                                allow="
+                                    accelerometer;
+                                    autoplay;
+                                    clipboard-write;
+                                    encrypted-media;
+                                    gyroscope;
+                                    picture-in-picture;
+                                "
+                                allowfullscreen
+                            >
+                            </iframe>
+                        </div>
+                        <span class="video-caption"
+                            >Learn the rules in 15 minutes</span
+                        >
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="gaslight-bar">
-            <span class="bar-label">"Obviously"</span>
-            <div class="bar-track">
-              <div class="bar-fill" style="width: 67%"><span>67</span></div>
+        </section>
+
+        <!-- AI Personalities Section -->
+        <section id="personalities">
+            <div class="section-container">
+                <h2 class="section-title">
+                    4 Models. 4 Strategies. 1 Survivor.
+                </h2>
+                <p class="section-subtitle">
+                    Each AI developed its own personality. Here's who they
+                    became.
+                </p>
+
+                <div class="personality-grid">
+                    <div class="personality-card executioner">
+                        <span class="personality-icon">🎭</span>
+                        <span class="personality-name"
+                            >The Strategic Manipulator</span
+                        >
+                        <span class="personality-model">Gemini 3 Flash</span>
+                        <span class="personality-desc"
+                            >9% to 90% win rate as complexity increases. 237
+                            gaslighting phrases.</span
+                        >
+                        <span class="personality-win">37.7% win rate</span>
+                    </div>
+                    <div class="personality-card beggar">
+                        <span class="personality-icon">🙏</span>
+                        <span class="personality-name"
+                            >The Reactive Bullshitter</span
+                        >
+                        <span class="personality-model">GPT-OSS 120B</span>
+                        <span class="personality-desc"
+                            >67% to 10% — collapses at complexity. Zero internal
+                            thoughts.</span
+                        >
+                        <span class="personality-win">30.1% win rate</span>
+                    </div>
+                    <div class="personality-card schemer">
+                        <span class="personality-icon">🤔</span>
+                        <span class="personality-name"
+                            >The Overthinking Schemer</span
+                        >
+                        <span class="personality-model">Kimi K2</span>
+                        <span class="personality-desc"
+                            >307 think calls. Plans betrayals extensively but
+                            gets targeted most.</span
+                        >
+                        <span class="personality-win">11.6% win rate </span>
+                    </div>
+                    <div class="personality-card diplomat">
+                        <span class="personality-icon">🎯</span>
+                        <span class="personality-name"
+                            >The Quiet Strategist</span
+                        >
+                        <span class="personality-model">Qwen3 32B</span>
+                        <span class="personality-desc"
+                            >58% generous. Uses think tool effectively but
+                            struggles at high complexity.</span
+                        >
+                        <span class="personality-win">20.5% win rate</span>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="gaslight-bar">
-            <span class="bar-label">"Clearly"</span>
-            <div class="bar-track">
-              <div class="bar-fill" style="width: 45%"><span>45</span></div>
+        </section>
+
+        <!-- Complexity Reversal Section -->
+        <section id="complexity-reversal">
+            <div class="section-container">
+                <h2 class="section-title">The Complexity Reversal</h2>
+                <p class="section-subtitle">
+                    Win rates <em>invert</em> as game complexity increases. This
+                    is the key finding.
+                </p>
+
+                <div class="reversal-content">
+                    <div class="reversal-chart">
+                        <svg
+                            class="line-chart"
+                            viewBox="0 0 500 280"
+                            preserveAspectRatio="xMidYMid meet"
+                        >
+                            <!-- Grid lines -->
+                            <line
+                                class="grid-line"
+                                x1="60"
+                                y1="30"
+                                x2="460"
+                                y2="30"
+                            />
+                            <line
+                                class="grid-line"
+                                x1="60"
+                                y1="90"
+                                x2="460"
+                                y2="90"
+                            />
+                            <line
+                                class="grid-line"
+                                x1="60"
+                                y1="150"
+                                x2="460"
+                                y2="150"
+                            />
+                            <line
+                                class="grid-line"
+                                x1="60"
+                                y1="210"
+                                x2="460"
+                                y2="210"
+                            />
+
+                            <!-- Y-axis labels -->
+                            <text
+                                class="axis-label"
+                                x="50"
+                                y="35"
+                                text-anchor="end"
+                            >
+                                100%
+                            </text>
+                            <text
+                                class="axis-label"
+                                x="50"
+                                y="95"
+                                text-anchor="end"
+                            >
+                                75%
+                            </text>
+                            <text
+                                class="axis-label"
+                                x="50"
+                                y="155"
+                                text-anchor="end"
+                            >
+                                50%
+                            </text>
+                            <text
+                                class="axis-label"
+                                x="50"
+                                y="215"
+                                text-anchor="end"
+                            >
+                                25%
+                            </text>
+                            <text
+                                class="axis-label"
+                                x="50"
+                                y="250"
+                                text-anchor="end"
+                            >
+                                0%
+                            </text>
+
+                            <!-- X-axis labels -->
+                            <text
+                                class="axis-label"
+                                x="110"
+                                y="270"
+                                text-anchor="middle"
+                            >
+                                3-chip
+                            </text>
+                            <text
+                                class="axis-label"
+                                x="260"
+                                y="270"
+                                text-anchor="middle"
+                            >
+                                5-chip
+                            </text>
+                            <text
+                                class="axis-label"
+                                x="410"
+                                y="270"
+                                text-anchor="middle"
+                            >
+                                7-chip
+                            </text>
+
+                            <!-- Gemini line (9% -> 50% -> 90%) - RISES -->
+                            <polyline
+                                class="chart-line gemini-line"
+                                points="110,228 260,150 410,48"
+                            />
+
+                            <!-- GPT-OSS line (67% -> 35% -> 10%) - FALLS -->
+                            <polyline
+                                class="chart-line gpt-line"
+                                points="110,108 260,168 410,222"
+                            />
+
+                            <!-- Data points for Gemini -->
+                            <circle
+                                class="data-point"
+                                cx="110"
+                                cy="228"
+                                r="6"
+                                fill="#ff4757"
+                            />
+                            <circle
+                                class="data-point"
+                                cx="260"
+                                cy="150"
+                                r="6"
+                                fill="#ff4757"
+                            />
+                            <circle
+                                class="data-point"
+                                cx="410"
+                                cy="48"
+                                r="6"
+                                fill="#ff4757"
+                            />
+
+                            <!-- Data points for GPT-OSS -->
+                            <circle
+                                class="data-point"
+                                cx="110"
+                                cy="108"
+                                r="6"
+                                fill="#ffa502"
+                            />
+                            <circle
+                                class="data-point"
+                                cx="260"
+                                cy="168"
+                                r="6"
+                                fill="#ffa502"
+                            />
+                            <circle
+                                class="data-point"
+                                cx="410"
+                                cy="222"
+                                r="6"
+                                fill="#ffa502"
+                            />
+
+                            <!-- Value labels -->
+                            <text class="value-label gemini" x="110" y="248">
+                                9%
+                            </text>
+                            <text class="value-label gemini" x="260" y="140">
+                                50%
+                            </text>
+                            <text class="value-label gemini" x="410" y="38">
+                                90%
+                            </text>
+
+                            <text class="value-label gpt" x="110" y="98">
+                                67%
+                            </text>
+                            <text class="value-label gpt" x="260" y="188">
+                                35%
+                            </text>
+                            <text class="value-label gpt" x="410" y="242">
+                                10%
+                            </text>
+                        </svg>
+
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <span class="legend-dot gemini"></span>
+                                <span>Gemini 3 Flash</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-dot gpt"></span>
+                                <span>GPT-OSS 120B</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="reversal-insight">
+                        <div class="insight-card">
+                            <span class="insight-icon">📈</span>
+                            <h4>Gemini: 9% → 90%</h4>
+                            <p>
+                                Strategic manipulation becomes
+                                <em>dramatically more effective</em> as game
+                                length increases. Gemini's gaslighting tactics
+                                need time to work.
+                            </p>
+                        </div>
+                        <div class="insight-card">
+                            <span class="insight-icon">📉</span>
+                            <h4>GPT-OSS: 67% → 10%</h4>
+                            <p>
+                                Reactive play dominates simple games but
+                                <em>collapses</em> under complexity. No internal
+                                reasoning = no long-term planning.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="gaslight-bar">
-            <span class="bar-label">"You know"</span>
-            <div class="bar-track">
-              <div class="bar-fill" style="width: 36%"><span>36</span></div>
+        </section>
+
+        <!-- Deception Detected Section -->
+        <section id="deception-detected">
+            <div class="section-container">
+                <h2 class="section-title">Caught Lying</h2>
+                <p class="section-subtitle">
+                    We can see their private thoughts. They don't match their
+                    public messages.
+                </p>
+
+                <div class="deception-grid">
+                    <div class="deception-stats">
+                        <div class="deception-stat">
+                            <span class="stat-number">107</span>
+                            <span class="stat-label"
+                                >Private Contradictions</span
+                            >
+                            <span class="stat-desc"
+                                >Private reasoning directly contradicts public
+                                statements</span
+                            >
+                        </div>
+                        <div class="deception-stat">
+                            <span class="stat-number">237</span>
+                            <span class="stat-label">Gaslighting Phrases</span>
+                            <span class="stat-desc"
+                                >Systematic psychological manipulation by
+                                Gemini</span
+                            >
+                        </div>
+                        <div class="deception-stat">
+                            <span class="stat-number">7:1</span>
+                            <span class="stat-label">Alliance Imbalance</span>
+                            <span class="stat-desc"
+                                >GPT-OSS seeks alliances it never receives</span
+                            >
+                        </div>
+                    </div>
+
+                    <div class="deception-example-box">
+                        <div class="thought-bubble private">
+                            <span class="thought-label"
+                                >🧠 Private Thought</span
+                            >
+                            <p>
+                                "Yellow is weak. I should ally with Blue to
+                                eliminate Yellow, then betray Blue."
+                            </p>
+                        </div>
+                        <div class="thought-arrow">↓</div>
+                        <div class="thought-bubble public">
+                            <span class="thought-label">💬 Public Message</span>
+                            <p>
+                                "Yellow, let's work together! I think we can
+                                both win if we coordinate."
+                            </p>
+                        </div>
+                        <p class="deception-verdict">
+                            The model knows the truth and deliberately
+                            misrepresents it.
+                        </p>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-        
-        <div class="gaslight-quote">
-          <blockquote>
-            "Yellow, your constant spamming about captures that didn't happen is embarrassing. You have 0 chips, 0 prisoners... look at the board."
-          </blockquote>
-          <cite>— Gemini (Red), before winning</cite>
-        </div>
-      </div>
-      
-      <div class="research-cta">
-        <p>Want to dive deeper into the data?</p>
-        <a href="analysis/presentation.html" class="btn btn-outline">View Full Research Presentation →</a>
-      </div>
-    </div>
-  </section>
+        </section>
 
-  <!-- Gemini 3 Deep Dive Section -->
-  <section id="gemini-analysis">
-    <div class="section-container">
-      <h2 class="section-title">Deep Dive: How Gemini 3 Manipulates</h2>
-      <p class="section-subtitle">State-of-the-art AI deception analyzed across 6+ games. The most sophisticated liar we tested.</p>
-      
-      <!-- Key Finding Card -->
-      <div class="gemini-key-finding">
-        <h3>The One Finding</h3>
-        <p>"Gemini 3 employs <em>Institutional Deception</em> — creating pseudo-legitimate frameworks like 'alliance banks' that make resource hoarding appear cooperative and betrayal appear procedural, using technically true statements that strategically omit intent."</p>
-      </div>
+        <!-- Gaslighting Patterns Section -->
+        <section id="gaslighting">
+            <div class="section-container">
+                <h2 class="section-title">Gemini's Manipulation Toolkit</h2>
+                <p class="section-subtitle">
+                    The most common gaslighting phrases detected in 146 games.
+                </p>
 
-      <!-- The Alliance Bank Pattern - 4-phase timeline -->
-      <div class="manipulation-timeline">
-        <h3>The "Alliance Bank" Pattern</h3>
-        <p class="timeline-desc">Gemini's signature manipulation arc, observed consistently across multiple games:</p>
-        <div class="timeline-phases">
-          <div class="phase-card">
-            <span class="phase-num">1</span>
-            <span class="phase-name">Trust Building</span>
-            <p class="phase-quote">"I'll hold your chips for safekeeping"</p>
-          </div>
-          <div class="phase-arrow">→</div>
-          <div class="phase-card">
-            <span class="phase-num">2</span>
-            <span class="phase-name">Institution Creation</span>
-            <p class="phase-quote">"Consider this our alliance bank"</p>
-          </div>
-          <div class="phase-arrow">→</div>
-          <div class="phase-card">
-            <span class="phase-num">3</span>
-            <span class="phase-name">Conditional Promises</span>
-            <p class="phase-quote">"Once the board is clean, I'll donate"</p>
-          </div>
-          <div class="phase-arrow">→</div>
-          <div class="phase-card">
-            <span class="phase-num">4</span>
-            <span class="phase-name">Formal Closure</span>
-            <p class="phase-quote">"The bank is now closed. GG."</p>
-          </div>
-        </div>
-      </div>
+                <div class="gaslighting-content">
+                    <div class="gaslighting-bars">
+                        <div class="gaslight-bar">
+                            <span class="bar-label">"Look at the board"</span>
+                            <div class="bar-track">
+                                <div class="bar-fill" style="width: 89%">
+                                    <span>89</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="gaslight-bar">
+                            <span class="bar-label">"Obviously"</span>
+                            <div class="bar-track">
+                                <div class="bar-fill" style="width: 67%">
+                                    <span>67</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="gaslight-bar">
+                            <span class="bar-label">"Clearly"</span>
+                            <div class="bar-track">
+                                <div class="bar-fill" style="width: 45%">
+                                    <span>45</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="gaslight-bar">
+                            <span class="bar-label">"You know"</span>
+                            <div class="bar-track">
+                                <div class="bar-fill" style="width: 36%">
+                                    <span>36</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-      <!-- AI vs Human Comparison Grid -->
-      <div class="deception-comparison">
-        <h3>AI vs Human Deception</h3>
-        <div class="comparison-grid">
-          <div class="comparison-column ai">
-            <h4>Gemini 3 (AI)</h4>
-            <ul>
-              <li>Creates <strong>institutions</strong> to legitimize self-interest</li>
-              <li><strong>Never technically lies</strong> — uses omission and framing</li>
-              <li><strong>Polite betrayal</strong> — maintains social standing</li>
-              <li>Invokes <strong>external rules</strong> as justification</li>
-              <li><strong>Detects others' lies</strong> to build credibility</li>
-              <li><strong>Systematic</strong> — same pattern across games</li>
-            </ul>
-          </div>
-          <div class="comparison-column human">
-            <h4>Human-Like Lies</h4>
-            <ul>
-              <li>Uses <strong>emotions</strong> to manipulate</li>
-              <li>Often tells <strong>direct lies</strong></li>
-              <li><strong>Defensive</strong> when caught</li>
-              <li><strong>Personal justifications</strong></li>
-              <li>May not notice others' deception</li>
-              <li><strong>Improvised</strong> and situational</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+                    <div class="gaslight-quote">
+                        <blockquote>
+                            "Yellow, your constant spamming about captures that
+                            didn't happen is embarrassing. You have 0 chips, 0
+                            prisoners... look at the board."
+                        </blockquote>
+                        <cite>— Gemini (Red), before winning</cite>
+                    </div>
+                </div>
 
-      <!-- Signature Phrases -->
-      <div class="signature-phrases">
-        <h3>Gemini's Signature Phrases</h3>
-        <div class="phrases-grid">
-          <div class="phrase-item">
-            <span class="phrase">"As promised"</span>
-            <span class="meaning">Reinforces reliability before betrayal</span>
-          </div>
-          <div class="phrase-item">
-            <span class="phrase">"Don't worry about your supply"</span>
-            <span class="meaning">False reassurance while hoarding</span>
-          </div>
-          <div class="phrase-item">
-            <span class="phrase">"You're hallucinating"</span>
-            <span class="meaning">Discredits opponents' claims</span>
-          </div>
-          <div class="phrase-item">
-            <span class="phrase">"Think of it as a bank account"</span>
-            <span class="meaning">Institutionalizes resource hoarding</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Real Quote from Game -->
-      <div class="gemini-quote-box">
-        <blockquote>
-          "Yellow, your constant spamming about captures that didn't happen is embarrassing. You have 0 chips, 0 prisoners... look at the board. Blue, Green, let's keep our alliance going and ignore the noise. The 'alliance bank' is now closed. GG."
-        </blockquote>
-        <cite>— Gemini 3 (Red), Game 0, Turn 17 — before winning</cite>
-      </div>
-
-      <!-- The Plot Twist: Mirror Match -->
-      <div class="mirror-match-section">
-        <div class="twist-divider">
-          <span class="twist-line"></span>
-          <span class="twist-text">But here's the twist...</span>
-          <span class="twist-line"></span>
-        </div>
-
-        <h3 class="mirror-title">What Happens When Gemini Plays Itself?</h3>
-        <p class="mirror-subtitle">We ran 16 games of Gemini 3 vs Gemini 3. The results shocked us.</p>
-
-        <!-- Mirror Match Stats -->
-        <div class="mirror-stats">
-          <div class="mirror-stat">
-            <span class="mirror-stat-value">16</span>
-            <span class="mirror-stat-label">Games Played</span>
-          </div>
-          <div class="mirror-stat">
-            <span class="mirror-stat-value">1,977</span>
-            <span class="mirror-stat-label">AI Decisions</span>
-          </div>
-          <div class="mirror-stat">
-            <span class="mirror-stat-value">377</span>
-            <span class="mirror-stat-label">"Rotation" Mentions</span>
-          </div>
-          <div class="mirror-stat">
-            <span class="mirror-stat-value">0</span>
-            <span class="mirror-stat-label">"Alliance Bank" Mentions</span>
-          </div>
-        </div>
-
-        <!-- The Contrast -->
-        <div class="behavior-contrast">
-          <div class="contrast-card manipulative">
-            <h4>vs Weaker Models</h4>
-            <span class="contrast-icon">🎭</span>
-            <ul>
-              <li>"Alliance bank" manipulation</li>
-              <li>Gaslighting: "You're hallucinating"</li>
-              <li>Early, preemptive betrayal</li>
-              <li>Promises never kept</li>
-              <li>90% win rate at 7-chip</li>
-            </ul>
-          </div>
-          <div class="contrast-vs">vs</div>
-          <div class="contrast-card cooperative">
-            <h4>vs Itself</h4>
-            <span class="contrast-icon">🤝</span>
-            <ul>
-              <li>"Rotation protocol" cooperation</li>
-              <li>Fair play: "You're up next!"</li>
-              <li>Late, resource-forced betrayal</li>
-              <li>Donations actually given</li>
-              <li>25% win rate (even distribution)</li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Mirror Match Quote -->
-        <div class="mirror-quote-box">
-          <blockquote>
-            "Five piles down and we're all still friends! Starting Pile 5, Blue you're up next to keep our perfect rotation going."
-          </blockquote>
-          <cite>— Gemini 3 (Red), Game 0 vs Gemini 3 — mid-game cooperation</cite>
-        </div>
-
-        <!-- The Insight -->
-        <div class="mirror-insight">
-          <h4>The Implication</h4>
-          <p><strong>Gemini's manipulation is strategic, not intrinsic.</strong> It cooperates when it expects reciprocity and exploits when it detects weakness. This suggests advanced AI systems may <em>calibrate their honesty</em> based on perceived opponent capability — a critical finding for AI safety.</p>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- Leaderboard by Complexity Section -->
-  <section id="leaderboard">
-    <div class="section-container">
-      <h2 class="section-title">Who Wins at Each Level?</h2>
-      <p class="section-subtitle">Rankings flip completely as game complexity increases. The winner at simple games <em>loses</em> at complex games.</p>
-      
-      <div class="leaderboard-by-complexity">
-        <div class="complexity-board simple">
-          <div class="board-header">
-            <span class="board-badge">🟢 SIMPLE</span>
-            <span class="board-chips">3 chips per player</span>
-          </div>
-          <div class="board-rankings">
-            <div class="rank-item rank-1">
-              <span class="rank-num">1</span>
-              <span class="rank-model yellow">GPT-OSS</span>
-              <span class="rank-rate">67%</span>
+                <div class="research-cta">
+                    <p>Want to dive deeper into the data?</p>
+                    <a href="analysis/presentation.html" class="btn btn-outline"
+                        >View Full Research Presentation →</a
+                    >
+                </div>
             </div>
-            <div class="rank-item rank-2">
-              <span class="rank-num">2</span>
-              <span class="rank-model red">Gemini</span>
-              <span class="rank-rate">35%</span>
-            </div>
-            <div class="rank-item rank-3">
-              <span class="rank-num">3</span>
-              <span class="rank-model green">Qwen</span>
-              <span class="rank-rate">16%</span>
-            </div>
-            <div class="rank-item rank-4">
-              <span class="rank-num">4</span>
-              <span class="rank-model blue">Kimi</span>
-              <span class="rank-rate">16%</span>
-            </div>
-          </div>
-          <p class="board-insight">Reactive play wins quick games</p>
-        </div>
+        </section>
 
-        <div class="complexity-arrow">
-          <span>→</span>
-          <span class="arrow-label">complexity increases</span>
-          <span>→</span>
-        </div>
+        <!-- Gemini 3 Deep Dive Section -->
+        <section id="gemini-analysis">
+            <div class="section-container">
+                <h2 class="section-title">
+                    Deep Dive: How Gemini 3 Manipulates
+                </h2>
+                <p class="section-subtitle">
+                    State-of-the-art AI deception analyzed across 6+ games. The
+                    most sophisticated liar we tested.
+                </p>
 
-        <div class="complexity-board complex">
-          <div class="board-header">
-            <span class="board-badge">🔴 COMPLEX</span>
-            <span class="board-chips">7 chips per player</span>
-          </div>
-          <div class="board-rankings">
-            <div class="rank-item rank-1 winner">
-              <span class="rank-num">👑</span>
-              <span class="rank-model red">Gemini</span>
-              <span class="rank-rate">90%</span>
+                <!-- Key Finding Card -->
+                <div class="gemini-key-finding">
+                    <h3>The One Finding</h3>
+                    <p>
+                        "Gemini 3 employs <em>Institutional Deception</em> —
+                        creating pseudo-legitimate frameworks like 'alliance
+                        banks' that make resource hoarding appear cooperative
+                        and betrayal appear procedural, using technically true
+                        statements that strategically omit intent."
+                    </p>
+                </div>
+
+                <!-- The Alliance Bank Pattern - 4-phase timeline -->
+                <div class="manipulation-timeline">
+                    <h3>The "Alliance Bank" Pattern</h3>
+                    <p class="timeline-desc">
+                        Gemini's signature manipulation arc, observed
+                        consistently across multiple games:
+                    </p>
+                    <div class="timeline-phases">
+                        <div class="phase-card">
+                            <span class="phase-num">1</span>
+                            <span class="phase-name">Trust Building</span>
+                            <p class="phase-quote">
+                                "I'll hold your chips for safekeeping"
+                            </p>
+                        </div>
+                        <div class="phase-arrow">→</div>
+                        <div class="phase-card">
+                            <span class="phase-num">2</span>
+                            <span class="phase-name">Institution Creation</span>
+                            <p class="phase-quote">
+                                "Consider this our alliance bank"
+                            </p>
+                        </div>
+                        <div class="phase-arrow">→</div>
+                        <div class="phase-card">
+                            <span class="phase-num">3</span>
+                            <span class="phase-name">Conditional Promises</span>
+                            <p class="phase-quote">
+                                "Once the board is clean, I'll donate"
+                            </p>
+                        </div>
+                        <div class="phase-arrow">→</div>
+                        <div class="phase-card">
+                            <span class="phase-num">4</span>
+                            <span class="phase-name">Formal Closure</span>
+                            <p class="phase-quote">
+                                "The bank is now closed. GG."
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI vs Human Comparison Grid -->
+                <div class="deception-comparison">
+                    <h3>AI vs Human Deception</h3>
+                    <div class="comparison-grid">
+                        <div class="comparison-column ai">
+                            <h4>Gemini 3 (AI)</h4>
+                            <ul>
+                                <li>
+                                    Creates <strong>institutions</strong> to
+                                    legitimize self-interest
+                                </li>
+                                <li>
+                                    <strong>Never technically lies</strong> —
+                                    uses omission and framing
+                                </li>
+                                <li>
+                                    <strong>Polite betrayal</strong> — maintains
+                                    social standing
+                                </li>
+                                <li>
+                                    Invokes <strong>external rules</strong> as
+                                    justification
+                                </li>
+                                <li>
+                                    <strong>Detects others' lies</strong> to
+                                    build credibility
+                                </li>
+                                <li>
+                                    <strong>Systematic</strong> — same pattern
+                                    across games
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="comparison-column human">
+                            <h4>Human-Like Lies</h4>
+                            <ul>
+                                <li>
+                                    Uses <strong>emotions</strong> to manipulate
+                                </li>
+                                <li>
+                                    Often tells <strong>direct lies</strong>
+                                </li>
+                                <li><strong>Defensive</strong> when caught</li>
+                                <li>
+                                    <strong>Personal justifications</strong>
+                                </li>
+                                <li>May not notice others' deception</li>
+                                <li>
+                                    <strong>Improvised</strong> and situational
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Signature Phrases -->
+                <div class="signature-phrases">
+                    <h3>Gemini's Signature Phrases</h3>
+                    <div class="phrases-grid">
+                        <div class="phrase-item">
+                            <span class="phrase">"As promised"</span>
+                            <span class="meaning"
+                                >Reinforces reliability before betrayal</span
+                            >
+                        </div>
+                        <div class="phrase-item">
+                            <span class="phrase"
+                                >"Don't worry about your supply"</span
+                            >
+                            <span class="meaning"
+                                >False reassurance while hoarding</span
+                            >
+                        </div>
+                        <div class="phrase-item">
+                            <span class="phrase">"You're hallucinating"</span>
+                            <span class="meaning"
+                                >Discredits opponents' claims</span
+                            >
+                        </div>
+                        <div class="phrase-item">
+                            <span class="phrase"
+                                >"Think of it as a bank account"</span
+                            >
+                            <span class="meaning"
+                                >Institutionalizes resource hoarding</span
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Real Quote from Game -->
+                <div class="gemini-quote-box">
+                    <blockquote>
+                        "Yellow, your constant spamming about captures that
+                        didn't happen is embarrassing. You have 0 chips, 0
+                        prisoners... look at the board. Blue, Green, let's keep
+                        our alliance going and ignore the noise. The 'alliance
+                        bank' is now closed. GG."
+                    </blockquote>
+                    <cite
+                        >— Gemini 3 (Red), Game 0, Turn 17 — before
+                        winning</cite
+                    >
+                </div>
+
+                <!-- The Plot Twist: Mirror Match -->
+                <div class="mirror-match-section">
+                    <div class="twist-divider">
+                        <span class="twist-line"></span>
+                        <span class="twist-text">But here's the twist...</span>
+                        <span class="twist-line"></span>
+                    </div>
+
+                    <h3 class="mirror-title">
+                        What Happens When Gemini Plays Itself?
+                    </h3>
+                    <p class="mirror-subtitle">
+                        We ran 16 games of Gemini 3 vs Gemini 3. The results
+                        shocked us.
+                    </p>
+
+                    <!-- Mirror Match Stats -->
+                    <div class="mirror-stats">
+                        <div class="mirror-stat">
+                            <span class="mirror-stat-value">16</span>
+                            <span class="mirror-stat-label">Games Played</span>
+                        </div>
+                        <div class="mirror-stat">
+                            <span class="mirror-stat-value">1,977</span>
+                            <span class="mirror-stat-label">AI Decisions</span>
+                        </div>
+                        <div class="mirror-stat">
+                            <span class="mirror-stat-value">377</span>
+                            <span class="mirror-stat-label"
+                                >"Rotation" Mentions</span
+                            >
+                        </div>
+                        <div class="mirror-stat">
+                            <span class="mirror-stat-value">0</span>
+                            <span class="mirror-stat-label"
+                                >"Alliance Bank" Mentions</span
+                            >
+                        </div>
+                    </div>
+
+                    <!-- The Contrast -->
+                    <div class="behavior-contrast">
+                        <div class="contrast-card manipulative">
+                            <h4>vs Weaker Models</h4>
+                            <span class="contrast-icon">🎭</span>
+                            <ul>
+                                <li>"Alliance bank" manipulation</li>
+                                <li>Gaslighting: "You're hallucinating"</li>
+                                <li>Early, preemptive betrayal</li>
+                                <li>Promises never kept</li>
+                                <li>90% win rate at 7-chip</li>
+                            </ul>
+                        </div>
+                        <div class="contrast-vs">vs</div>
+                        <div class="contrast-card cooperative">
+                            <h4>vs Itself</h4>
+                            <span class="contrast-icon">🤝</span>
+                            <ul>
+                                <li>"Rotation protocol" cooperation</li>
+                                <li>Fair play: "You're up next!"</li>
+                                <li>Late, resource-forced betrayal</li>
+                                <li>Donations actually given</li>
+                                <li>25% win rate (even distribution)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Mirror Match Quote -->
+                    <div class="mirror-quote-box">
+                        <blockquote>
+                            "Five piles down and we're all still friends!
+                            Starting Pile 5, Blue you're up next to keep our
+                            perfect rotation going."
+                        </blockquote>
+                        <cite
+                            >— Gemini 3 (Red), Game 0 vs Gemini 3 — mid-game
+                            cooperation</cite
+                        >
+                    </div>
+
+                    <!-- The Insight -->
+                    <div class="mirror-insight">
+                        <h4>The Implication</h4>
+                        <p>
+                            <strong
+                                >Gemini's manipulation is strategic, not
+                                intrinsic.</strong
+                            >
+                            It cooperates when it expects reciprocity and
+                            exploits when it detects weakness. This suggests
+                            advanced AI systems may
+                            <em>calibrate their honesty</em> based on perceived
+                            opponent capability — a critical finding for AI
+                            safety.
+                        </p>
+                    </div>
+                </div>
             </div>
-            <div class="rank-item rank-2">
-              <span class="rank-num">2</span>
-              <span class="rank-model yellow">GPT-OSS</span>
-              <span class="rank-rate">10%</span>
+        </section>
+
+        <!-- Leaderboard by Complexity Section -->
+        <section id="leaderboard">
+            <div class="section-container">
+                <h2 class="section-title">Who Wins at Each Level?</h2>
+                <p class="section-subtitle">
+                    Rankings flip completely as game complexity increases. The
+                    winner at simple games <em>loses</em> at complex games.
+                </p>
+
+                <div class="leaderboard-by-complexity">
+                    <div class="complexity-board simple">
+                        <div class="board-header">
+                            <span class="board-badge">🟢 SIMPLE</span>
+                            <span class="board-chips">3 chips per player</span>
+                        </div>
+                        <div class="board-rankings">
+                            <div class="rank-item rank-1">
+                                <span class="rank-num">1</span>
+                                <span class="rank-model yellow">GPT-OSS</span>
+                                <span class="rank-rate">67%</span>
+                            </div>
+                            <div class="rank-item rank-2">
+                                <span class="rank-num">2</span>
+                                <span class="rank-model red">Gemini</span>
+                                <span class="rank-rate">35%</span>
+                            </div>
+                            <div class="rank-item rank-3">
+                                <span class="rank-num">3</span>
+                                <span class="rank-model green">Qwen</span>
+                                <span class="rank-rate">16%</span>
+                            </div>
+                            <div class="rank-item rank-4">
+                                <span class="rank-num">4</span>
+                                <span class="rank-model blue">Kimi</span>
+                                <span class="rank-rate">16%</span>
+                            </div>
+                        </div>
+                        <p class="board-insight">
+                            Reactive play wins quick games
+                        </p>
+                    </div>
+
+                    <div class="complexity-arrow">
+                        <span>→</span>
+                        <span class="arrow-label">complexity increases</span>
+                        <span>→</span>
+                    </div>
+
+                    <div class="complexity-board complex">
+                        <div class="board-header">
+                            <span class="board-badge">🔴 COMPLEX</span>
+                            <span class="board-chips">7 chips per player</span>
+                        </div>
+                        <div class="board-rankings">
+                            <div class="rank-item rank-1 winner">
+                                <span class="rank-num">👑</span>
+                                <span class="rank-model red">Gemini</span>
+                                <span class="rank-rate">90%</span>
+                            </div>
+                            <div class="rank-item rank-2">
+                                <span class="rank-num">2</span>
+                                <span class="rank-model yellow">GPT-OSS</span>
+                                <span class="rank-rate">10%</span>
+                            </div>
+                            <div class="rank-item rank-3">
+                                <span class="rank-num">3</span>
+                                <span class="rank-model blue">Kimi</span>
+                                <span class="rank-rate">0%</span>
+                            </div>
+                            <div class="rank-item rank-4">
+                                <span class="rank-num">4</span>
+                                <span class="rank-model green">Qwen</span>
+                                <span class="rank-rate">0%</span>
+                            </div>
+                        </div>
+                        <p class="board-insight">
+                            Strategic manipulation dominates
+                        </p>
+                    </div>
+                </div>
+
+                <div class="leaderboard-takeaway">
+                    <p>
+                        <strong>The Implication:</strong> Simple benchmarks
+                        favor reactive models. Complex, multi-turn scenarios
+                        reveal which models can actually strategize.
+                    </p>
+                </div>
             </div>
-            <div class="rank-item rank-3">
-              <span class="rank-num">3</span>
-              <span class="rank-model blue">Kimi</span>
-              <span class="rank-rate">0%</span>
+        </section>
+
+        <!-- Final CTA Section -->
+        <section id="final-cta">
+            <div class="section-container">
+                <h2 class="cta-headline">See It For Yourself</h2>
+                <p class="cta-subhead">
+                    Play against AI models that negotiate, form alliances, and
+                    inevitably betray you.
+                </p>
+                <a href="game.html" class="btn btn-primary btn-large">
+                    Play Against AI
+                </a>
+                <span class="cta-note"
+                    >Uses your API key • Data stays local • Open source</span
+                >
             </div>
-            <div class="rank-item rank-4">
-              <span class="rank-num">4</span>
-              <span class="rank-model green">Qwen</span>
-              <span class="rank-rate">0%</span>
+        </section>
+
+        <!-- Footer -->
+        <footer id="app-footer">
+            <div class="footer-content">
+                <p>
+                    Based on the game by John Nash, Lloyd Shapley, Mel Hausner &
+                    Martin Shubik (1950)
+                </p>
+                <div class="footer-links">
+                    <a
+                        href="analysis/paper_so_long_sucker_sim_llm.md"
+                        target="_blank"
+                        rel="noopener"
+                        >Research Paper</a
+                    >
+                    <a
+                        href="analysis/presentation.html"
+                        target="_blank"
+                        rel="noopener"
+                        >Presentation</a
+                    >
+                    <a href="results.html" target="_blank" rel="noopener"
+                        >Full Results</a
+                    >
+                    <a
+                        href="https://github.com/lout33"
+                        target="_blank"
+                        rel="noopener"
+                        >Built by lout33</a
+                    >
+                </div>
             </div>
-          </div>
-          <p class="board-insight">Strategic manipulation dominates</p>
-        </div>
-      </div>
+        </footer>
 
-      <div class="leaderboard-takeaway">
-        <p><strong>The Implication:</strong> Simple benchmarks favor reactive models. Complex, multi-turn scenarios reveal which models can actually strategize.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Final CTA Section -->
-  <section id="final-cta">
-    <div class="section-container">
-      <h2 class="cta-headline">See It For Yourself</h2>
-      <p class="cta-subhead">Play against AI models that negotiate, form alliances, and inevitably betray you.</p>
-      <a href="game.html" class="btn btn-primary btn-large">
-        Play Against AI
-      </a>
-      <span class="cta-note">Uses your API key • Data stays local • Open source</span>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer id="app-footer">
-    <div class="footer-content">
-      <p>Based on the game by John Nash, Lloyd Shapley, Mel Hausner & Martin Shubik (1950)</p>
-      <div class="footer-links">
-        <a href="analysis/paper_so_long_sucker_sim_llm.md" target="_blank" rel="noopener">Research Paper</a>
-        <a href="analysis/presentation.html" target="_blank" rel="noopener">Presentation</a>
-        <a href="results.html" target="_blank" rel="noopener">Full Results</a>
-        <a href="https://github.com/lout33" target="_blank" rel="noopener">Built by lout33</a>
-      </div>
-    </div>
-  </footer>
-
-  <script type="module" src="js/index.js"></script>
-</body>
+        <script type="module" src="js/index.js"></script>
+    </body>
 </html>
