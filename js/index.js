@@ -220,10 +220,6 @@ class IndexPage {
   }
 
   init() {
-    this.renderLeaderboard();
-    this.renderInsights();
-    this.renderStrategies();
-    this.renderConversations();
     this.setupSmoothScroll();
   }
 

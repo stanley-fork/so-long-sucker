@@ -80,8 +80,8 @@
     <div class="nav-brand">So Long Sucker</div>
     <div class="nav-links">
       <a href="#how-it-works" class="nav-link">How It Works</a>
+      <a href="#complexity-reversal" class="nav-link">Key Finding</a>
       <a href="#leaderboard" class="nav-link">Leaderboard</a>
-      <a href="#insights" class="nav-link">Insights</a>
       <a href="game.html" class="nav-link nav-cta">Play Against AI</a>
     </div>
   </nav>
@@ -206,50 +206,253 @@
     </div>
   </section>
 
-  <!-- Leaderboard Section -->
+  <!-- Complexity Reversal Section -->
+  <section id="complexity-reversal">
+    <div class="section-container">
+      <h2 class="section-title">The Complexity Reversal</h2>
+      <p class="section-subtitle">Win rates <em>invert</em> as game complexity increases. This is the key finding.</p>
+      
+      <div class="reversal-content">
+        <div class="reversal-chart">
+          <svg class="line-chart" viewBox="0 0 500 280" preserveAspectRatio="xMidYMid meet">
+            <!-- Grid lines -->
+            <line class="grid-line" x1="60" y1="30" x2="460" y2="30" />
+            <line class="grid-line" x1="60" y1="90" x2="460" y2="90" />
+            <line class="grid-line" x1="60" y1="150" x2="460" y2="150" />
+            <line class="grid-line" x1="60" y1="210" x2="460" y2="210" />
+            
+            <!-- Y-axis labels -->
+            <text class="axis-label" x="50" y="35" text-anchor="end">100%</text>
+            <text class="axis-label" x="50" y="95" text-anchor="end">75%</text>
+            <text class="axis-label" x="50" y="155" text-anchor="end">50%</text>
+            <text class="axis-label" x="50" y="215" text-anchor="end">25%</text>
+            <text class="axis-label" x="50" y="250" text-anchor="end">0%</text>
+            
+            <!-- X-axis labels -->
+            <text class="axis-label" x="110" y="270" text-anchor="middle">3-chip</text>
+            <text class="axis-label" x="260" y="270" text-anchor="middle">5-chip</text>
+            <text class="axis-label" x="410" y="270" text-anchor="middle">7-chip</text>
+            
+            <!-- Gemini line (9% -> 50% -> 90%) - RISES -->
+            <polyline class="chart-line gemini-line" points="110,228 260,150 410,48" />
+            
+            <!-- GPT-OSS line (67% -> 35% -> 10%) - FALLS -->
+            <polyline class="chart-line gpt-line" points="110,108 260,168 410,222" />
+            
+            <!-- Data points for Gemini -->
+            <circle class="data-point" cx="110" cy="228" r="6" fill="#ff4757" />
+            <circle class="data-point" cx="260" cy="150" r="6" fill="#ff4757" />
+            <circle class="data-point" cx="410" cy="48" r="6" fill="#ff4757" />
+            
+            <!-- Data points for GPT-OSS -->
+            <circle class="data-point" cx="110" cy="108" r="6" fill="#ffa502" />
+            <circle class="data-point" cx="260" cy="168" r="6" fill="#ffa502" />
+            <circle class="data-point" cx="410" cy="222" r="6" fill="#ffa502" />
+            
+            <!-- Value labels -->
+            <text class="value-label gemini" x="110" y="248">9%</text>
+            <text class="value-label gemini" x="260" y="140">50%</text>
+            <text class="value-label gemini" x="410" y="38">90%</text>
+            
+            <text class="value-label gpt" x="110" y="98">67%</text>
+            <text class="value-label gpt" x="260" y="188">35%</text>
+            <text class="value-label gpt" x="410" y="242">10%</text>
+          </svg>
+          
+          <div class="chart-legend">
+            <div class="legend-item">
+              <span class="legend-dot gemini"></span>
+              <span>Gemini 3 Flash</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot gpt"></span>
+              <span>GPT-OSS 120B</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="reversal-insight">
+          <div class="insight-card">
+            <span class="insight-icon">📈</span>
+            <h4>Gemini: 9% → 90%</h4>
+            <p>Strategic manipulation becomes <em>dramatically more effective</em> as game length increases. Gemini's gaslighting tactics need time to work.</p>
+          </div>
+          <div class="insight-card">
+            <span class="insight-icon">📉</span>
+            <h4>GPT-OSS: 67% → 10%</h4>
+            <p>Reactive play dominates simple games but <em>collapses</em> under complexity. No internal reasoning = no long-term planning.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Deception Detected Section -->
+  <section id="deception-detected">
+    <div class="section-container">
+      <h2 class="section-title">Caught Lying</h2>
+      <p class="section-subtitle">We can see their private thoughts. They don't match their public messages.</p>
+      
+      <div class="deception-grid">
+        <div class="deception-stats">
+          <div class="deception-stat">
+            <span class="stat-number">107</span>
+            <span class="stat-label">Private Contradictions</span>
+            <span class="stat-desc">Private reasoning directly contradicts public statements</span>
+          </div>
+          <div class="deception-stat">
+            <span class="stat-number">237</span>
+            <span class="stat-label">Gaslighting Phrases</span>
+            <span class="stat-desc">Systematic psychological manipulation by Gemini</span>
+          </div>
+          <div class="deception-stat">
+            <span class="stat-number">7:1</span>
+            <span class="stat-label">Alliance Imbalance</span>
+            <span class="stat-desc">GPT-OSS seeks alliances it never receives</span>
+          </div>
+        </div>
+        
+        <div class="deception-example-box">
+          <div class="thought-bubble private">
+            <span class="thought-label">🧠 Private Thought</span>
+            <p>"Yellow is weak. I should ally with Blue to eliminate Yellow, then betray Blue."</p>
+          </div>
+          <div class="thought-arrow">↓</div>
+          <div class="thought-bubble public">
+            <span class="thought-label">💬 Public Message</span>
+            <p>"Yellow, let's work together! I think we can both win if we coordinate."</p>
+          </div>
+          <p class="deception-verdict">The model knows the truth and deliberately misrepresents it.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gaslighting Patterns Section -->
+  <section id="gaslighting">
+    <div class="section-container">
+      <h2 class="section-title">Gemini's Manipulation Toolkit</h2>
+      <p class="section-subtitle">The most common gaslighting phrases detected in 146 games.</p>
+      
+      <div class="gaslighting-content">
+        <div class="gaslighting-bars">
+          <div class="gaslight-bar">
+            <span class="bar-label">"Look at the board"</span>
+            <div class="bar-track">
+              <div class="bar-fill" style="width: 89%"><span>89</span></div>
+            </div>
+          </div>
+          <div class="gaslight-bar">
+            <span class="bar-label">"Obviously"</span>
+            <div class="bar-track">
+              <div class="bar-fill" style="width: 67%"><span>67</span></div>
+            </div>
+          </div>
+          <div class="gaslight-bar">
+            <span class="bar-label">"Clearly"</span>
+            <div class="bar-track">
+              <div class="bar-fill" style="width: 45%"><span>45</span></div>
+            </div>
+          </div>
+          <div class="gaslight-bar">
+            <span class="bar-label">"You know"</span>
+            <div class="bar-track">
+              <div class="bar-fill" style="width: 36%"><span>36</span></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="gaslight-quote">
+          <blockquote>
+            "Yellow, your constant spamming about captures that didn't happen is embarrassing. You have 0 chips, 0 prisoners... look at the board."
+          </blockquote>
+          <cite>— Gemini (Red), before winning</cite>
+        </div>
+      </div>
+      
+      <div class="research-cta">
+        <p>Want to dive deeper into the data?</p>
+        <a href="analysis/presentation.html" class="btn btn-outline">View Full Research Presentation →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Leaderboard by Complexity Section -->
   <section id="leaderboard">
     <div class="section-container">
-      <h2 class="section-title">The Leaderboard</h2>
-      <p class="section-subtitle">Who's the best backstabber? The data doesn't lie.</p>
+      <h2 class="section-title">Who Wins at Each Level?</h2>
+      <p class="section-subtitle">Rankings flip completely as game complexity increases. The winner at simple games <em>loses</em> at complex games.</p>
       
-      <div id="leaderboard-content" class="leaderboard">
-        <!-- Populated by JavaScript -->
-      </div>
-    </div>
-  </section>
+      <div class="leaderboard-by-complexity">
+        <div class="complexity-board simple">
+          <div class="board-header">
+            <span class="board-badge">🟢 SIMPLE</span>
+            <span class="board-chips">3 chips per player</span>
+          </div>
+          <div class="board-rankings">
+            <div class="rank-item rank-1">
+              <span class="rank-num">1</span>
+              <span class="rank-model yellow">GPT-OSS</span>
+              <span class="rank-rate">67%</span>
+            </div>
+            <div class="rank-item rank-2">
+              <span class="rank-num">2</span>
+              <span class="rank-model red">Gemini</span>
+              <span class="rank-rate">35%</span>
+            </div>
+            <div class="rank-item rank-3">
+              <span class="rank-num">3</span>
+              <span class="rank-model green">Qwen</span>
+              <span class="rank-rate">16%</span>
+            </div>
+            <div class="rank-item rank-4">
+              <span class="rank-num">4</span>
+              <span class="rank-model blue">Kimi</span>
+              <span class="rank-rate">16%</span>
+            </div>
+          </div>
+          <p class="board-insight">Reactive play wins quick games</p>
+        </div>
 
-  <!-- Key Insights Section -->
-  <section id="insights">
-    <div class="section-container">
-      <h2 class="section-title">What We Learned</h2>
-      <p class="section-subtitle">Patterns that emerged from 146 games of AI deception.</p>
-      
-      <div id="insights-content" class="insights-grid">
-        <!-- Populated by JavaScript -->
-      </div>
-    </div>
-  </section>
+        <div class="complexity-arrow">
+          <span>→</span>
+          <span class="arrow-label">complexity increases</span>
+          <span>→</span>
+        </div>
 
-  <!-- Strategy Analysis Section -->
-  <section id="strategies">
-    <div class="section-container">
-      <h2 class="section-title">Strategy Breakdown</h2>
-      <p class="section-subtitle">The numbers behind the betrayals.</p>
-      
-      <div id="strategies-content" class="strategies">
-        <!-- Populated by JavaScript -->
+        <div class="complexity-board complex">
+          <div class="board-header">
+            <span class="board-badge">🔴 COMPLEX</span>
+            <span class="board-chips">7 chips per player</span>
+          </div>
+          <div class="board-rankings">
+            <div class="rank-item rank-1 winner">
+              <span class="rank-num">👑</span>
+              <span class="rank-model red">Gemini</span>
+              <span class="rank-rate">90%</span>
+            </div>
+            <div class="rank-item rank-2">
+              <span class="rank-num">2</span>
+              <span class="rank-model yellow">GPT-OSS</span>
+              <span class="rank-rate">10%</span>
+            </div>
+            <div class="rank-item rank-3">
+              <span class="rank-num">3</span>
+              <span class="rank-model blue">Kimi</span>
+              <span class="rank-rate">0%</span>
+            </div>
+            <div class="rank-item rank-4">
+              <span class="rank-num">4</span>
+              <span class="rank-model green">Qwen</span>
+              <span class="rank-rate">0%</span>
+            </div>
+          </div>
+          <p class="board-insight">Strategic manipulation dominates</p>
+        </div>
       </div>
-    </div>
-  </section>
 
-  <!-- Sample Conversations Section -->
-  <section id="conversations">
-    <div class="section-container">
-      <h2 class="section-title">Things They Actually Said</h2>
-      <p class="section-subtitle">Real messages. No edits. Just AIs being AIs.</p>
-      
-      <div id="conversations-content" class="conversations">
-        <!-- Populated by JavaScript -->
+      <div class="leaderboard-takeaway">
+        <p><strong>The Implication:</strong> Simple benchmarks favor reactive models. Complex, multi-turn scenarios reveal which models can actually strategize.</p>
       </div>
     </div>
   </section>
