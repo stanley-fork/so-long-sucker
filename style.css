@@ -154,6 +154,23 @@ body {
   color: #000 !important;
 }
 
+.nav-link.nav-github {
+  display: flex;
+  align-items: center;
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  transition: all 0.2s;
+}
+
+.nav-link.nav-github:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.nav-link.nav-github svg {
+  display: block;
+}
+
 /* Hero Section */
 #hero {
   min-height: 100vh;
