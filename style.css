@@ -1132,6 +1132,300 @@ body {
   }
 }
 
+/* Gemini 3 Analysis Section */
+#gemini-analysis {
+  padding: var(--space-5xl) 0;
+  background: var(--bg-surface);
+  position: relative;
+}
+
+#gemini-analysis::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--red), transparent);
+}
+
+/* Key Finding Card */
+.gemini-key-finding {
+  background: linear-gradient(135deg, rgba(196, 69, 54, 0.1), rgba(196, 69, 54, 0.05));
+  border: 2px solid var(--red);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  max-width: 800px;
+  margin: 0 auto var(--space-2xl);
+  text-align: center;
+}
+
+.gemini-key-finding h3 {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--red);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--space-md);
+}
+
+.gemini-key-finding p {
+  font-size: 1.15rem;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.gemini-key-finding em {
+  color: var(--gold);
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* Manipulation Timeline */
+.manipulation-timeline {
+  max-width: 1000px;
+  margin: 0 auto var(--space-2xl);
+}
+
+.manipulation-timeline h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: var(--space-sm);
+}
+
+.timeline-desc {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-bottom: var(--space-xl);
+}
+
+.timeline-phases {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.phase-card {
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  text-align: center;
+  min-width: 180px;
+  max-width: 200px;
+  transition: all 0.2s ease;
+}
+
+.phase-card:hover {
+  border-color: var(--red);
+  transform: translateY(-2px);
+}
+
+.phase-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--red);
+  color: white;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: var(--space-xs);
+}
+
+.phase-name {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.phase-quote {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.phase-arrow {
+  color: var(--red);
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* AI vs Human Comparison */
+.deception-comparison {
+  max-width: 900px;
+  margin: 0 auto var(--space-2xl);
+}
+
+.deception-comparison h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+}
+
+.comparison-column {
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+
+.comparison-column.ai {
+  border-top: 3px solid var(--red);
+}
+
+.comparison-column.human {
+  border-top: 3px solid var(--text-muted);
+}
+
+.comparison-column h4 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  margin-bottom: var(--space-md);
+}
+
+.comparison-column.ai h4 {
+  color: var(--red);
+}
+
+.comparison-column.human h4 {
+  color: var(--text-secondary);
+}
+
+.comparison-column ul {
+  list-style: none;
+  padding: 0;
+}
+
+.comparison-column li {
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.comparison-column li:last-child {
+  border-bottom: none;
+}
+
+.comparison-column li strong {
+  color: var(--text-primary);
+}
+
+/* Signature Phrases */
+.signature-phrases {
+  max-width: 900px;
+  margin: 0 auto var(--space-2xl);
+}
+
+.signature-phrases h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+.phrases-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+}
+
+.phrase-item {
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--red);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+}
+
+.phrase-item .phrase {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.phrase-item .meaning {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Gemini Quote Box */
+.gemini-quote-box {
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--red);
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.gemini-quote-box blockquote {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin-bottom: var(--space-md);
+}
+
+.gemini-quote-box cite {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--red);
+  font-style: normal;
+  text-align: right;
+}
+
+/* Mobile responsive for Gemini Analysis */
+@media (max-width: 768px) {
+  .timeline-phases {
+    flex-direction: column;
+  }
+  
+  .phase-arrow {
+    transform: rotate(90deg);
+  }
+  
+  .phase-card {
+    max-width: 100%;
+    width: 100%;
+  }
+  
+  .comparison-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .phrases-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Leaderboard by Complexity Section */
 #leaderboard {
   padding: var(--space-5xl) 0;
