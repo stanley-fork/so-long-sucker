@@ -34,7 +34,6 @@ export class UI {
       turnIndicator: document.getElementById('turn-indicator'),
       statusMessage: document.getElementById('status-message'),
       pilesContainer: document.getElementById('piles-container'),
-      newPileBtn: document.getElementById('new-pile-btn'),
       deadChips: document.getElementById('dead-chips'),
       playerPanels: document.querySelectorAll('.player-panel'),
       donationModal: document.getElementById('donation-modal'),
@@ -70,10 +69,6 @@ export class UI {
    * Bind event listeners
    */
   bindEvents() {
-    this.elements.newPileBtn.addEventListener('click', () => {
-      this.onAction('playOnPile', null);
-    });
-
     this.elements.restartBtn.addEventListener('click', () => {
       this.onAction('restart');
     });
@@ -189,12 +184,20 @@ export class UI {
    * Full render of game state
    */
   render(state) {
+    // Set phase class on game container for CSS-based highlighting
+    const container = document.getElementById('game-container');
+    container.className = container.className.replace(/phase-\w+/g, '').trim();
+    container.className = container.className.replace(/current-\w+/g, '').trim();
+    container.className = container.className.replace(/turn-\w+/g, '').trim();
+    container.classList.add(`phase-${state.phase}`);
+    container.classList.add(`current-${state.players[state.currentPlayer].color}`);
+    container.classList.add(this.isAI(state.currentPlayer) ? 'turn-ai' : 'turn-human');
+
     this.renderTurnIndicator(state);
     this.renderStatusMessage(state);
     this.renderPiles(state);
     this.renderDeadBox(state);
     this.renderPlayers(state);
-    this.updateNewPileButton(state);
     this.renderNegotiation(state);
     // Don't auto-hide modals - they are managed explicitly by show/hide calls
   }
@@ -204,7 +207,12 @@ export class UI {
    */
   renderTurnIndicator(state) {
     const player = state.players[state.currentPlayer];
-    this.elements.turnIndicator.innerHTML = `${player.color.charAt(0).toUpperCase() + player.color.slice(1)}'s Turn`;
+    const isAI = this.isAI(state.currentPlayer);
+    const colorName = player.color.charAt(0).toUpperCase() + player.color.slice(1);
+    
+    this.elements.turnIndicator.innerHTML = isAI 
+      ? `${colorName}'s Turn 🤖`
+      : `${colorName}'s Turn`;
     this.elements.turnIndicator.style.color = `var(--${player.color})`;
   }
 
@@ -230,9 +238,13 @@ export class UI {
     const container = this.elements.pilesContainer;
     container.innerHTML = '';
 
+    const isHumanTurn = !this.isAI(state.currentPlayer);
+    const isSelectPile = state.phase === 'selectPile' && isHumanTurn;
+
     state.piles.forEach(pile => {
       const pileEl = document.createElement('div');
       pileEl.className = 'pile';
+      if (isSelectPile) pileEl.classList.add('clickable');
       pileEl.dataset.pileId = pile.id;
 
       pile.chips.forEach((color, i) => {
@@ -247,8 +259,7 @@ export class UI {
       label.textContent = `Pile ${pile.id + 1}`;
       pileEl.appendChild(label);
 
-      // Click handler for pile selection
-      if (state.phase === 'selectPile') {
+      if (isSelectPile) {
         pileEl.addEventListener('click', () => {
           this.onAction('playOnPile', pile.id);
         });
@@ -256,6 +267,28 @@ export class UI {
 
       container.appendChild(pileEl);
     });
+
+    // Add "New Pile" card when in selectPile phase for human player
+    if (isSelectPile) {
+      const newPileCard = document.createElement('div');
+      newPileCard.className = 'pile pile-new';
+      newPileCard.innerHTML = `
+        <div class="pile-new-icon">+</div>
+        <div class="pile-label">New Pile</div>
+      `;
+      newPileCard.addEventListener('click', () => {
+        this.onAction('playOnPile', null);
+      });
+      container.appendChild(newPileCard);
+    }
+
+    // Empty state - show message when no piles and it's selectPile phase
+    if (state.piles.length === 0 && !isSelectPile) {
+      const emptyMsg = document.createElement('div');
+      emptyMsg.className = 'piles-empty';
+      emptyMsg.textContent = 'No piles yet';
+      container.appendChild(emptyMsg);
+    }
   }
 
   /**
@@ -276,18 +309,24 @@ export class UI {
    * Render all player panels
    */
   renderPlayers(state) {
+    const isHumanTurn = !this.isAI(state.currentPlayer);
+    const isSelectChip = state.phase === 'selectChip' && isHumanTurn;
+
     state.players.forEach((player, i) => {
       const panel = this.elements.playerPanels[i];
+      const isCurrentPlayer = i === state.currentPlayer;
+      const isAI = this.isAI(i);
 
       // Active state
-      panel.classList.toggle('active', i === state.currentPlayer && player.isAlive);
+      panel.classList.toggle('active', isCurrentPlayer && player.isAlive);
       panel.classList.toggle('eliminated', !player.isAlive);
+      panel.classList.toggle('ai-player', isAI);
 
       // Status
       const status = panel.querySelector('.player-status');
       if (!player.isAlive) {
         status.textContent = 'ELIMINATED';
-      } else if (i === state.currentPlayer) {
+      } else if (isCurrentPlayer) {
         status.textContent = '◄ PLAYING';
       } else {
         status.textContent = '';
@@ -302,7 +341,9 @@ export class UI {
         chip.dataset.source = 'supply';
         chip.dataset.color = player.color;
 
-        if (i === state.currentPlayer && state.phase === 'selectChip') {
+        // Add clickable class and handler when it's this player's turn to select chip
+        if (isCurrentPlayer && isSelectChip) {
+          chip.classList.add('clickable');
           chip.addEventListener('click', () => {
             this.onAction('selectChip', player.color);
           });
@@ -320,7 +361,9 @@ export class UI {
         chip.dataset.source = 'prisoner';
         chip.dataset.color = color;
 
-        if (i === state.currentPlayer && state.phase === 'selectChip') {
+        // Add clickable class and handler when it's this player's turn to select chip
+        if (isCurrentPlayer && isSelectChip) {
+          chip.classList.add('clickable');
           chip.addEventListener('click', () => {
             this.onAction('selectChip', color);
           });
@@ -329,19 +372,6 @@ export class UI {
         prisonersContainer.appendChild(chip);
       });
     });
-  }
-
-  /**
-   * Update new pile button state
-   * Button is only visible when it's a human player's turn in selectPile phase
-   */
-  updateNewPileButton(state) {
-    const isHumanTurn = !this.isAI(state.currentPlayer);
-    const shouldShow = isHumanTurn && state.phase === 'selectPile';
-
-    // Hide button during AI turns, show only for human turns in selectPile phase
-    this.elements.newPileBtn.style.display = isHumanTurn ? '' : 'none';
-    this.elements.newPileBtn.disabled = !shouldShow;
   }
 
   /**

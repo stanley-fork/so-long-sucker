@@ -4,7 +4,6 @@ import { Game } from './game.js';
 import { UI } from './ui.js';
 import { COLORS } from './player.js';
 import { AgentManager } from './ai/manager.js';
-import { AzureClaudeProvider } from './ai/providers/azure-claude.js';
 import { GroqProvider } from './ai/providers/groq.js';
 import { CONFIG } from './config.js';
 import { applyTestState } from './testStates.js';
@@ -86,12 +85,6 @@ class SoLongSucker {
     playerSelects.forEach(select => {
       select.addEventListener('change', () => this.updateAIConfigVisibility());
     });
-
-    // Show/hide Azure resource based on provider
-    document.getElementById('ai-provider').addEventListener('change', () => {
-      this.updateProviderFields();
-    });
-    this.updateProviderFields();
 
     // Test API button
     document.getElementById('test-api-btn').addEventListener('click', () => {
@@ -353,13 +346,12 @@ class SoLongSucker {
   async testAPI() {
     const resultEl = document.getElementById('test-result');
     const btn = document.getElementById('test-api-btn');
-
-    const provider = document.getElementById('ai-provider').value;
     const apiKey = document.getElementById('api-key').value;
-    const azureResource = document.getElementById('azure-resource').value;
 
-    if (!apiKey) {
-      resultEl.textContent = '❌ Please enter an API key';
+    const groqKey = apiKey || CONFIG.GROQ_API_KEY;
+    
+    if (!groqKey) {
+      resultEl.textContent = '❌ Please enter a Groq API key';
       resultEl.style.color = 'red';
       return;
     }
@@ -369,26 +361,10 @@ class SoLongSucker {
     resultEl.style.color = 'white';
 
     try {
-      // Parse provider:model format
-      const [providerType, model] = provider.includes(':')
-        ? provider.split(':')
-        : [provider, null];
-
-      if (providerType === 'groq') {
-        const groqKey = apiKey || CONFIG.GROQ_API_KEY;
-        const groqProvider = new GroqProvider(groqKey, model || 'llama-3.3-70b-versatile');
-        await groqProvider.test();
-        resultEl.textContent = `✅ Groq connection successful! (${model || 'llama-3.3-70b-versatile'})`;
-        resultEl.style.color = 'lightgreen';
-      } else if (providerType === 'azure-claude') {
-        const azureProvider = new AzureClaudeProvider(apiKey, azureResource, 'claude-opus-4-5');
-        await azureProvider.test();
-        resultEl.textContent = '✅ Azure Claude connection successful!';
-        resultEl.style.color = 'lightgreen';
-      } else {
-        resultEl.textContent = '⚠️ Test only implemented for Groq and Azure Claude';
-        resultEl.style.color = 'yellow';
-      }
+      const groqProvider = new GroqProvider(groqKey, 'moonshotai/kimi-k2-instruct-0905');
+      await groqProvider.test();
+      resultEl.textContent = '✅ Groq connection successful!';
+      resultEl.style.color = 'lightgreen';
     } catch (error) {
       console.error('API test error:', error);
       resultEl.textContent = `❌ ${error.message}`;
@@ -399,20 +375,20 @@ class SoLongSucker {
   }
 
   /**
-   * Show/hide Azure-specific fields
-   */
-  updateProviderFields() {
-    const provider = document.getElementById('ai-provider').value;
-    const azureRow = document.getElementById('azure-resource-row');
-    azureRow.style.display = provider === 'azure-claude' ? 'flex' : 'none';
-  }
-
-  /**
-   * Update visibility of AI config section
+   * Update visibility of AI config section and per-player model selectors
    */
   updateAIConfigVisibility() {
-    const hasAI = this.getAIPlayers().length > 0;
+    const aiPlayers = this.getAIPlayers();
+    const hasAI = aiPlayers.length > 0;
     document.getElementById('ai-config').style.display = hasAI ? 'block' : 'none';
+    
+    for (let i = 0; i < 4; i++) {
+      const modelSelect = document.getElementById(`player-${i}-model`);
+      if (modelSelect) {
+        const isAI = aiPlayers.includes(i);
+        modelSelect.classList.toggle('hidden', !isAI);
+      }
+    }
   }
 
   /**
@@ -430,16 +406,33 @@ class SoLongSucker {
   }
 
   /**
+   * Get per-player model configuration
+   * @returns {Object} Map of playerId -> model name
+   */
+  getPlayerModels() {
+    const models = {};
+    for (let i = 0; i < 4; i++) {
+      const typeSelect = document.getElementById(`player-${i}-type`);
+      const modelSelect = document.getElementById(`player-${i}-model`);
+      if (typeSelect.value === 'ai' && modelSelect) {
+        models[i] = modelSelect.value;
+      }
+    }
+    return models;
+  }
+
+  /**
    * Load saved configuration from localStorage, with defaults from CONFIG
    */
   loadSavedConfig() {
     // Set defaults from CONFIG
     document.getElementById('api-key').value = CONFIG.GROQ_API_KEY;
-    document.getElementById('azure-resource').value = CONFIG.AZURE_RESOURCE;
 
-    // Also set defaults for simulation fields
-    document.getElementById('sim-api-key').value = CONFIG.GROQ_API_KEY;
-    document.getElementById('sim-azure-resource').value = CONFIG.AZURE_RESOURCE;
+    // Also set defaults for simulation fields (if they exist)
+    const simApiKey = document.getElementById('sim-api-key');
+    const simAzureResource = document.getElementById('sim-azure-resource');
+    if (simApiKey) simApiKey.value = CONFIG.GROQ_API_KEY;
+    if (simAzureResource) simAzureResource.value = CONFIG.AZURE_RESOURCE;
 
     // Override with saved config if available
     const saved = localStorage.getItem('soLongSuckerConfig');
@@ -448,15 +441,7 @@ class SoLongSucker {
         const config = JSON.parse(saved);
         if (config.apiKey) {
           document.getElementById('api-key').value = config.apiKey;
-          document.getElementById('sim-api-key').value = config.apiKey;
-        }
-        if (config.provider) {
-          document.getElementById('ai-provider').value = config.provider;
-          document.getElementById('sim-ai-provider').value = config.provider;
-        }
-        if (config.azureResource) {
-          document.getElementById('azure-resource').value = config.azureResource;
-          document.getElementById('sim-azure-resource').value = config.azureResource;
+          if (simApiKey) simApiKey.value = config.apiKey;
         }
         if (config.players) {
           config.players.forEach((type, i) => {
@@ -464,12 +449,17 @@ class SoLongSucker {
             if (select) select.value = type;
           });
         }
+        if (config.playerModels) {
+          config.playerModels.forEach((model, i) => {
+            const select = document.getElementById(`player-${i}-model`);
+            if (select && model) select.value = model;
+          });
+        }
       } catch (e) {
         console.error('Failed to load config:', e);
       }
     }
     this.updateAIConfigVisibility();
-    this.updateProviderFields();
 
     // Update simulation provider fields visibility
     const simProvider = document.getElementById('sim-ai-provider').value;
@@ -483,10 +473,11 @@ class SoLongSucker {
   saveConfig() {
     const config = {
       apiKey: document.getElementById('api-key').value,
-      provider: document.getElementById('ai-provider').value,
-      azureResource: document.getElementById('azure-resource').value,
       players: [0, 1, 2, 3].map(i =>
         document.getElementById(`player-${i}-type`).value
+      ),
+      playerModels: [0, 1, 2, 3].map(i =>
+        document.getElementById(`player-${i}-model`)?.value || 'moonshotai/kimi-k2-instruct-0905'
       )
     };
     localStorage.setItem('soLongSuckerConfig', JSON.stringify(config));
@@ -600,21 +591,13 @@ class SoLongSucker {
    */
   startGame(continueGame = false) {
     const aiPlayers = this.getAIPlayers();
+    const playerModels = this.getPlayerModels();
     const apiKey = document.getElementById('api-key').value;
-    const providerValue = document.getElementById('ai-provider').value;
-    const azureResource = document.getElementById('azure-resource').value;
-
-    // Parse provider:model format (e.g., "groq:llama-3.3-70b-versatile")
-    const [provider, model] = providerValue.includes(':')
-      ? providerValue.split(':')
-      : [providerValue, null];
 
     // Use default Groq key if not provided
-    const finalApiKey = provider === 'groq' && !apiKey
-      ? CONFIG.GROQ_API_KEY
-      : apiKey;
+    const finalApiKey = apiKey || CONFIG.GROQ_API_KEY;
 
-    // Validate API key if AI players are selected (skip for Groq with hardcoded key)
+    // Validate API key if AI players are selected
     if (aiPlayers.length > 0 && !finalApiKey) {
       alert('Please enter an API key for AI players');
       return;
@@ -649,11 +632,8 @@ class SoLongSucker {
         this.handleAction.bind(this),
         this.render.bind(this)
       );
-      this.agentManager.setProvider(provider, finalApiKey, {
-        resource: azureResource,
-        model: model || 'claude-opus-4-5'
-      });
-      this.agentManager.setAIPlayers(aiPlayers);
+      this.agentManager.setProvider('groq', finalApiKey);
+      this.agentManager.setAIPlayers(aiPlayers, playerModels);
       // Tell UI which players are AI so it can disable controls during AI turns
       this.ui.setAIPlayers(aiPlayers);
     }
@@ -893,7 +873,8 @@ class SoLongSucker {
       case 'gameOver':
         this.render();
         if (this.agentManager) {
-          this.agentManager.getDataCollector()?.addGameEnd(this.game);
+          // Mark as completed and save final state
+          this.agentManager.getDataCollector()?.markCompleted(this.game);
           this.agentManager.stop();
         }
         this.ui.showGameOver(result.winner);

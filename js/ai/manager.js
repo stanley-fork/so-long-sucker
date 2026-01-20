@@ -7,6 +7,7 @@ import { AzureClaudeProvider } from './providers/azure-claude.js';
 import { GroqProvider } from './providers/groq.js';
 import { GeminiProvider } from './providers/gemini.js';
 import { GameDataCollector } from './data-collector.js';
+import { uploadGameToStorage } from '../api/supabase.js';
 import { CONFIG } from '../config.js';
 
 const COLORS = ['red', 'blue', 'green', 'yellow'];
@@ -24,6 +25,11 @@ export class AgentManager {
 
     // Data collection
     this.dataCollector = new GameDataCollector();
+    this.setupDataCollector();
+
+    // Handle page unload to save abandoned games
+    this.boundBeforeUnload = this.handleBeforeUnload.bind(this);
+    window.addEventListener('beforeunload', this.boundBeforeUnload);
 
     // Stuck state detection
     this.stuckState = {
@@ -35,41 +41,44 @@ export class AgentManager {
   }
 
   /**
-   * Configure the LLM provider
+   * Configure the LLM provider (stores API key and provider type for per-player setup)
    */
-  setProvider(providerType, apiKey, options = {}) {
+  setProvider(providerType, apiKey) {
     this.providerType = providerType;
-    switch (providerType) {
+    this.apiKey = apiKey;
+  }
+
+  /**
+   * Create a provider instance for a specific model
+   * @param {string} model - Model identifier
+   * @returns {LLMProvider} Provider instance
+   */
+  createProvider(model) {
+    switch (this.providerType) {
       case 'openai':
-        this.provider = new OpenAIProvider(apiKey);
-        break;
+        return new OpenAIProvider(this.apiKey, model);
       case 'claude':
-        this.provider = new ClaudeProvider(apiKey);
-        break;
+        return new ClaudeProvider(this.apiKey, model);
       case 'azure-claude':
-        this.provider = new AzureClaudeProvider(
-          apiKey,
-          options.resource || CONFIG.AZURE_RESOURCE,
-          options.model || CONFIG.AZURE_MODEL
-        );
-        break;
+        return new AzureClaudeProvider(this.apiKey, CONFIG.AZURE_RESOURCE, model);
       case 'groq':
-        this.provider = new GroqProvider(apiKey, options.model || 'llama-3.3-70b-versatile');
-        break;
+        return new GroqProvider(this.apiKey, model);
       case 'gemini':
-        this.provider = new GeminiProvider(apiKey, options.model || 'gemini-2.5-flash');
-        break;
+        return new GeminiProvider(this.apiKey, model);
       default:
-        throw new Error(`Unknown provider: ${providerType}`);
+        throw new Error(`Unknown provider: ${this.providerType}`);
     }
   }
 
   /**
-   * Set which players are AI-controlled
+   * Set which players are AI-controlled with per-player model config
    * @param {number[]} playerIds - Array of player IDs that should be AI-controlled
+   * @param {Object} playerModelConfig - Map of playerId -> model name (optional)
    */
-  setAIPlayers(playerIds) {
+  setAIPlayers(playerIds, playerModelConfig = {}) {
     this.agents = {};
+    
+    const defaultModel = 'moonshotai/kimi-k2-instruct-0905';
     
     // Build player types and models for data collection
     const playerTypes = {};
@@ -78,7 +87,7 @@ export class AgentManager {
     for (let i = 0; i < 4; i++) {
       if (playerIds.includes(i)) {
         playerTypes[i] = 'ai';
-        playerModels[i] = this.provider?.getModelName?.() || this.provider?.model || 'unknown';
+        playerModels[i] = playerModelConfig[i] || defaultModel;
       } else {
         playerTypes[i] = 'human';
       }
@@ -91,14 +100,13 @@ export class AgentManager {
       chips: this.game.startingChips || 7
     });
     
-    // Create AI agents
+    // Create AI agents with per-player providers
     for (const id of playerIds) {
-      if (!this.provider) {
-        throw new Error('Provider not set. Call setProvider first.');
-      }
-      this.agents[id] = new AIAgent(id, this.provider, this.game, this.onAction);
+      const model = playerModelConfig[id] || defaultModel;
+      const provider = this.createProvider(model);
+      this.agents[id] = new AIAgent(id, provider, this.game, this.onAction);
+      console.log(`🤖 ${COLORS[id].toUpperCase()} agent: ${model}`);
     }
-    console.log(`AI agents created for players: ${playerIds.map(id => COLORS[id]).join(', ')}`);
   }
 
   /**
@@ -126,6 +134,9 @@ export class AgentManager {
     // Reset and add game_start snapshot
     this.dataCollector.reset();
     this.dataCollector.addGameStart(this.game);
+    
+    // Trigger initial save (game start)
+    this.dataCollector.triggerSave();
 
     // Start a separate loop for each AI agent with staggered start times
     Object.entries(this.agents).forEach(([id, agent], index) => {
@@ -524,6 +535,56 @@ export class AgentManager {
         }
       }
     }
+  }
+
+  /**
+   * Set up data collector with save callback
+   */
+  setupDataCollector() {
+    this.dataCollector.setSaveCallback(async (sessionId, gameData) => {
+      gameData.session.provider = this.providerType || 'groq';
+      await uploadGameToStorage(sessionId, gameData);
+    });
+  }
+
+  /**
+   * Handle page unload - save abandoned game
+   */
+  handleBeforeUnload(event) {
+    if (this.running && this.dataCollector.getSnapshotCount() > 0) {
+      // Mark as abandoned and save synchronously
+      this.dataCollector.gameStatus = 'abandoned';
+      const sessionId = this.dataCollector.getSessionId();
+      const modelName = this.provider?.getModelName?.() || this.provider?.model || 'unknown';
+      const gameData = this.dataCollector.exportData(this.providerType, modelName);
+      
+      // Use sendBeacon for reliable save on page unload
+      const blob = new Blob([JSON.stringify(gameData)], { type: 'application/json' });
+      const url = `https://fisiwiuxcaexlawqlfnl.supabase.co/storage/v1/object/game-data/games/${sessionId}.json`;
+      
+      // sendBeacon doesn't support custom headers, so we need to use fetch with keepalive
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpc2l3aXV4Y2FleGxhd3FsZm5sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxNzcyNTUsImV4cCI6MjA4MTc1MzI1NX0.QIA1uUId1ytjQdPL5Q_828Bgg3Vj9Xy4DPir6TDj-bE',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpc2l3aXV4Y2FleGxhd3FsZm5sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxNzcyNTUsImV4cCI6MjA4MTc1MzI1NX0.QIA1uUId1ytjQdPL5Q_828Bgg3Vj9Xy4DPir6TDj-bE',
+          'x-upsert': 'true'
+        },
+        body: JSON.stringify(gameData),
+        keepalive: true // Important for page unload
+      }).catch(() => {}); // Ignore errors on unload
+      
+      console.log('📤 Saving abandoned game on page unload:', sessionId);
+    }
+  }
+
+  /**
+   * Clean up event listeners
+   */
+  destroy() {
+    window.removeEventListener('beforeunload', this.boundBeforeUnload);
+    this.stop();
   }
 
   /**

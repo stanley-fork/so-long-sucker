@@ -138,17 +138,17 @@ body {
   color: var(--gold);
 }
 
-.nav-cta {
+.nav-link.nav-cta {
   padding: var(--space-sm) var(--space-lg);
   background: var(--gold);
-  color: var(--bg-deep);
+  color: #000 !important;
   border-radius: var(--radius-md);
   font-weight: 600;
 }
 
-.nav-cta:hover {
+.nav-link.nav-cta:hover {
   background: #e6c03e;
-  color: var(--bg-deep);
+  color: #000 !important;
 }
 
 /* Hero Section */
@@ -824,6 +824,47 @@ body {
   border-color: var(--gold);
 }
 
+.player-model-select {
+  width: 100%;
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: border-color 0.2s, opacity 0.2s;
+  margin-top: var(--space-xs);
+}
+
+.player-model-select:hover {
+  border-color: var(--gold);
+}
+
+.player-model-select:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.player-model-select.hidden {
+  display: none;
+}
+
+.api-note-open-source {
+  margin-top: var(--space-xs);
+  font-style: italic;
+}
+
+.api-note a {
+  color: var(--gold);
+  text-decoration: none;
+}
+
+.api-note a:hover {
+  text-decoration: underline;
+}
+
 /* Config grid */
 .config-grid {
   display: flex;
@@ -1007,9 +1048,34 @@ body {
 #game-container {
   min-height: 100vh;
   padding: var(--space-md);
+  padding-top: 70px; /* Account for fixed nav height */
   background:
     radial-gradient(ellipse at 50% 100%, rgba(212, 175, 55, 0.02) 0%, transparent 50%),
     var(--bg-deep);
+}
+
+/* Phase-based visual guidance - dim non-interactive elements */
+#game-container.phase-selectChip #piles-area {
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+#game-container.phase-selectPile .player-panel:not(.active) .chips {
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+
+#game-container.phase-selectPile .player-panel.active .chips {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Restore full opacity on game over */
+#game-container.phase-gameOver #piles-area,
+#game-container.phase-gameOver .player-panel .chips {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* Header */
@@ -1051,6 +1117,42 @@ body {
 .header-right {
   display: flex;
   gap: var(--space-sm);
+}
+
+/* Header border changes based on current player color */
+#game-container.current-red #game-header {
+  border-color: var(--red);
+  border-left: 4px solid var(--red);
+}
+
+#game-container.current-blue #game-header {
+  border-color: var(--blue);
+  border-left: 4px solid var(--blue);
+}
+
+#game-container.current-green #game-header {
+  border-color: var(--green);
+  border-left: 4px solid var(--green);
+}
+
+#game-container.current-yellow #game-header {
+  border-color: var(--yellow);
+  border-left: 4px solid var(--yellow);
+}
+
+/* AI turn indicator - subtle pulsing header */
+#game-container.turn-ai #game-header {
+  animation: ai-header-pulse 2s ease-in-out infinite;
+}
+
+@keyframes ai-header-pulse {
+  0%, 100% { background: var(--bg-surface); }
+  50% { background: var(--bg-elevated); }
+}
+
+/* Human turn - solid, clear */
+#game-container.turn-human #game-header {
+  background: var(--bg-surface);
 }
 
 /* Main game board */
@@ -1130,6 +1232,64 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin-top: var(--space-sm);
+}
+
+/* Clickable pile - glows when you can click it */
+.pile.clickable {
+  border-color: var(--gold);
+  animation: pile-pulse 1.5s ease-in-out infinite;
+  cursor: pointer;
+}
+
+@keyframes pile-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(212, 175, 55, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.6); }
+}
+
+/* New Pile card - big obvious "+" card */
+.pile-new {
+  border: 2px dashed var(--gold);
+  background: rgba(212, 175, 55, 0.08);
+  min-height: 120px;
+  min-width: 90px;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  animation: pile-new-pulse 1.5s ease-in-out infinite;
+  cursor: pointer;
+}
+
+.pile-new:hover {
+  background: rgba(212, 175, 55, 0.15);
+  transform: translateY(-4px) scale(1.02);
+}
+
+.pile-new-icon {
+  font-size: 2.5rem;
+  color: var(--gold);
+  font-weight: 300;
+  line-height: 1;
+}
+
+@keyframes pile-new-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+    border-color: var(--gold);
+  }
+  50% { 
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.5);
+    border-color: rgba(212, 175, 55, 0.8);
+  }
+}
+
+/* Empty piles message */
+.piles-empty {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: var(--space-xl);
+  text-align: center;
+  width: 100%;
 }
 
 /* Chips */
@@ -1230,6 +1390,34 @@ body {
 
 .chip-small.selected {
   transform: scale(1.2);
+}
+
+/* Clickable chip - pulses when you can click it */
+.chip-small.clickable {
+  animation: chip-pulse 1s ease-in-out infinite;
+  cursor: pointer;
+}
+
+.chip-small.clickable:hover {
+  animation: none;
+  transform: scale(1.25);
+}
+
+@keyframes chip-pulse {
+  0%, 100% { 
+    transform: scale(1);
+    box-shadow:
+      inset 0 2px 3px rgba(255,255,255,0.2),
+      inset 0 -2px 3px rgba(0,0,0,0.3),
+      0 2px 4px rgba(0,0,0,0.3);
+  }
+  50% { 
+    transform: scale(1.1);
+    box-shadow:
+      inset 0 2px 3px rgba(255,255,255,0.2),
+      inset 0 -2px 3px rgba(0,0,0,0.3),
+      0 0 15px rgba(212, 175, 55, 0.6);
+  }
 }
 
 .chip-small.red {
@@ -1410,6 +1598,44 @@ body {
 .player-panel.active {
   border-color: var(--gold);
   box-shadow: 0 0 0 1px var(--gold-dim);
+}
+
+/* Active player border matches their color */
+.player-panel.active[data-player="0"] {
+  border-color: var(--red);
+  box-shadow: 0 0 12px rgba(212, 85, 74, 0.4);
+}
+
+.player-panel.active[data-player="1"] {
+  border-color: var(--blue);
+  box-shadow: 0 0 12px rgba(74, 142, 184, 0.4);
+}
+
+.player-panel.active[data-player="2"] {
+  border-color: var(--green);
+  box-shadow: 0 0 12px rgba(90, 172, 125, 0.4);
+}
+
+.player-panel.active[data-player="3"] {
+  border-color: var(--yellow);
+  box-shadow: 0 0 12px rgba(217, 178, 52, 0.4);
+}
+
+/* AI player indicator - subtle robot icon/badge */
+.player-panel.ai-player .player-name::after {
+  content: '🤖';
+  margin-left: 6px;
+  font-size: 0.75rem;
+}
+
+/* AI player active - different glow style (more subtle, pulsing) */
+.player-panel.ai-player.active {
+  animation: ai-turn-pulse 2s ease-in-out infinite;
+}
+
+@keyframes ai-turn-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
 }
 
 .player-panel.eliminated {

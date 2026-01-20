@@ -5,6 +5,11 @@ const COLORS = ['red', 'blue', 'green', 'yellow'];
 
 export class GameDataCollector {
   constructor() {
+    this.onSave = null; // Callback for saving (set by manager, persists across resets)
+    // Player configuration (set via setPlayerConfig, persists across resets)
+    this.playerTypes = {}; // playerId -> 'human' | 'ai'
+    this.playerModels = {}; // playerId -> model name (for AI players)
+    this.chips = 7; // default chip count
     this.reset();
   }
 
@@ -16,10 +21,12 @@ export class GameDataCollector {
     this.lastAliveStatus = [true, true, true, true];
     this.lastChatSnapshotIndex = 0; // For incremental chat tracking
     
-    // Player configuration (set via setPlayerConfig)
-    this.playerTypes = {}; // playerId -> 'human' | 'ai'
-    this.playerModels = {}; // playerId -> model name (for AI players)
-    this.chips = 7; // default chip count
+    // Progress-based saving (new session ID per game)
+    this.sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    this.saveThresholds = [0.25, 0.50, 0.75]; // 25%, 50%, 75% of chips played
+    this.savedThresholds = []; // Track which thresholds we've saved at
+    this.gameStatus = 'in_progress'; // 'in_progress' | 'completed' | 'abandoned'
+    // NOTE: Don't reset onSave or player config - they persist across game resets
   }
 
   /**
@@ -155,9 +162,82 @@ export class GameDataCollector {
     });
   }
 
-  // Increment turn counter
+  // Increment turn counter and check for save threshold
   incrementTurn() {
     this.turnCount++;
+    this.checkSaveThreshold();
+  }
+
+  /**
+   * Set callback for when data should be saved
+   * @param {Function} callback - (sessionId, gameData) => Promise<void>
+   */
+  setSaveCallback(callback) {
+    this.onSave = callback;
+  }
+
+  /**
+   * Get the total number of chips in the game
+   */
+  getTotalChips() {
+    return this.chips * 4;
+  }
+
+  /**
+   * Get current game progress (0 to 1)
+   */
+  getProgress() {
+    return this.turnCount / this.getTotalChips();
+  }
+
+  /**
+   * Check if we've crossed a save threshold and trigger save
+   */
+  checkSaveThreshold() {
+    const progress = this.getProgress();
+    
+    for (const threshold of this.saveThresholds) {
+      if (progress >= threshold && !this.savedThresholds.includes(threshold)) {
+        this.savedThresholds.push(threshold);
+        console.log(`📊 Crossed ${threshold * 100}% threshold (${this.turnCount} turns)`);
+        this.triggerSave();
+        break; // Only save once per turn
+      }
+    }
+  }
+
+  /**
+   * Trigger a save to storage
+   */
+  async triggerSave() {
+    if (this.onSave) {
+      const data = this.exportData();
+      await this.onSave(this.sessionId, data);
+    }
+  }
+
+  /**
+   * Mark game as completed and trigger final save
+   */
+  async markCompleted(game) {
+    this.gameStatus = 'completed';
+    this.addGameEnd(game);
+    await this.triggerSave();
+  }
+
+  /**
+   * Mark game as abandoned and trigger save
+   */
+  async markAbandoned() {
+    this.gameStatus = 'abandoned';
+    await this.triggerSave();
+  }
+
+  /**
+   * Get session ID
+   */
+  getSessionId() {
+    return this.sessionId;
   }
 
   // Export data in the same format as CLI
@@ -174,17 +254,28 @@ export class GameDataCollector {
       }
     }
 
+    // Find winner from snapshots if game ended
+    let winner = null;
+    const endSnapshot = this.snapshots.find(s => s.type === 'game_end');
+    if (endSnapshot) {
+      winner = endSnapshot.winner;
+    }
+
     return {
       session: {
-        id: `session-${Date.now()}`,
+        id: this.sessionId,
         provider: providerType || 'unknown',
         model: modelName || 'unknown',
         playerTypes: playerTypesExport, // { red: 'human', blue: 'ai', ... }
-        playerModels: Object.keys(playerModelsExport).length > 0 ? playerModelsExport : null, // { blue: 'gemini-2.5-flash', ... }
+        playerModels: Object.keys(playerModelsExport).length > 0 ? playerModelsExport : null,
         startTime: this.startTime,
         endTime: Date.now(),
         totalGames: 1,
         chips: this.chips,
+        totalTurns: this.turnCount,
+        eliminationOrder: this.eliminationOrder,
+        winner: winner,
+        status: this.gameStatus, // 'in_progress' | 'completed' | 'abandoned'
         source: 'browser' // Distinguish from CLI data
       },
       snapshots: this.snapshots
