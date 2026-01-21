@@ -19,9 +19,9 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://so-long-sucker.vercel.app/analysis/presentation.html</loc>
+    <loc>https://so-long-sucker.vercel.app/blog.html</loc>
     <lastmod>2026-01-20</lastmod>
-    <changefreq>monthly</changefreq>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 </urlset>
