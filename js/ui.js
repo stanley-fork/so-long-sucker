@@ -36,11 +36,13 @@ export class UI {
     if (!modelConfig) return 'AI';
     
     const modelMap = {
-      'gemini:gemini-2.5-flash': 'Gemini 2.5',
       'gemini:gemini-3-flash-preview': 'Gemini 3',
+      'gemini:gemini-2.5-flash': 'Gemini 2.5',
+      'groq:openai/gpt-oss-120b': 'GPT-OSS',
       'groq:moonshotai/kimi-k2-instruct-0905': 'Kimi K2',
       'groq:llama-3.3-70b-versatile': 'Llama 3.3',
       'groq:qwen/qwen3-32b': 'Qwen 3',
+      'openai/gpt-oss-120b': 'GPT-OSS',
       'moonshotai/kimi-k2-instruct-0905': 'Kimi K2',
       'llama-3.3-70b-versatile': 'Llama 3.3',
       'qwen/qwen3-32b': 'Qwen 3'

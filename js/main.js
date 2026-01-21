@@ -416,17 +416,18 @@ class SoLongSucker {
     
     const models = [];
     
-    // Gemini models first (default)
+    // Gemini models first (Gemini 3 Flash as default)
     if (CONFIG.GEMINI_ENABLED) {
       models.push(
-        { value: 'gemini:gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
-        { value: 'gemini:gemini-3-flash-preview', label: 'Gemini 3 Flash' }
+        { value: 'gemini:gemini-3-flash-preview', label: 'Gemini 3 Flash' },
+        { value: 'gemini:gemini-2.5-flash', label: 'Gemini 2.5 Flash' }
       );
     }
     
     // Groq models
     if (CONFIG.GROQ_ENABLED) {
       models.push(
+        { value: 'groq:openai/gpt-oss-120b', label: 'GPT-OSS 120B' },
         { value: 'groq:moonshotai/kimi-k2-instruct-0905', label: 'Kimi K2' },
         { value: 'groq:llama-3.3-70b-versatile', label: 'Llama 3.3 70B' },
         { value: 'groq:qwen/qwen3-32b', label: 'Qwen 3 32B' }

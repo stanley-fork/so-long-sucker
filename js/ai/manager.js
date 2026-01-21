@@ -106,7 +106,7 @@ export class AgentManager {
   setAIPlayers(playerIds, playerModelConfig = {}) {
     this.agents = {};
     
-    const defaultModel = 'gemini:gemini-2.5-flash';
+    const defaultModel = 'gemini:gemini-3-flash-preview';
     
     // Build player types and models for data collection
     const playerTypes = {};
