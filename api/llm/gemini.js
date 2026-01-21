@@ -1,3 +1,30 @@
+// Simple in-memory rate limiter (800 requests/hour per IP)
+const rateLimitMap = new Map();
+const RATE_LIMIT = 800;
+const RATE_WINDOW = 60 * 60 * 1000; // 1 hour
+
+function getIP(request) {
+  const forwarded = request.headers.get('x-forwarded-for');
+  return forwarded ? forwarded.split(',')[0].trim() : 'unknown';
+}
+
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+  
+  if (!record || now - record.start > RATE_WINDOW) {
+    rateLimitMap.set(ip, { start: now, count: 1 });
+    return { allowed: true, remaining: RATE_LIMIT - 1 };
+  }
+  
+  if (record.count >= RATE_LIMIT) {
+    return { allowed: false, remaining: 0 };
+  }
+  
+  record.count++;
+  return { allowed: true, remaining: RATE_LIMIT - record.count };
+}
+
 function convertSchema(schema) {
   if (!schema || typeof schema !== 'object') return schema;
   const result = {};
@@ -44,6 +71,17 @@ function formatTools(tools) {
 }
 
 export async function POST(request) {
+  const ip = getIP(request);
+  const rateLimit = checkRateLimit(ip);
+  
+  if (!rateLimit.allowed) {
+    console.log(`🚫 Gemini rate limit exceeded for IP: ${ip}`);
+    return Response.json(
+      { error: 'Rate limit exceeded', fallbackToGroq: true },
+      { status: 429 }
+    );
+  }
+
   const { systemPrompt, userPrompt, tools, model } = await request.json();
 
   const apiKey = process.env.GEMINI_API_KEY;
@@ -54,8 +92,8 @@ export async function POST(request) {
     );
   }
 
-  const modelName = model || 'gemini-2.5-flash';
-  console.log(`🤖 Gemini [proxy] ${modelName}`);
+  const modelName = model || 'gemini-3-flash-preview';
+  console.log(`🤖 Gemini [proxy] ${modelName} (${rateLimit.remaining} remaining)`);
 
   const body = {
     systemInstruction: { parts: [{ text: systemPrompt }] },

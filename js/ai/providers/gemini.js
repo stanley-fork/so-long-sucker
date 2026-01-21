@@ -1,14 +1,17 @@
 import { LLMProvider } from './base.js';
+import { GroqProvider } from './groq.js';
 
 export class GeminiProvider extends LLMProvider {
-  constructor(apiKey, model = 'gemini-2.5-flash') {
+  constructor(apiKey, model = 'gemini-3-flash-preview') {
     super(apiKey);
     this.model = model;
     this.proxyUrl = '/api/llm/gemini';
+    this.fallbackProvider = null;
+    this.usingFallback = false;
   }
 
   getName() {
-    return 'Gemini';
+    return this.usingFallback ? 'Groq (fallback)' : 'Gemini';
   }
 
   async call(systemPrompt, userPrompt, tools) {
@@ -28,6 +31,24 @@ export class GeminiProvider extends LLMProvider {
         model: this.model
       })
     });
+
+    // Handle rate limit - fallback to Groq
+    if (response.status === 429) {
+      const errorData = await response.json();
+      if (errorData.fallbackToGroq) {
+        console.log(`⚠️ Gemini rate limited, falling back to Groq GPT-OSS`);
+        
+        if (!this.usingFallback) {
+          this.usingFallback = true;
+          window.dispatchEvent(new CustomEvent('llm-fallback', {
+            detail: { from: 'Gemini', to: 'GPT-OSS 120B' }
+          }));
+        }
+        
+        return this._callGroqFallback(systemPrompt, userPrompt, tools);
+      }
+      throw new Error(`Gemini API error: Rate limit exceeded`);
+    }
 
     const responseTime = Date.now() - startTime;
 
@@ -62,6 +83,13 @@ export class GeminiProvider extends LLMProvider {
         rawToolCalls
       }
     };
+  }
+
+  async _callGroqFallback(systemPrompt, userPrompt, tools) {
+    if (!this.fallbackProvider) {
+      this.fallbackProvider = new GroqProvider('proxy', 'openai/gpt-oss-120b');
+    }
+    return this.fallbackProvider.call(systemPrompt, userPrompt, tools);
   }
 
   async test() {

@@ -8,6 +8,33 @@ export class UI {
     this.aiPlayers = [];  // Track which players are AI
     this.cacheElements();
     this.bindEvents();
+    this.setupToastListener();
+  }
+
+  setupToastListener() {
+    window.addEventListener('llm-fallback', (e) => {
+      this.showToast(`Switched to ${e.detail.to} (rate limit reached)`, 'warning');
+    });
+  }
+
+  showToast(message, type = 'info') {
+    const existing = document.querySelector('.toast-notification');
+    if (existing) existing.remove();
+    
+    const toast = document.createElement('div');
+    toast.className = `toast-notification toast-${type}`;
+    toast.innerHTML = `
+      <span class="toast-icon">${type === 'warning' ? '⚠️' : 'ℹ️'}</span>
+      <span class="toast-message">${message}</span>
+    `;
+    
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 300);
+    }, 5000);
   }
 
   /**
