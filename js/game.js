@@ -21,6 +21,10 @@ export class Game {
     this.winner = null;
     this.pileIdCounter = 0;
 
+    // Turn tracking for AI context
+    this.turnCount = 0;
+    this.actionHistory = [];
+
     // Temporary state for multi-step actions
     this.selectedChip = null;
     this.pendingCapture = null;
@@ -66,6 +70,23 @@ export class Game {
   }
 
   /**
+   * Log an action to history (for AI context)
+   * @param {string} playerColor - Color of player taking action
+   * @param {string} action - Action description
+   */
+  logAction(playerColor, action) {
+    this.actionHistory.push({
+      turn: this.turnCount,
+      player: playerColor,
+      action
+    });
+    // Keep only last 20 actions to avoid memory bloat
+    if (this.actionHistory.length > 20) {
+      this.actionHistory.shift();
+    }
+  }
+
+  /**
    * Select a chip to play
    * @param {string} color - Color of chip to play
    */
@@ -94,10 +115,12 @@ export class Game {
     const color = player.playChip(this.selectedChip);
 
     let pile;
+    let isNewPile = false;
     if (pileId === null) {
       // New pile
       pile = new Pile(this.pileIdCounter++);
       this.piles.push(pile);
+      isNewPile = true;
     } else {
       pile = this.piles.find(p => p.id === pileId);
       if (!pile) throw new Error('Pile not found');
@@ -109,6 +132,11 @@ export class Game {
     // Add chip to pile
     pile.addChip(color);
     this.selectedChip = null;
+
+    // Log the action and increment turn
+    this.turnCount++;
+    const pileDesc = isNewPile ? 'new pile' : `pile ${pileId}`;
+    this.logAction(player.color, `played ${color} on ${pileDesc}`);
 
     if (willCapture) {
       this.pendingCapture = pile;
@@ -244,6 +272,9 @@ export class Game {
     const capturingPlayer = this.getCurrentPlayer();
     capturingPlayer.receivePrisoners(captured);
 
+    // Log the capture
+    this.logAction(capturingPlayer.color, `captured pile, killed ${killed}, got ${captured.length} chips`);
+
     // Remove empty pile
     this.piles = this.piles.filter(p => !p.isEmpty());
 
@@ -317,6 +348,9 @@ export class Game {
       donor.donatePrisoner(color);
       requester.receiveDonation(color);
 
+      // Log the donation
+      this.logAction(donor.color, `donated ${color} to ${requester.color}`);
+
       this.phase = 'selectChip';
       this.donationRequester = null;
       this.donationAskedPlayers = [];
@@ -324,6 +358,11 @@ export class Game {
 
       return { action: 'donationAccepted', donor: donorIndex, color };
     }
+
+    // Log refusal
+    const donor = this.players[donorIndex];
+    const requester = this.players[this.donationRequester];
+    this.logAction(donor.color, `refused to donate to ${requester.color}`);
 
     // Refused - ask next player
     return this.askNextDonation();
@@ -334,7 +373,11 @@ export class Game {
    * @param {number} playerIndex
    */
   eliminatePlayer(playerIndex) {
-    this.players[playerIndex].eliminate();
+    const eliminated = this.players[playerIndex];
+    eliminated.eliminate();
+
+    // Log elimination
+    this.logAction(eliminated.color, 'was eliminated');
 
     this.donationRequester = null;
     this.donationAskedPlayers = [];
@@ -533,6 +576,9 @@ export class Game {
       pendingCaptureColor: this.pendingCaptureColor,
       donationRequester: this.donationRequester,
       currentDonor: this.currentDonor,
+      // Turn tracking for AI context
+      turnCount: this.turnCount,
+      actionHistory: [...this.actionHistory],
       // Negotiation state
       messages: [...this.messages],
       promises: this.promises.map(p => ({ ...p })),

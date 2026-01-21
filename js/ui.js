@@ -447,6 +447,11 @@ export class UI {
       btn.className = `modal-btn donate`;
       btn.innerHTML = `<span class="chip-small ${color}" style="margin-right: 8px;"></span> Donate ${color}`;
       btn.addEventListener('click', () => {
+        // Check if game is still in the expected phase
+        if (this.game.phase !== 'donation') {
+          this.hideAllModals();
+          return;
+        }
         this.onAction('donate', { donor: donorIndex, accepts: true, color });
       });
       this.elements.donationOptions.appendChild(btn);
@@ -457,6 +462,11 @@ export class UI {
     refuseBtn.className = 'modal-btn refuse';
     refuseBtn.textContent = 'Refuse';
     refuseBtn.addEventListener('click', () => {
+      // Check if game is still in the expected phase
+      if (this.game.phase !== 'donation') {
+        this.hideAllModals();
+        return;
+      }
       this.onAction('donate', { donor: donorIndex, accepts: false });
     });
     this.elements.donationOptions.appendChild(refuseBtn);
@@ -478,6 +488,11 @@ export class UI {
       btn.innerHTML = `<span class="chip-small ${color}" style="margin-right: 8px;"></span> ${color.charAt(0).toUpperCase() + color.slice(1)}`;
       btn.style.borderLeft = `4px solid var(--${color})`;
       btn.addEventListener('click', () => {
+        // Check if game is still in the expected phase
+        if (this.game.phase !== 'selectNextPlayer') {
+          this.hideAllModals();
+          return;
+        }
         this.onAction('chooseNextPlayer', player.id);
       });
       this.elements.nextPlayerOptions.appendChild(btn);
@@ -499,6 +514,11 @@ export class UI {
       btn.innerHTML = `<span class="chip-small ${color}" style="margin-right: 8px;"></span> Kill ${color}`;
       btn.style.borderLeft = `4px solid var(--${color})`;
       btn.addEventListener('click', () => {
+        // Check if game is still in the expected phase
+        if (this.game.phase !== 'capture') {
+          this.hideAllModals();
+          return;
+        }
         this.onAction('resolveCapture', color);
       });
       this.elements.captureChips.appendChild(btn);

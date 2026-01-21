@@ -393,6 +393,12 @@ export class AgentManager {
    * Recovery: selectChip phase
    */
   recoverSelectChip(player, playerId) {
+    // Don't auto-recover if current player is human
+    if (!this.isAI(playerId)) {
+      console.log(`🔧 Recovery: Skipping - waiting for human ${COLORS[playerId]} to select chip`);
+      return false;
+    }
+    
     // Check if player has no chips - should trigger donation
     if (player.supply === 0 && player.prisoners.length === 0) {
       console.log(`🔧 Recovery: ${COLORS[playerId]} has no chips, triggering donation`);
@@ -419,6 +425,13 @@ export class AgentManager {
    * Recovery: selectPile phase
    */
   recoverSelectPile() {
+    // Don't auto-recover if current player is human
+    const state = this.game.getState();
+    if (!this.isAI(state.currentPlayer)) {
+      console.log(`🔧 Recovery: Skipping - waiting for human ${COLORS[state.currentPlayer]} to select pile`);
+      return false;
+    }
+    
     console.log(`🔧 Recovery: Auto-playing on new pile`);
     try {
       const result = this.game.playOnPile(null);
@@ -439,6 +452,12 @@ export class AgentManager {
    * Recovery: selectNextPlayer phase
    */
   recoverSelectNextPlayer(state) {
+    // Don't auto-recover if current player is human
+    if (!this.isAI(state.currentPlayer)) {
+      console.log(`🔧 Recovery: Skipping - waiting for human ${COLORS[state.currentPlayer]} to choose next player`);
+      return false;
+    }
+    
     // Find first alive player that's not current
     const alivePlayers = state.players.filter(p => p.isAlive && p.id !== state.currentPlayer);
     if (alivePlayers.length > 0) {
@@ -454,6 +473,12 @@ export class AgentManager {
    * Recovery: capture phase
    */
   recoverCapture(state) {
+    // Don't auto-recover if current player is human
+    if (!this.isAI(state.currentPlayer)) {
+      console.log(`🔧 Recovery: Skipping - waiting for human ${COLORS[state.currentPlayer]} to choose chip to kill`);
+      return false;
+    }
+    
     if (state.pendingCapture && state.pendingCapture.chips.length > 0) {
       // Kill the first chip in the pile
       const chipToKill = state.pendingCapture.chips[0];
@@ -474,7 +499,13 @@ export class AgentManager {
   recoverDonation(state) {
     const currentDonor = state.currentDonor;
     if (currentDonor !== null) {
-      // Auto-refuse donation from current donor
+      // Don't auto-refuse if the donor is human - let them decide
+      if (!this.isAI(currentDonor)) {
+        console.log(`🔧 Recovery: Skipping - waiting for human ${COLORS[currentDonor]} to respond to donation`);
+        return false;
+      }
+      
+      // Auto-refuse donation from AI donor
       console.log(`🔧 Recovery: Auto-refusing donation from ${COLORS[currentDonor]}`);
       const result = this.game.handleDonation(currentDonor, false);
       if (result?.action === 'gameOver') {

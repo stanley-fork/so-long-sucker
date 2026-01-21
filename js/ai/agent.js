@@ -88,7 +88,7 @@ HOW TO PLAY:
     const myPlayer = state.players[this.playerId];
     const isMyTurn = state.currentPlayer === this.playerId;
 
-    let prompt = `CURRENT GAME STATE:
+    let prompt = `GAME TURN: ${state.turnCount || 0}
 
 YOUR STATUS (${this.color.toUpperCase()}):
 - Supply: ${myPlayer.supply} ${this.color} chips
@@ -108,8 +108,16 @@ ${state.piles.length === 0 ? '- No piles yet' : state.piles.map(p =>
 DEAD BOX: ${state.deadBox.length > 0 ? state.deadBox.join(', ') : 'empty'}
 
 PHASE: ${state.phase}
-CURRENT TURN: ${COLORS[state.currentPlayer].toUpperCase()}${isMyTurn ? ' (YOU)' : ''}
+CURRENT PLAYER: ${COLORS[state.currentPlayer].toUpperCase()}${isMyTurn ? ' (YOU)' : ''}
 `;
+
+    // Add recent action history for context
+    if (state.actionHistory?.length > 0) {
+      const recent = state.actionHistory.slice(-10);
+      prompt += `\nRECENT ACTIONS:\n${recent.map(a => 
+        `- Turn ${a.turn}: ${a.player.toUpperCase()} ${a.action}`
+      ).join('\n')}\n`;
+    }
 
     // Add phase-specific context
     if (state.phase === 'selectChip' && isMyTurn) {
