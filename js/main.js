@@ -418,7 +418,8 @@ class SoLongSucker {
     const groqModels = [
       { value: 'moonshotai/kimi-k2-instruct-0905', label: 'Kimi K2' },
       { value: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B' },
-      { value: 'qwen/qwen3-32b', label: 'Qwen 3 32B' }
+      { value: 'qwen/qwen3-32b', label: 'Qwen 3 32B' },
+      { value: 'openai/gpt-oss-120b', label: 'GPT-OSS 120B' }
     ];
 
     modelSelects.forEach(select => {

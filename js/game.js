@@ -112,19 +112,23 @@ export class Game {
     }
 
     const player = this.getCurrentPlayer();
-    const color = player.playChip(this.selectedChip);
 
     let pile;
     let isNewPile = false;
     if (pileId === null) {
-      // New pile
       pile = new Pile(this.pileIdCounter++);
       this.piles.push(pile);
       isNewPile = true;
     } else {
-      pile = this.piles.find(p => p.id === pileId);
+      const normalizedPileId = typeof pileId === 'string' ? parseInt(pileId, 10) : pileId;
+      if (typeof normalizedPileId !== 'number' || isNaN(normalizedPileId)) {
+        throw new Error('Invalid pile ID');
+      }
+      pile = this.piles.find(p => p.id === normalizedPileId);
       if (!pile) throw new Error('Pile not found');
     }
+
+    const color = player.playChip(this.selectedChip);
 
     // Check for capture BEFORE adding chip
     const willCapture = pile.wouldCapture(color);
@@ -226,7 +230,11 @@ export class Game {
     if (this.phase !== 'selectNextPlayer') {
       throw new Error('Not in next player selection phase');
     }
-    return this.setNextPlayer(playerIndex);
+    const idx = typeof playerIndex === 'string' ? parseInt(playerIndex, 10) : playerIndex;
+    if (typeof idx !== 'number' || isNaN(idx) || idx < 0 || idx > 3) {
+      throw new Error('Invalid player index');
+    }
+    return this.setNextPlayer(idx);
   }
 
   /**
@@ -234,10 +242,15 @@ export class Game {
    * @param {number} playerIndex
    */
   setNextPlayer(playerIndex) {
+    if (playerIndex < 0 || playerIndex > 3) {
+      throw new Error('Invalid player index');
+    }
     const nextPlayer = this.players[playerIndex];
+    if (!nextPlayer) {
+      throw new Error('Player not found');
+    }
 
     if (!nextPlayer.isAlive) {
-      // Skip eliminated players
       return this.setNextPlayer((playerIndex + 1) % 4);
     }
 

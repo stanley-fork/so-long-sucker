@@ -259,13 +259,23 @@ CURRENT PLAYER: ${COLORS[state.currentPlayer].toUpperCase()}${isMyTurn ? ' (YOU)
         case 'selectPile':
           this.consecutiveThinks = 0;
           this.thoughts = [];
-          const pileId = action.arguments.pileId === 'new' ? null : action.arguments.pileId;
+          let pileId = action.arguments.pileId;
+          if (pileId === 'new' || pileId === null || pileId === undefined) {
+            pileId = null;
+          } else {
+            pileId = parseInt(pileId, 10);
+            if (isNaN(pileId)) pileId = null;
+          }
           this.onAction('playOnPile', pileId);
           return true;
 
         case 'chooseNextPlayer':
           this.consecutiveThinks = 0;
-          this.onAction('chooseNextPlayer', action.arguments.playerId);
+          const playerId = parseInt(action.arguments.playerId, 10);
+          if (isNaN(playerId)) {
+            throw new Error('Invalid player ID');
+          }
+          this.onAction('chooseNextPlayer', playerId);
           return true;
 
         case 'killChip':
