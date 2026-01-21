@@ -74,6 +74,31 @@ export class AgentManager {
   }
 
   /**
+   * Create a provider instance by explicit provider type
+   * @param {string} providerType - Provider type (groq, gemini, etc.)
+   * @param {string} model - Model identifier
+   * @returns {LLMProvider} Provider instance
+   */
+  createProviderByType(providerType, model) {
+    switch (providerType) {
+      case 'openai':
+        return new OpenAIProvider(this.apiKey, model);
+      case 'claude':
+        return new ClaudeProvider(this.apiKey, model);
+      case 'azure-claude':
+        return new AzureClaudeProvider(this.apiKey, CONFIG.AZURE_RESOURCE, model);
+      case 'groq':
+        return new GroqProvider(this.apiKey, model);
+      case 'gemini':
+        return new GeminiProvider(this.apiKey, model);
+      case 'openrouter':
+        return new OpenRouterProvider(this.apiKey, model);
+      default:
+        throw new Error(`Unknown provider: ${providerType}`);
+    }
+  }
+
+  /**
    * Set which players are AI-controlled with per-player model config
    * @param {number[]} playerIds - Array of player IDs that should be AI-controlled
    * @param {Object} playerModelConfig - Map of playerId -> model name (optional)
@@ -81,7 +106,7 @@ export class AgentManager {
   setAIPlayers(playerIds, playerModelConfig = {}) {
     this.agents = {};
     
-    const defaultModel = 'moonshotai/kimi-k2-instruct-0905';
+    const defaultModel = 'gemini:gemini-2.5-flash';
     
     // Build player types and models for data collection
     const playerTypes = {};
@@ -105,10 +130,21 @@ export class AgentManager {
     
     // Create AI agents with per-player providers
     for (const id of playerIds) {
-      const model = playerModelConfig[id] || defaultModel;
-      const provider = this.createProvider(model);
+      const modelConfig = playerModelConfig[id] || defaultModel;
+      
+      // Parse provider:model format (e.g., "gemini:gemini-2.5-flash")
+      let providerType, model;
+      if (modelConfig.includes(':')) {
+        [providerType, model] = modelConfig.split(':');
+      } else {
+        // Legacy format - use global providerType
+        providerType = this.providerType;
+        model = modelConfig;
+      }
+      
+      const provider = this.createProviderByType(providerType, model);
       this.agents[id] = new AIAgent(id, provider, this.game, this.onAction);
-      console.log(`🤖 ${COLORS[id].toUpperCase()} agent: ${model}`);
+      console.log(`🤖 ${COLORS[id].toUpperCase()} agent: ${providerType}/${model}`);
     }
   }
 

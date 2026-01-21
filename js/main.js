@@ -413,15 +413,27 @@ class SoLongSucker {
   updateModelOptionsForProvider() {
     const modelSelects = document.querySelectorAll('.player-model-select');
     
-    const groqModels = [
-      { value: 'moonshotai/kimi-k2-instruct-0905', label: 'Kimi K2' },
-      { value: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B' },
-      { value: 'qwen/qwen3-32b', label: 'Qwen 3 32B' },
-      { value: 'openai/gpt-oss-120b', label: 'GPT-OSS 120B' }
-    ];
+    const models = [];
+    
+    // Gemini models first (default)
+    if (CONFIG.GEMINI_ENABLED) {
+      models.push(
+        { value: 'gemini:gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+        { value: 'gemini:gemini-3-flash-preview', label: 'Gemini 3 Flash' }
+      );
+    }
+    
+    // Groq models
+    if (CONFIG.GROQ_ENABLED) {
+      models.push(
+        { value: 'groq:moonshotai/kimi-k2-instruct-0905', label: 'Kimi K2' },
+        { value: 'groq:llama-3.3-70b-versatile', label: 'Llama 3.3 70B' },
+        { value: 'groq:qwen/qwen3-32b', label: 'Qwen 3 32B' }
+      );
+    }
 
     modelSelects.forEach(select => {
-      select.innerHTML = groqModels.map(m => 
+      select.innerHTML = models.map(m => 
         `<option value="${m.value}">${m.label}</option>`
       ).join('');
     });
@@ -685,9 +697,11 @@ class SoLongSucker {
         return;
       }
     } else {
-      providerType = 'groq';
+      // Free play - provider determined by model selection (provider:model format)
       finalApiKey = 'proxy';
-      if (aiPlayers.length > 0 && !CONFIG.GROQ_ENABLED) {
+      providerType = 'free';
+      
+      if (aiPlayers.length > 0 && !CONFIG.GEMINI_ENABLED && !CONFIG.GROQ_ENABLED) {
         alert('Free play is not available. Please use OpenRouter with your own API key.');
         return;
       }
@@ -724,8 +738,8 @@ class SoLongSucker {
       );
       this.agentManager.setProvider(providerType, finalApiKey);
       this.agentManager.setAIPlayers(aiPlayers, playerModels);
-      // Tell UI which players are AI so it can disable controls during AI turns
-      this.ui.setAIPlayers(aiPlayers);
+      // Tell UI which players are AI and their models
+      this.ui.setAIPlayers(aiPlayers, playerModels);
     }
 
     // Switch from setup to game

@@ -13,9 +13,11 @@ export class UI {
   /**
    * Set which players are AI-controlled
    * @param {number[]} aiPlayers - Array of player indices that are AI
+   * @param {Object} playerModels - Map of playerId -> model name (optional)
    */
-  setAIPlayers(aiPlayers) {
+  setAIPlayers(aiPlayers, playerModels = {}) {
     this.aiPlayers = aiPlayers || [];
+    this.playerModels = playerModels || {};
   }
 
   /**
@@ -24,6 +26,27 @@ export class UI {
    */
   isAI(playerIndex) {
     return this.aiPlayers.includes(playerIndex);
+  }
+
+  /**
+   * Get display name for a model
+   * @param {string} modelConfig - Model config string (provider:model format)
+   */
+  getModelDisplayName(modelConfig) {
+    if (!modelConfig) return 'AI';
+    
+    const modelMap = {
+      'gemini:gemini-2.5-flash': 'Gemini 2.5',
+      'gemini:gemini-3-flash-preview': 'Gemini 3',
+      'groq:moonshotai/kimi-k2-instruct-0905': 'Kimi K2',
+      'groq:llama-3.3-70b-versatile': 'Llama 3.3',
+      'groq:qwen/qwen3-32b': 'Qwen 3',
+      'moonshotai/kimi-k2-instruct-0905': 'Kimi K2',
+      'llama-3.3-70b-versatile': 'Llama 3.3',
+      'qwen/qwen3-32b': 'Qwen 3'
+    };
+    
+    return modelMap[modelConfig] || modelConfig.split(':').pop().split('/').pop();
   }
 
   /**
@@ -330,6 +353,19 @@ export class UI {
         status.textContent = '◄ PLAYING';
       } else {
         status.textContent = '';
+      }
+
+      // Model name for AI players
+      let modelLabel = panel.querySelector('.player-model-label');
+      if (isAI && this.playerModels[i]) {
+        if (!modelLabel) {
+          modelLabel = document.createElement('div');
+          modelLabel.className = 'player-model-label';
+          status.parentNode.insertBefore(modelLabel, status.nextSibling);
+        }
+        modelLabel.textContent = this.getModelDisplayName(this.playerModels[i]);
+      } else if (modelLabel) {
+        modelLabel.remove();
       }
 
       // Supply chips
