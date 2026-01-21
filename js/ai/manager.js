@@ -505,13 +505,9 @@ export class AgentManager {
         return false;
       }
       
-      // Auto-refuse donation from AI donor
+      // Auto-refuse donation from AI donor - use onAction to properly trigger modal for next donor
       console.log(`🔧 Recovery: Auto-refusing donation from ${COLORS[currentDonor]}`);
-      const result = this.game.handleDonation(currentDonor, false);
-      if (result?.action === 'gameOver') {
-        this.dataCollector.addGameEnd(this.game);
-        this.stop();
-      }
+      this.onAction('donate', { donor: currentDonor, accepts: false });
       return true;
     }
 
