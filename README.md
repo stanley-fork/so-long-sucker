@@ -99,6 +99,7 @@ npm run simulate -- --providers gemini3,kimi,qwen3,gpt-oss --chips 7  # Mixed mo
 | 💻 **CLI Docs** | [CLI.md](./CLI.md) |
 | 🐙 **GitHub** | [github.com/lout33/so-long-sucker](https://github.com/lout33/so-long-sucker) |
 
+
 ---
 
 ## Credits
