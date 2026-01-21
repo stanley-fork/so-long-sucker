@@ -57,6 +57,7 @@ class SoLongSucker {
     this.bindModeEvents();
     this.bindSimulationEvents();
     this.loadSavedConfig();
+    this.updateModelOptionsForProvider();
   }
 
   /**
