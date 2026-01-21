@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "start": "vercel dev",
     "build": "vite build",
     "preview": "vite preview",
     "simulate": "node cli/index.js"

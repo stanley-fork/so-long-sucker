@@ -293,10 +293,8 @@ class SoLongSucker {
       ? providerValue.split(':')
       : [providerValue, null];
 
-    // Use default Groq key if not provided
-    const finalApiKey = providerType === 'groq' && !apiKey
-      ? CONFIG.GROQ_API_KEY
-      : apiKey;
+    // For Groq, use proxy (no API key needed on frontend)
+    const finalApiKey = providerType === 'groq' ? 'proxy' : apiKey;
 
     if (!finalApiKey) {
       alert('Please enter an API key');
@@ -499,7 +497,7 @@ class SoLongSucker {
     // Also set defaults for simulation fields (if they exist)
     const simApiKey = document.getElementById('sim-api-key');
     const simAzureResource = document.getElementById('sim-azure-resource');
-    if (simApiKey) simApiKey.value = CONFIG.GROQ_API_KEY;
+    if (simApiKey) simApiKey.value = CONFIG.GROQ_ENABLED ? 'proxy' : '';
     if (simAzureResource) simAzureResource.value = CONFIG.AZURE_RESOURCE;
 
     // Override with saved config if available
@@ -682,19 +680,17 @@ class SoLongSucker {
     if (selectedProvider === 'openrouter') {
       providerType = 'openrouter';
       finalApiKey = document.getElementById('openrouter-api-key').value;
+      if (aiPlayers.length > 0 && !finalApiKey) {
+        alert('Please enter your OpenRouter API key');
+        return;
+      }
     } else {
       providerType = 'groq';
-      finalApiKey = CONFIG.PUBLIC_GROQ_KEY || CONFIG.GROQ_API_KEY;
-    }
-
-    // Validate API key if AI players are selected
-    if (aiPlayers.length > 0 && !finalApiKey) {
-      if (selectedProvider === 'openrouter') {
-        alert('Please enter your OpenRouter API key');
-      } else {
+      finalApiKey = 'proxy';
+      if (aiPlayers.length > 0 && !CONFIG.GROQ_ENABLED) {
         alert('Free play is not available. Please use OpenRouter with your own API key.');
+        return;
       }
-      return;
     }
 
     // Save config

@@ -1,21 +1,16 @@
-// Groq LLM Provider (OpenAI-compatible)
-
 import { LLMProvider } from './base.js';
 
 export class GroqProvider extends LLMProvider {
   constructor(apiKey, model = 'llama-3.3-70b-versatile') {
     super(apiKey);
     this.model = model;
-    this.baseUrl = 'https://api.groq.com/openai/v1/chat/completions';
+    this.proxyUrl = '/api/llm/groq';
   }
 
   getName() {
     return 'Groq';
   }
 
-  /**
-   * Convert our tool format to OpenAI format
-   */
   formatTools(tools) {
     return tools.map(tool => ({
       type: 'function',
@@ -30,21 +25,18 @@ export class GroqProvider extends LLMProvider {
   async call(systemPrompt, userPrompt, tools) {
     const startTime = Date.now();
 
-    const response = await fetch(this.baseUrl, {
+    console.log(`🤖 Groq [proxy] ${this.model}`);
+
+    const response = await fetch(this.proxyUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: this.model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
+        systemPrompt,
+        userPrompt,
         tools: this.formatTools(tools),
-        tool_choice: 'auto',
-        temperature: 0.7
+        model: this.model
       })
     });
 
@@ -52,13 +44,12 @@ export class GroqProvider extends LLMProvider {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(`Groq API error: ${error.error?.message || response.statusText}`);
+      throw new Error(`Groq API error: ${error.error || response.statusText}`);
     }
 
     const data = await response.json();
     const message = data.choices[0].message;
 
-    // Parse tool calls, handling potential JSON parse errors
     const rawToolCalls = (message.tool_calls || []).map(tc => {
       try {
         return {
@@ -87,27 +78,25 @@ export class GroqProvider extends LLMProvider {
   }
 
   async test() {
-    console.log('🧪 Testing Groq connection...');
+    console.log('🧪 Testing Groq connection via proxy...');
     console.log('   Model:', this.model);
 
-    const response = await fetch(this.baseUrl, {
+    const response = await fetch(this.proxyUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: this.model,
-        messages: [
-          { role: 'user', content: 'Say "ok" and nothing else.' }
-        ],
-        max_tokens: 10
+        systemPrompt: 'You are a test assistant.',
+        userPrompt: 'Say "ok" and nothing else.',
+        tools: [],
+        model: this.model
       })
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(`Groq API error: ${error.error?.message || response.statusText}`);
+      throw new Error(`Groq API error: ${error.error || response.statusText}`);
     }
 
     const data = await response.json();

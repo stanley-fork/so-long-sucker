@@ -3,17 +3,13 @@
 
 // Debug: Log env check
 console.log('🔧 Environment check:', {
-  PUBLIC_GROQ_KEY: import.meta.env.VITE_PUBLIC_GROQ_KEY ? 'SET' : 'NOT SET',
-  GROQ_API_KEY: import.meta.env.VITE_GROQ_API_KEY ? 'SET' : 'NOT SET',
+  GROQ_ENABLED: import.meta.env.VITE_GROQ_ENABLED ? 'SET' : 'NOT SET',
   MODE: import.meta.env.MODE
 });
 
 export const CONFIG = {
-  // Groq API (for Llama & Kimi models)
-  GROQ_API_KEY: import.meta.env.VITE_GROQ_API_KEY || '',
-
-  // Public Groq key for Quick Play (shared for demo purposes)
-  PUBLIC_GROQ_KEY: import.meta.env.VITE_PUBLIC_GROQ_KEY || '',
+  // Groq enabled flag (server-side proxy handles the actual API key)
+  GROQ_ENABLED: import.meta.env.VITE_GROQ_ENABLED === 'true',
 
   // OpenRouter API (for users with their own keys)
   OPENROUTER_API_KEY: import.meta.env.VITE_OPENROUTER_API_KEY || '',
@@ -36,7 +32,7 @@ export const CONFIG = {
 export function isProviderConfigured(provider) {
   switch (provider) {
     case 'groq':
-      return !!CONFIG.GROQ_API_KEY;
+      return CONFIG.GROQ_ENABLED;
     case 'openrouter':
       return !!CONFIG.OPENROUTER_API_KEY;
     case 'openai':
@@ -52,15 +48,15 @@ export function isProviderConfigured(provider) {
   }
 }
 
-// Check if Quick Play is available (public key configured)
+// Check if Quick Play is available (Groq proxy enabled)
 export function isQuickPlayAvailable() {
-  return !!CONFIG.PUBLIC_GROQ_KEY;
+  return CONFIG.GROQ_ENABLED;
 }
 
 // Get configured providers
 export function getConfiguredProviders() {
   const providers = [];
-  if (CONFIG.GROQ_API_KEY) providers.push('groq');
+  if (CONFIG.GROQ_ENABLED) providers.push('groq');
   if (CONFIG.OPENROUTER_API_KEY) providers.push('openrouter');
   if (CONFIG.OPENAI_API_KEY) providers.push('openai');
   if (CONFIG.CLAUDE_API_KEY) providers.push('claude');
