@@ -439,6 +439,20 @@ class SoLongSucker {
         `<option value="${m.value}">${m.label}</option>`
       ).join('');
     });
+
+    // Set different defaults per player
+    const defaults = [
+      'gemini:gemini-3-flash-preview',           // Red (player 0)
+      'gemini:gemini-3-flash-preview',           // Blue (player 1) -> Gemini 3 Flash
+      'groq:openai/gpt-oss-120b',                // Green (player 2) -> GPT-OSS 120B
+      'groq:moonshotai/kimi-k2-instruct-0905'    // Yellow (player 3) -> Kimi K2
+    ];
+    
+    modelSelects.forEach((select, i) => {
+      if (defaults[i] && models.some(m => m.value === defaults[i])) {
+        select.value = defaults[i];
+      }
+    });
   }
 
   /**
