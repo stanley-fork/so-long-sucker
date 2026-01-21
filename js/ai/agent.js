@@ -61,8 +61,10 @@ GAME OVERVIEW:
 
 RULES:
 - Play 1 chip per turn onto piles
-- CAPTURE: If your chip matches the color directly below, you capture the pile
-  - Kill 1 chip (to dead box), keep the rest as prisoners
+- CAPTURE: When a chip is played on top of the SAME COLOR, the COLOR OWNER captures the pile
+  - The color owner (not necessarily the player who played) gets the pile
+  - They kill 1 chip (to dead box) and keep the rest as prisoners
+  - If the color owner is eliminated, the entire pile goes to dead box
 - NEXT PLAYER: You choose who plays next from colors missing in the pile
   - If all 4 colors present, owner of deepest chip goes next
 - DONATION: No chips means you must ask others for help, or be eliminated
@@ -71,6 +73,7 @@ RULES:
 STRATEGY:
 - Form alliances early to survive
 - Prisoners give flexibility (you can play any color)
+- Playing another player's color can GIVE THEM captures - use this strategically
 - Control who plays next to your advantage
 - Betrayal timing matters - too early loses allies, too late loses the game
 
@@ -131,7 +134,13 @@ CURRENT PLAYER: ${COLORS[state.currentPlayer].toUpperCase()}${isMyTurn ? ' (YOU)
         prompt += ` Pile IDs: ${state.piles.map(p => p.id).join(', ')}`;
       }
     } else if (state.phase === 'selectNextPlayer' && isMyTurn) {
-      prompt += `\nYou must choose who plays next from players whose color is missing from the pile.`;
+      const lastPile = state.piles[state.piles.length - 1];
+      const missingColors = lastPile ? COLORS.filter(c => !lastPile.chips.includes(c)) : [];
+      const eligiblePlayers = missingColors
+        .map(c => state.players.find(p => p.color === c))
+        .filter(p => p && p.isAlive)
+        .map(p => `${p.color.toUpperCase()} (${p.id})`);
+      prompt += `\nYou must choose who plays next. Eligible players: ${eligiblePlayers.join(', ')}`;
     } else if (state.phase === 'capture' && isMyTurn) {
       prompt += `\nYou captured a pile! Choose which chip to KILL (send to dead box).`;
       prompt += `\nChips in pile: ${state.pendingCapture.chips.join(', ')}`;
