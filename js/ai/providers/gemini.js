@@ -89,7 +89,16 @@ export class GeminiProvider extends LLMProvider {
     if (!this.fallbackProvider) {
       this.fallbackProvider = new GroqProvider('proxy', 'openai/gpt-oss-120b');
     }
-    return this.fallbackProvider.call(systemPrompt, userPrompt, tools);
+    const result = await this.fallbackProvider.call(systemPrompt, userPrompt, tools);
+    
+    result.metadata = {
+      ...result.metadata,
+      usedFallback: true,
+      fallbackModel: 'openai/gpt-oss-120b',
+      originalModel: this.model
+    };
+    
+    return result;
   }
 
   async test() {

@@ -123,6 +123,14 @@ export async function POST(request) {
 
   if (!response.ok) {
     console.error('❌ Gemini API error:', data.error?.message || response.statusText);
+    
+    if (response.status === 429) {
+      return Response.json(
+        { error: 'Rate limit exceeded', fallbackToGroq: true },
+        { status: 429 }
+      );
+    }
+    
     return Response.json(
       { error: data.error?.message || 'Gemini API error' },
       { status: response.status }
