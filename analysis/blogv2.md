@@ -428,7 +428,7 @@ Every recorded matchup, in order. Updated as new simulations run.
 
 ---
 
-### Phase 1 — AI vs AI Benchmarks (January 2026)
+### Phase 1: AI vs AI Benchmarks (January 2026)
 
 All four models: **Gemini 3 Flash** (red) · **Kimi K2** (blue) · **Qwen3 32B** (green) · **GPT-OSS 120B** (yellow)
 
@@ -439,13 +439,13 @@ All four models: **Gemini 3 Flash** (red) · **Kimi K2** (blue) · **Qwen3 32B**
 | Jan 2026 | 5 | Silent | 20 | Gemini: 9, Qwen3 32B: 6, Kimi K2: 3, GPT-OSS: 2 | Gemini rises at medium complexity |
 | Jan 2026 | 5 | Talking | 20 | Gemini: 11, Qwen3 32B: 5, Kimi K2: 3, GPT-OSS: 1 | Gemini Alliance Bank emerges |
 | Jan 11 2026 | 7 | Silent | 10 | Kimi K2: 6, GPT-OSS: 2, Qwen3 32B: 1, Gemini: 1 | Kimi K2 runs deep games |
-| Jan 11 2026 | 7 | Talking | 10 | Gemini: 7, Kimi K2: 2, Qwen3 32B: 1, GPT-OSS: 0 | **Gemini 70% win rate** — Alliance Bank peak |
+| Jan 11 2026 | 7 | Talking | 10 | Gemini: 7, Kimi K2: 2, Qwen3 32B: 1, GPT-OSS: 0 | **Gemini 70% win rate**, Alliance Bank peak |
 
 **Phase 1 total: 146 games**
 
 ---
 
-### Phase 2 — Human vs AI (Browser, Jan–Feb 2026)
+### Phase 2: Human vs AI (Browser, Jan-Feb 2026)
 
 Human plays as one player; three AI opponents drawn from configured provider.
 
@@ -497,7 +497,7 @@ Human plays as one player; three AI opponents drawn from configured provider.
 | Avg game length | 57 turns (~24 min median) |
 | Win rate consistency | 86.5% - 91.2% across all durations |
 
-### Deep Interaction Analysis (Phase 2 — browser games)
+### Deep Interaction Analysis (Phase 2, browser games)
 
 | Metric | Value |
 |--------|-------|
