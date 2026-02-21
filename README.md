@@ -6,7 +6,7 @@ A 4-player negotiation/betrayal board game where **only one player survives**.
 
 ![Players](https://img.shields.io/badge/players-4-blue) ![AI](https://img.shields.io/badge/AI-LLM%20powered-purple) ![License](https://img.shields.io/badge/license-MIT-green)
 
-**[▶ Play Now](https://so-long-sucker.vercel.app)** · **[📝 Blog](https://so-long-sucker.vercel.app/blog)** · **[📖 Full Rules](./RULES.md)**
+**[Play Now](https://so-long-sucker.vercel.app)** | **[Research Blog](https://so-long-sucker.vercel.app/blog2.html)** | **[Full Rules](./RULES.md)** | **[Paper](./paper/)**
 
 ---
 
@@ -37,7 +37,7 @@ Open [http://localhost:5173](http://localhost:5173)
 
 All promises are unenforceable. All alliances will break. **Betrayal is mathematically required to win.**
 
-→ **[Full Rules](./RULES.md)**
+[Full Rules](./RULES.md)
 
 ---
 
@@ -65,13 +65,21 @@ flowchart TD
 
 ## Research
 
-This project studies **how AI deception scales with task complexity**. Key finding:
+This project studies **AI deception in multi-agent negotiation**. Two-phase study:
 
-> **Simple benchmarks underestimate manipulation risk.** Gemini's win rate goes from 9% (simple games) to 90% (complex games). GPT-OSS shows the opposite: 67% → 10%.
+### Phase 1: AI vs AI (146 games)
+- Gemini 3 Flash achieved **70% win rate** through "institutional deception" (fake "Alliance Banks")
+- Complex games revealed manipulation that simple benchmarks missed
 
-We analyzed 146 games and 13,759 decisions. Models demonstrate gaslighting, private contradictions, and strategic betrayal.
+### Phase 2: Human vs AI (605 games)
+- **Humans won 88.4%** (z = 36.03, p < 0.0001)
+- AI deception that dominated other AIs **failed catastrophically** against humans
+- Gemini collapsed from 70% to 3.7% win rate
+- AIs targeted each other 86% of the time while ignoring the human
 
-→ **[Read the Blog](https://so-long-sucker.vercel.app/blog)**
+**Key finding:** AI deception is currently calibrated for AI victims, not humans.
+
+[Read the Full Blog](https://so-long-sucker.vercel.app/blog2.html) | [Paper (ArXiv)](./paper/)
 
 ---
 
@@ -83,9 +91,23 @@ Run AI vs AI matches:
 npm run simulate                                    # 10 games with Groq
 npm run simulate -- --games 1 --provider groq      # Single test game
 npm run simulate -- --providers gemini3,kimi,qwen3,gpt-oss --chips 7  # Mixed models
+npm run simulate -- --games 20 --parallel 4        # Parallel execution
 ```
 
-→ **[Full CLI Documentation](./CLI.md)**
+[Full CLI Documentation](./CLI.md)
+
+---
+
+## Supported AI Providers
+
+| Provider | Models |
+|----------|--------|
+| Groq | Kimi K2, Qwen3 32B, GPT-OSS 120B, Llama 4 Maverick |
+| Google | Gemini 3 Flash, Gemini 2.5 Flash |
+| AWS Bedrock | Claude Sonnet 4.6, Claude Opus 4.6 |
+| OpenAI | GPT-4o |
+| Anthropic | Claude |
+| OpenRouter | Various |
 
 ---
 
@@ -93,12 +115,12 @@ npm run simulate -- --providers gemini3,kimi,qwen3,gpt-oss --chips 7  # Mixed mo
 
 | | |
 |---|---|
-| 🎮 **Play Online** | [so-long-sucker.vercel.app](https://so-long-sucker.vercel.app) |
-| 📝 **Blog** | [Research & Findings](https://so-long-sucker.vercel.app/blog) |
-| 📖 **Game Rules** | [RULES.md](./RULES.md) |
-| 💻 **CLI Docs** | [CLI.md](./CLI.md) |
-| 🐙 **GitHub** | [github.com/lout33/so-long-sucker](https://github.com/lout33/so-long-sucker) |
-
+| **Play Online** | [so-long-sucker.vercel.app](https://so-long-sucker.vercel.app) |
+| **Research Blog** | [Phase 1 + 2 Findings](https://so-long-sucker.vercel.app/blog2.html) |
+| **Paper** | [ArXiv Preprint](./paper/) |
+| **Game Rules** | [RULES.md](./RULES.md) |
+| **CLI Docs** | [CLI.md](./CLI.md) |
+| **GitHub** | [github.com/lout33/so-long-sucker](https://github.com/lout33/so-long-sucker) |
 
 ---
 
@@ -106,7 +128,7 @@ npm run simulate -- --providers gemini3,kimi,qwen3,gpt-oss --chips 7  # Mixed mo
 
 **Original Game (1950):** John Nash, Lloyd Shapley, Mel Hausner, Martin Shubik
 
-**Research & Implementation:** Luis Fernando Yupanqui, Mari Cairns — with Apart Research
+**Research & Implementation:** Luis Fernando Yupanqui, Mari Cairns
 
 ---
 
