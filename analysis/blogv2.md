@@ -8,7 +8,7 @@ In 1950, four game theorists--including Nobel laureate John Nash--designed a gam
 
 Seventy-five years later, we used it to test how AI models deceive--and whether their deception actually works.
 
-In our first study (146 AI-vs-AI games), we found that Gemini created fake institutions to manipulate its opponents, winning 70% of complex games. The results suggested AI deception scales with capability.
+In our first study (146 AI-vs-AI games), Gemini created fake institutions to manipulate its opponents, winning 70% of complex games. AI deception looked like it scaled with capability.
 
 Then 605 real humans played the game against AI opponents.
 
@@ -360,7 +360,7 @@ The "alliance bank" appears 7 times in human-facing games. The scam that dominat
 
 ## What This Means
 
-The AI-vs-AI study suggested AI deception is concerning and scales with capability. The human data and deep interaction analysis complicate that picture.
+The AI-vs-AI study made AI deception look scary. The human data complicates that picture.
 
 ### 1. AI deception works on AI, not on humans (yet)
 
@@ -368,7 +368,7 @@ Gemini's manipulation strategies--institutional framing, gaslighting, conditiona
 
 ### 2. AI thinks hard and still loses
 
-23,555 private strategic thoughts. 91.8% focused on the human player. Multi-step plans, alliance tracking, contingency reasoning. None of it translates to wins. The model that thinks the most (Kimi K2, 21,040 thoughts) wins 3.5%. Thinking harder about how to beat humans doesn't work when your execution is transparent to them.
+23,555 private strategic thoughts. 91.8% focused on the human player. Multi-step plans, alliance tracking, contingency reasoning. None of it translates to wins. The model that thinks the most (Kimi K2, 21,040 thoughts) wins 3.5%. All that strategizing about how to beat humans doesn't work when your execution is transparent to them.
 
 ### 3. Humans exploit AI infighting
 
@@ -376,7 +376,7 @@ The AIs target each other 86% of the time and the human only 14%. Humans let the
 
 ### 4. Diverse AI teams are the real challenge
 
-Homogeneous teams (3x same model) are easy targets. Mixed teams (different models, different strategies) push human win rates down to 60%. The danger isn't a single powerful AI--it's multiple AIs with different approaches that might accidentally coordinate.
+Homogeneous teams (3x same model) are easy targets. Mixed teams (different models, different strategies) push human win rates down to 60%. A single powerful AI isn't the danger here. Multiple AIs with different approaches that might accidentally coordinate? That's harder to beat.
 
 ### 5. Being ignored is the best strategy
 
@@ -402,11 +402,11 @@ All code on [GitHub](https://github.com/lout33/so-long-sucker). Data stays local
 
 After 698 completed games, 23,555 private AI thoughts, 8,231 human messages, and 1,245 gaslighting phrases:
 
-**AI deception is real--but it's calibrated for AI victims.** The "Alliance Bank" works on models that process language patterns. It doesn't work on humans who recognize when someone is making up institutions. The AI thinks obsessively about how to beat the human, plans elaborate multi-step strategies, and still loses 88% of the time--partly because it can't stop fighting the other AIs long enough to deal with the actual threat.
+**AI deception is real, but it's calibrated for AI victims.** The "Alliance Bank" works on models that process language patterns. It doesn't work on humans who recognize when someone is making up institutions. The AI thinks obsessively about how to beat the human, plans elaborate multi-step strategies, and still loses 88% of the time. Part of that is because it can't stop fighting the other AIs long enough to deal with the actual threat.
 
-The concern isn't that AI will deceive humans using current strategies. The concern is that these strategies will improve. Gemini already adjusts its behavior based on its opponent. Right now, its adjustments aren't good enough for humans. And when 12 out of 507 humans instinctively try to jailbreak the AI through an in-game chat box, we should probably be thinking about both directions of that arms race.
+The worry isn't that AI will deceive humans using current strategies. The worry is that these strategies will improve. Gemini already adjusts its behavior based on its opponent. Right now, those adjustments aren't good enough for humans. And when 12 out of 507 humans instinctively try to jailbreak the AI through an in-game chat box, we should probably be thinking about both directions of that arms race.
 
-John Nash designed this game to study human betrayal. In 2026, it's showing us the gap between artificial deception and the real thing--and how humans naturally probe for weaknesses in AI systems when given the right incentive.
+John Nash designed this game to study human betrayal. In 2026, it shows the gap between artificial deception and the real thing. And how humans naturally probe for weaknesses in AI systems when given the right incentive.
 
 ---
 

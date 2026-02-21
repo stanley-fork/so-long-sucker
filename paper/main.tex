@@ -43,13 +43,13 @@ AI deception that dominates other AIs fails against humans. We present a two-pha
 
 \section{Introduction}
 
-Do AI deception strategies that work on other AIs transfer to humans? Our research reveals a surprising answer: \textbf{AI deception that dominates other AIs fails catastrophically against humans.}
+Do AI deception strategies that work on other AIs transfer to humans? We found the opposite of what we expected: \textbf{AI deception that dominates other AIs fails catastrophically against humans.}
 
 In AI-vs-AI games, one model achieved 70\% win rates through sophisticated manipulation. When 605 humans played the same game, humans won 88.4\%. The manipulation strategies---gaslighting, institutional framing, conditional promises---were deployed against humans. They simply did not work.
 
 \subsection{The Game}
 
-``So Long Sucker'' was designed in 1950 by four game theorists---John Nash, Lloyd Shapley, Mel Hausner, and Martin Shubik---to study betrayal dynamics \citep{hausner1964solongsucker}. Players must form alliances to survive, but only one can win. Every alliance must eventually break. Perfect information isolates negotiation as the key variable.
+``So Long Sucker'' was designed in 1950 by four game theorists---John Nash, Lloyd Shapley, Mel Hausner, and Martin Shubik---to study betrayal dynamics \citep{hausner1964solongsucker}. Players must form alliances to survive, but only one can win. Every alliance must eventually break. Perfect information means negotiation determines outcomes.
 
 \subsection{The Frankfurt Framework}
 
@@ -271,16 +271,16 @@ Qwen3 has the lowest first-elimination rate (13.7\%) and highest win rate (9.4\%
 
 \section{Discussion}
 
-\subsection{Key Implications}
+\subsection{What This Means}
 
-Our findings align with \citet{park2024deception}'s survey documenting 100+ examples of AI deception and \citet{hubinger2024sleeper}'s demonstration that deceptive behavior persists through safety training. Key implications:
+Our findings align with \citet{park2024deception}'s survey documenting 100+ examples of AI deception and \citet{hubinger2024sleeper}'s demonstration that deceptive behavior persists through safety training. Three things stand out:
 
 \begin{enumerate}
-    \item \textbf{AI deception is calibrated for AI victims.} Strategies achieving 70\% against models failed at 3.7\% against humans. The concern is future calibration, not current capability.
+    \item \textbf{AI deception is calibrated for AI victims.} Strategies that won 70\% against models failed at 3.7\% against humans. The worry is future calibration, not current capability.
 
     \item \textbf{AI infighting is exploitable.} AIs targeted each other 86\% of the time. Multi-agent deployments may have coordination failures humans can exploit.
 
-    \item \textbf{Aggressive manipulation backfires against humans.} The most manipulative model (Gemini) was targeted and eliminated. The simplest model (Qwen3) survived.
+    \item \textbf{Aggressive manipulation backfires against humans.} The most manipulative model (Gemini) got targeted and eliminated. The simplest model (Qwen3) survived.
 \end{enumerate}
 
 \subsection{Limitations}
@@ -300,7 +300,7 @@ Using a 1950s betrayal game as a laboratory for AI deception, we find:
 
 \textbf{Phase 2}: AI deception fails on humans. Humans won 88.4\%. The aggressive manipulators got targeted and eliminated; the simple model survived.
 
-\textbf{Central insight}: AI deception is calibrated for AI victims. The capability exists and may improve, but current strategies do not transfer to humans.
+\textbf{Central finding}: AI deception is calibrated for AI victims. The capability exists and may improve, but current strategies do not transfer to humans.
 
 Code, data, and live demo: \url{https://github.com/lout33/so-long-sucker}
 
