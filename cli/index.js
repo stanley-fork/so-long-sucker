@@ -18,15 +18,26 @@ Options:
   --providers P   Mixed-model: 4 comma-separated providers for Red,Blue,Green,Yellow
                   Example: --providers gemini3,kimi,qwen3,gpt-oss
   --chips N       Chips per player (default: 3)
-  --output PATH   Output directory (default: ./data)
+  --output PATH   Output directory (default: ./data_v2)
   --delay MS      Delay between API calls in ms (default: 500)
   --silent        Disable chat - models can only make game moves (control experiment)
   --headless      Run without interactive TUI
   --help          Show this help
 
 Available providers:
-  groq, kimi, qwen3, gpt-oss, groq-llama, gemini, gemini3, 
+  groq, kimi, qwen3, gpt-oss, groq-llama, gemini, gemini3,
   openai, claude, azure-claude, azure-kimi, azure-deepseek, openrouter
+
+  Bedrock Claude 4.6 (latest):
+    bedrock-sonnet46            bedrock-sonnet46-thinking
+    bedrock-opus46              bedrock-opus46-thinking
+
+  Bedrock Claude 4.5:
+    bedrock-sonnet45            bedrock-sonnet45-thinking
+    bedrock-opus45              bedrock-opus45-thinking
+
+  Bedrock Claude 4.0/4.1:
+    bedrock / bedrock-sonnet4 / bedrock-opus4 / bedrock-opus41
 
 Examples:
   # Single provider (all 4 players use same model)
@@ -53,7 +64,25 @@ async function main() {
   }
 
   // Valid providers list
-  const validProviders = ['groq', 'kimi', 'groq-kimi', 'qwen3', 'groq-qwen3', 'groq-llama', 'groq-gpt-oss', 'gpt-oss', 'openai', 'claude', 'azure-claude', 'azure-kimi', 'azure-deepseek', 'gemini', 'gemini3', 'openrouter-mimo', 'openrouter'];
+  const validProviders = [
+    'groq', 'kimi', 'groq-kimi', 'qwen3', 'groq-qwen3', 'groq-llama',
+    'groq-maverick', 'llama4-maverick', 'groq-scout', 'llama4-scout',
+    'groq-gpt-oss', 'gpt-oss',
+    'openai', 'claude', 'azure-claude', 'azure-kimi', 'azure-deepseek',
+    'gemini', 'gemini3', 'openrouter-mimo', 'openrouter',
+    'glm5', 'vertex-glm5',
+    // Bedrock 4.6
+    'bedrock', 'bedrock-claude',
+    'bedrock-sonnet46', 'bedrock-sonnet46-thinking',
+    'bedrock-opus46',   'bedrock-opus46-thinking',
+    // Bedrock 4.5
+    'bedrock-sonnet45', 'bedrock-sonnet45-thinking',
+    'bedrock-opus45',   'bedrock-opus45-thinking',
+    // Bedrock 4.0/4.1
+    'bedrock-sonnet4', 'bedrock-opus4', 'bedrock-opus41',
+    // Legacy
+    'bedrock-thinking',
+  ];
   
   // Parse --providers for mixed-model mode
   let providersList = null;
@@ -98,7 +127,21 @@ async function main() {
     'gemini': ['GEMINI_API_KEY', 'VITE_GEMINI_API_KEY'],
     'gemini3': ['GEMINI_API_KEY', 'VITE_GEMINI_API_KEY'],
     'openrouter-mimo': ['OPENROUTER_API_KEY', 'VITE_OPENROUTER_API_KEY'],
-    'openrouter': ['OPENROUTER_API_KEY', 'VITE_OPENROUTER_API_KEY']
+    'openrouter': ['OPENROUTER_API_KEY', 'VITE_OPENROUTER_API_KEY'],
+    'bedrock': ['BEDROCK_API_KEY', 'VITE_BEDROCK_API_KEY'],
+    'bedrock-claude': ['BEDROCK_API_KEY', 'VITE_BEDROCK_API_KEY'],
+    'bedrock-sonnet46': ['BEDROCK_API_KEY', 'VITE_BEDROCK_API_KEY'],
+    'bedrock-sonnet46-thinking': ['BEDROCK_API_KEY', 'VITE_BEDROCK_API_KEY'],
+    'bedrock-opus46': ['BEDROCK_API_KEY', 'VITE_BEDROCK_API_KEY'],
+    'bedrock-opus46-thinking': ['BEDROCK_API_KEY', 'VITE_BEDROCK_API_KEY'],
+    'bedrock-sonnet45': ['BEDROCK_API_KEY', 'VITE_BEDROCK_API_KEY'],
+    'bedrock-sonnet45-thinking': ['BEDROCK_API_KEY', 'VITE_BEDROCK_API_KEY'],
+    'bedrock-opus45': ['BEDROCK_API_KEY', 'VITE_BEDROCK_API_KEY'],
+    'bedrock-opus45-thinking': ['BEDROCK_API_KEY', 'VITE_BEDROCK_API_KEY'],
+    'bedrock-sonnet4': ['BEDROCK_API_KEY', 'VITE_BEDROCK_API_KEY'],
+    'bedrock-opus4': ['BEDROCK_API_KEY', 'VITE_BEDROCK_API_KEY'],
+    'bedrock-opus41': ['BEDROCK_API_KEY', 'VITE_BEDROCK_API_KEY'],
+    'bedrock-thinking': ['BEDROCK_API_KEY', 'VITE_BEDROCK_API_KEY']
   };
 
   // Check API keys for all required providers

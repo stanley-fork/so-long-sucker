@@ -29,7 +29,11 @@ export const CONFIG = {
 
   // Azure Claude
   AZURE_RESOURCE: import.meta.env.VITE_AZURE_RESOURCE || 'data4peopleservice-8737-resource',
-  AZURE_MODEL: import.meta.env.VITE_AZURE_MODEL || 'claude-opus-4-5'
+  AZURE_MODEL: import.meta.env.VITE_AZURE_MODEL || 'claude-opus-4-5',
+
+  // AWS Bedrock (ABSK bearer token)
+  BEDROCK_API_KEY: import.meta.env.VITE_BEDROCK_API_KEY || '',
+  BEDROCK_REGION: import.meta.env.VITE_BEDROCK_REGION || 'us-east-1'
 };
 
 // Helper to check if a provider is configured
@@ -47,6 +51,8 @@ export function isProviderConfigured(provider) {
       return !!CONFIG.CLAUDE_API_KEY;
     case 'azure-claude':
       return !!CONFIG.AZURE_RESOURCE;
+    case 'bedrock':
+      return !!CONFIG.BEDROCK_API_KEY;
     default:
       return false;
   }

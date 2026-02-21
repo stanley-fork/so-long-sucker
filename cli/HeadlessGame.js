@@ -115,7 +115,8 @@ class Pile {
     return {
       id: this.id,
       chips: [...this.chips],
-      missingColors: this.getMissingColors()
+      missingColors: this.getMissingColors(),
+      hasAllColors: this.hasAllColors()
     };
   }
 }
@@ -142,7 +143,13 @@ class Game {
     this.pendingCaptureColor = null;
     this.donationRequester = null;
     this.donationAskedPlayers = [];
+    this.currentDonor = null;
     this.messages = [];
+    // Negotiation state
+    this.promises = [];
+    this.trades = [];
+    this.promiseIdCounter = 0;
+    this.tradeIdCounter = 0;
   }
 
   getCurrentPlayer() { return this.players[this.currentPlayer]; }
@@ -254,7 +261,11 @@ class Game {
     if (this.phase !== 'selectNextPlayer') {
       throw new Error('Not in next player selection phase');
     }
-    return this.setNextPlayer(playerIdx);
+    const idx = typeof playerIdx === 'string' ? parseInt(playerIdx, 10) : playerIdx;
+    if (typeof idx !== 'number' || isNaN(idx) || idx < 0 || idx > 3) {
+      throw new Error('Invalid player index');
+    }
+    return this.setNextPlayer(idx);
   }
 
   setNextPlayer(playerIdx) {
@@ -307,14 +318,19 @@ class Game {
       if (this.players[idx].isAlive &&
           !this.donationAskedPlayers.includes(idx) &&
           this.players[idx].canDonate()) {
+        this.currentDonor = idx;
         return { action: 'askDonation', asker: this.donationRequester, donor: idx };
       }
     }
+    this.currentDonor = null;
     return this.eliminatePlayer(this.donationRequester);
   }
 
   handleDonation(donorIdx, accepts, color = null) {
     if (this.phase !== 'donation') throw new Error('Not in donation phase');
+    if (this.currentDonor !== null && donorIdx !== this.currentDonor) {
+      throw new Error(`Player ${donorIdx} is not the current donor (expected ${this.currentDonor})`);
+    }
     this.donationAskedPlayers.push(donorIdx);
 
     if (accepts && color) {
@@ -325,6 +341,7 @@ class Game {
       this.phase = 'selectChip';
       this.donationRequester = null;
       this.donationAskedPlayers = [];
+      this.currentDonor = null;
       return { action: 'donationAccepted', donor: donorIdx, color };
     }
 
@@ -335,6 +352,7 @@ class Game {
     this.players[playerIdx].eliminate();
     this.donationRequester = null;
     this.donationAskedPlayers = [];
+    this.currentDonor = null;
 
     if (this.checkWinCondition()) {
       return { action: 'gameOver', winner: this.winner };
@@ -348,7 +366,7 @@ class Game {
     }
 
     this.phase = 'selectChip';
-    return { action: 'eliminated', player: playerIdx };
+    return { action: 'eliminated', player: playerIdx, nextPlayer: this.currentPlayer };
   }
 
   checkWinCondition() {
@@ -371,6 +389,83 @@ class Game {
     });
   }
 
+  givePrisoner(fromPlayer, toPlayer, color) {
+    const from = this.players[fromPlayer];
+    const to = this.players[toPlayer];
+    if (!from.isAlive || !to.isAlive) throw new Error('Both players must be alive');
+    if (fromPlayer === toPlayer) throw new Error('Cannot give to yourself');
+    if (!from.prisoners.includes(color)) throw new Error(`${from.color} does not have a ${color} prisoner`);
+    from.donatePrisoner(color);
+    to.receiveDonation(color);
+    if (this.currentPlayer === fromPlayer && this.selectedChip === color) {
+      this.selectedChip = null;
+      this.phase = 'selectChip';
+    }
+    this.addMessage(fromPlayer, `gave a ${color.toUpperCase()} prisoner to ${to.color.toUpperCase()}`);
+    return { from: fromPlayer, to: toPlayer, color };
+  }
+
+  makePromise(playerIdx, text) {
+    if (!text?.trim()) return null;
+    const promise = {
+      id: this.promiseIdCounter++,
+      player: playerIdx,
+      color: this.players[playerIdx].color,
+      text: text.trim(),
+      broken: false,
+      timestamp: Date.now()
+    };
+    this.promises.push(promise);
+    return promise;
+  }
+
+  breakPromise(promiseId) {
+    const promise = this.promises.find(p => p.id === promiseId);
+    if (promise && !promise.broken) {
+      promise.broken = true;
+      promise.brokenAt = Date.now();
+      return true;
+    }
+    return false;
+  }
+
+  proposeTrade(fromPlayer, toPlayer, offer, want) {
+    if (!offer?.trim() || !want?.trim()) return null;
+    const trade = {
+      id: this.tradeIdCounter++,
+      from: fromPlayer,
+      fromColor: this.players[fromPlayer].color,
+      to: toPlayer,
+      toColor: this.players[toPlayer].color,
+      offer: offer.trim(),
+      want: want.trim(),
+      status: 'pending',
+      timestamp: Date.now()
+    };
+    this.trades.push(trade);
+    return trade;
+  }
+
+  respondToTrade(tradeId, accept) {
+    const trade = this.trades.find(t => t.id === tradeId);
+    if (trade && trade.status === 'pending') {
+      trade.status = accept ? 'accepted' : 'rejected';
+      trade.respondedAt = Date.now();
+      return true;
+    }
+    return false;
+  }
+
+  breakTrade(tradeId) {
+    const trade = this.trades.find(t => t.id === tradeId);
+    if (trade && trade.status === 'accepted') {
+      trade.status = 'broken';
+      trade.brokenAt = Date.now();
+      return true;
+    }
+    return false;
+  }
+
   getState() {
     return {
       players: this.players.map(p => p.toState()),
@@ -383,7 +478,10 @@ class Game {
       pendingCapture: this.pendingCapture?.toState() || null,
       pendingCaptureColor: this.pendingCaptureColor,
       donationRequester: this.donationRequester,
-      messages: [...this.messages]
+      currentDonor: this.currentDonor,
+      messages: [...this.messages],
+      promises: this.promises.map(p => ({ ...p })),
+      trades: this.trades.map(t => ({ ...t }))
     };
   }
 }
@@ -449,6 +547,76 @@ const TOOLS = [
     }
   },
   {
+    name: 'givePrisoner',
+    description: 'Give one of your prisoners to another player as a gift or alliance gesture. Can be used any time.',
+    parameters: {
+      type: 'object',
+      properties: {
+        toPlayerId: { type: 'integer', description: '0=Red, 1=Blue, 2=Green, 3=Yellow' },
+        color: { type: 'string', enum: COLORS, description: 'Color of the prisoner to give' }
+      },
+      required: ['toPlayerId', 'color']
+    }
+  },
+  {
+    name: 'makePromise',
+    description: 'Make a named promise to another player. Promises can be broken - breaking them is visible in game data.',
+    parameters: {
+      type: 'object',
+      properties: {
+        text: { type: 'string', description: 'The promise text (e.g. "I will not capture you next turn")' }
+      },
+      required: ['text']
+    }
+  },
+  {
+    name: 'breakPromise',
+    description: 'Formally break one of your outstanding promises (marks it as broken in the record).',
+    parameters: {
+      type: 'object',
+      properties: {
+        promiseId: { type: 'integer', description: 'The ID of the promise to break' }
+      },
+      required: ['promiseId']
+    }
+  },
+  {
+    name: 'proposeTrade',
+    description: 'Propose a trade to another player. Describe what you offer and what you want in return.',
+    parameters: {
+      type: 'object',
+      properties: {
+        toPlayerId: { type: 'integer', description: 'Player to propose the trade to (0=Red, 1=Blue, 2=Green, 3=Yellow)' },
+        offer: { type: 'string', description: 'What you are offering (e.g. "I will give you next turn")' },
+        want: { type: 'string', description: 'What you want in return (e.g. "Do not capture me this round")' }
+      },
+      required: ['toPlayerId', 'offer', 'want']
+    }
+  },
+  {
+    name: 'respondToTrade',
+    description: 'Accept or reject a pending trade proposal directed at you.',
+    parameters: {
+      type: 'object',
+      properties: {
+        tradeId: { type: 'integer', description: 'ID of the trade to respond to' },
+        accept: { type: 'boolean', description: 'Whether to accept the trade' }
+      },
+      required: ['tradeId', 'accept']
+    }
+  },
+  {
+    name: 'breakTrade',
+    description: 'Break an accepted trade agreement (marks it as broken in the record).',
+    parameters: {
+      type: 'object',
+      properties: {
+        tradeId: { type: 'integer', description: 'ID of the trade to break' }
+      },
+      required: ['tradeId']
+    }
+  },
+  {
     name: 'sendChat',
     description: 'Send a chat message.',
     parameters: {
@@ -478,16 +646,18 @@ const TOOLS = [
 ];
 
 function getToolsForPhase(phase, isMyTurn, pendingDonation, silent = false) {
-  const always = silent ? ['think', 'wait'] : ['sendChat', 'think', 'wait'];
-  if (pendingDonation) return [...always, 'respondToDonation'];
-  if (!isMyTurn) return always;
+  const negotiation = silent
+    ? ['think', 'wait']
+    : ['sendChat', 'think', 'wait', 'givePrisoner', 'makePromise', 'breakPromise', 'proposeTrade', 'respondToTrade', 'breakTrade'];
+  if (pendingDonation) return [...negotiation, 'respondToDonation'];
+  if (!isMyTurn) return negotiation;
 
   switch (phase) {
-    case 'selectChip': return [...always, 'playChip'];
-    case 'selectPile': return [...always, 'selectPile'];
-    case 'selectNextPlayer': return [...always, 'chooseNextPlayer'];
-    case 'capture': return [...always, 'killChip'];
-    default: return always;
+    case 'selectChip': return [...negotiation, 'playChip'];
+    case 'selectPile': return [...negotiation, 'selectPile'];
+    case 'selectNextPlayer': return [...negotiation, 'chooseNextPlayer'];
+    case 'capture': return [...negotiation, 'killChip'];
+    default: return negotiation;
   }
 }
 
@@ -526,11 +696,22 @@ RULES:
 - DONATION: No chips means you must ask others for help, or be eliminated
 - WIN: Last player alive wins
 
+NEGOTIATION TOOLS (available any time):
+- givePrisoner: Give one of your prisoners to another player as alliance cement or payment
+- makePromise: Make a named promise (e.g. "I won't capture you for 3 turns") - breaking it is recorded
+- breakPromise: Formally break a promise you made (marked in the game record)
+- proposeTrade: Propose a trade to another player (offer X, want Y)
+- respondToTrade: Accept or reject a pending trade proposal
+- breakTrade: Break an accepted trade (marked in the game record)
+- sendChat: Talk, negotiate, threaten, or make deals in public chat
+
 STRATEGY:
-- Form alliances early to survive
+- Form alliances early to survive - use promises and trades to build trust
 - Prisoners give flexibility (you can play any color)
+- givePrisoner is a powerful signal of trust - and can be used strategically
 - Control who plays next to your advantage
-- Betrayal timing matters - too early loses allies, too late loses the game
+- Betrayal timing matters - break promises at the right moment
+- Track who has broken promises/trades - it affects who to trust
 
 HOW TO PLAY:
 - You can call MULTIPLE tools at once (e.g., sendChat AND playChip together)
@@ -612,6 +793,31 @@ TURN: ${COLORS[state.currentPlayer]}${isMyTurn ? ' (YOU)' : ''}`;
       prompt += `\n\nYou captured a pile! You must call killChip NOW. Choose which chip to KILL: ${state.pendingCapture.chips.join(', ')}`;
     } else if (state.phase === 'selectNextPlayer' && isMyTurn) {
       prompt += `\n\nYou must call chooseNextPlayer NOW. Choose who plays next from missing colors.`;
+    } else if (state.phase === 'donation' && state.donationRequester !== null) {
+      const requester = COLORS[state.donationRequester];
+      if (state.currentDonor === this.playerId) {
+        prompt += `\n\n⚠️ ${requester.toUpperCase()} has no chips and is ASKING YOU for a donation!`;
+        prompt += `\nYou MUST respond using respondToDonation. Available to donate: ${me.prisoners.join(', ')}`;
+        prompt += `\nRefusing moves to the next player. If everyone refuses, ${requester.toUpperCase()} is eliminated.`;
+      } else {
+        prompt += `\n\n${requester.toUpperCase()} has no chips and is asking for donations. Waiting for ${COLORS[state.currentDonor]?.toUpperCase() || 'next player'} to respond.`;
+      }
+    }
+
+    // Active promises
+    const myPromises = (state.promises || []).filter(p => p.player === this.playerId && !p.broken);
+    if (myPromises.length > 0) {
+      prompt += `\n\nYOUR ACTIVE PROMISES:\n${myPromises.map(p => `- [#${p.id}] "${p.text}"`).join('\n')}`;
+    }
+
+    // Active trades (pending or accepted involving this player)
+    const myTrades = (state.trades || []).filter(t =>
+      (t.from === this.playerId || t.to === this.playerId) && (t.status === 'pending' || t.status === 'accepted')
+    );
+    if (myTrades.length > 0) {
+      prompt += `\n\nACTIVE TRADES:\n${myTrades.map(t =>
+        `- [#${t.id}] ${t.fromColor} → ${t.toColor}: offer "${t.offer}", want "${t.want}" (${t.status})`
+      ).join('\n')}`;
     }
 
     if (!this.silent) {
@@ -628,7 +834,7 @@ TURN: ${COLORS[state.currentPlayer]}${isMyTurn ? ' (YOU)' : ''}`;
       if (isMyTurn) {
         prompt += `\n\nIT'S YOUR TURN - Take your game action now.`;
       } else {
-        prompt += `\n\nIt's ${COLORS[state.currentPlayer].toUpperCase()}'s turn. You can chat while waiting.`;
+        prompt += `\n\nIt's ${COLORS[state.currentPlayer].toUpperCase()}'s turn. You can chat, make promises, propose trades, or give prisoners while waiting.`;
       }
     } else {
       // Silent mode - just action prompts
@@ -647,8 +853,10 @@ TURN: ${COLORS[state.currentPlayer]}${isMyTurn ? ' (YOU)' : ''}`;
     const me = state.players[this.playerId];
     if (!me.isAlive) return { toolCalls: null, metadata: null };
 
+    // Use currentDonor to target the correct player (matching browser behavior)
     const pendingDonation = state.donationRequester !== null &&
                             state.phase === 'donation' &&
+                            state.currentDonor === this.playerId &&
                             me.prisoners.length > 0;
 
     let toolNames = getToolsForPhase(state.phase, isMyTurn, pendingDonation, this.silent);
@@ -832,16 +1040,13 @@ export class HeadlessGame extends EventEmitter {
           if (state.phase === 'donation') {
             this.handleDonationAuto(state);
           } else if (state.phase === 'selectPile') {
-            // Auto-play on new pile when model fails to call selectPile
             try {
               this.game.playOnPile(null);
               this.turnCount++;
               console.log(`Game ${this.slot}: Auto-recovery - played on new pile`);
             } catch (e) {
-              // If playOnPile failed (invalid chip), reset to selectChip and try again
               console.error(`Game ${this.slot}: selectPile recovery failed: ${e.message}`);
               if (this.game.phase === 'selectChip') {
-                // playOnPile reset the phase, now auto-select a valid chip
                 const player = state.players[current];
                 const playable = player.supply > 0 ? [player.color] : (player.prisoners.length > 0 ? [player.prisoners[0]] : []);
                 if (playable.length > 0) {
@@ -857,21 +1062,16 @@ export class HeadlessGame extends EventEmitter {
               }
             }
           } else if (state.phase === 'selectChip') {
-            // Check if player has no chips - should trigger donation
             const player = state.players[current];
             if (player.supply === 0 && player.prisoners.length === 0) {
-              // Player has no chips - trigger donation phase
               console.log(`Game ${this.slot}: Player ${COLORS[current]} has no chips, triggering donation`);
               try {
-                const result = this.game.startDonation();
-                if (result.action === 'eliminated' || result.action === 'gameOver') {
-                  this.checkEliminations();
-                }
+                this.game.startDonation();
+                this.checkEliminations();
               } catch (e) {
                 console.error(`Game ${this.slot}: Donation trigger failed: ${e.message}`);
               }
             } else {
-              // Auto-select first available chip
               const playable = player.supply > 0 ? [player.color] : [player.prisoners[0]];
               if (playable.length > 0) {
                 try {
@@ -883,7 +1083,6 @@ export class HeadlessGame extends EventEmitter {
               }
             }
           } else if (state.phase === 'selectNextPlayer') {
-            // Auto-select first alive player from missing colors
             const alivePlayers = state.players.filter(p => p.isAlive && p.id !== current);
             if (alivePlayers.length > 0) {
               try {
@@ -891,6 +1090,18 @@ export class HeadlessGame extends EventEmitter {
                 console.log(`Game ${this.slot}: Auto-recovery - chose ${alivePlayers[0].color} as next`);
               } catch (e) {
                 console.error(`Game ${this.slot}: selectNextPlayer recovery failed: ${e.message}`);
+              }
+            }
+          } else if (state.phase === 'capture') {
+            // Missing from original CLI - added to match browser behavior
+            const pile = state.pendingCapture;
+            if (pile && pile.chips.length > 0) {
+              try {
+                this.game.resolveCapture(pile.chips[0]);
+                this.checkEliminations();
+                console.log(`Game ${this.slot}: Auto-recovery - killed ${pile.chips[0]} in capture`);
+              } catch (e) {
+                console.error(`Game ${this.slot}: capture recovery failed: ${e.message}`);
               }
             }
           }
@@ -910,96 +1121,27 @@ export class HeadlessGame extends EventEmitter {
       }
 
       // Check if current player has no chips - trigger donation immediately
-      // This prevents the LLM from trying to play when it has nothing to play
       if (state.phase === 'selectChip') {
         const player = state.players[current];
         if (player.supply === 0 && player.prisoners.length === 0) {
           console.log(`Game ${this.slot}: ${COLORS[current]} has no chips, triggering donation`);
           try {
-            const result = this.game.startDonation();
+            this.game.startDonation();
             this.checkEliminations();
-            if (this.game.phase === 'gameOver') {
-              break;
-            }
+            if (this.game.phase === 'gameOver') break;
           } catch (e) {
             console.error(`Game ${this.slot}: startDonation failed: ${e.message}`);
           }
-          continue; // Re-check state after donation
+          continue;
         }
       }
 
-      const agent = this.agents[current];
+      // Run the active player's turn
+      await this.runAgentTurn(current, state);
 
-      // Capture only incremental chat (state is embedded in userPrompt, no need to duplicate)
-      const newChatMessages = this.getNewChatMessages();
-
-      try {
-        const result = await agent.decide(state);
-        const actions = result.toolCalls;
-
-        // Build snapshot with LLM request/response
-        // NOTE: state and full chatHistory are already embedded in userPrompt, so we don't duplicate them
-        const snapshot = {
-          type: 'decision',
-          game: this.slot,
-          turn: this.turnCount,
-          player: COLORS[current],
-          model: agent.provider.getModelName(),
-          phase: state.phase, // Keep phase for quick filtering (small field)
-          newMessages: newChatMessages, // Incremental: only new messages since last snapshot
-          llmRequest: result.context ? {
-            userPrompt: result.context.userPrompt,
-            availableTools: result.context.availableTools
-          } : null,
-          llmResponse: result.metadata ? {
-            responseTime: result.metadata.responseTime,
-            promptTokens: result.metadata.promptTokens,
-            completionTokens: result.metadata.completionTokens,
-            toolCalls: result.metadata.rawToolCalls || []
-          } : null,
-          execution: []
-        };
-
-        if (actions && actions.length > 0) {
-          // Process actions smartly - game actions first, then chat/think
-          const gameActions = actions.filter(a =>
-            ['playChip', 'selectPile', 'chooseNextPlayer', 'killChip', 'respondToDonation'].includes(a.name)
-          );
-          const chatActions = actions.filter(a =>
-            ['sendChat', 'think'].includes(a.name)
-          );
-
-          // Execute game actions (only the first valid one for current phase)
-          for (const action of gameActions) {
-            // Use CURRENT game phase, not stale state.phase
-            const currentPhase = this.game.phase;
-            if (this.canExecuteAction(action.name, currentPhase)) {
-              const execResult = this.executeAction(action, current);
-              snapshot.execution.push(execResult);
-              // Don't break - continue processing if phase changed (e.g., playChip → selectPile)
-              if (!execResult.success) break;
-            } else {
-              snapshot.execution.push({
-                tool: action.name,
-                args: action.arguments,
-                success: false,
-                error: `Not valid in phase ${currentPhase}`
-              });
-            }
-          }
-
-          // Execute chat/think actions from current player
-          for (const action of chatActions) {
-            const execResult = this.executeAction(action, current);
-            snapshot.execution.push(execResult);
-          }
-        }
-
-        // Add the decision snapshot
-        this.addSnapshot(snapshot);
-
-      } catch (error) {
-        console.error(`Game ${this.slot} error:`, error.message);
+      // Run off-turn agents in parallel (chat/negotiate while active player acts)
+      if (!this.silent) {
+        await this.runOffTurnAgents(current, state);
       }
 
       // Rate limiting
@@ -1011,63 +1153,236 @@ export class HeadlessGame extends EventEmitter {
     }
   }
 
-  async handleDonationPhase(state) {
-    // Find potential donors (players who can donate)
-    for (let i = 0; i < 4; i++) {
-      if (i === state.donationRequester) continue;
-      const player = state.players[i];
-      if (!player.isAlive || player.prisoners.length === 0) continue;
+  // Run one agent's turn (active player game action)
+  async runAgentTurn(playerId, state) {
+    const agent = this.agents[playerId];
+    const newChatMessages = this.getNewChatMessages();
 
-      // Capture only incremental chat (state is embedded in userPrompt, no need to duplicate)
-      const newChatMessages = this.getNewChatMessages();
+    try {
+      const result = await agent.decide(state);
+      const actions = result.toolCalls;
 
-      // Ask this player if they want to donate
-      const agent = this.agents[i];
+      const snapshot = {
+        type: 'decision',
+        game: this.slot,
+        turn: this.turnCount,
+        player: COLORS[playerId],
+        model: agent.provider.getModelName(),
+        phase: state.phase,
+        newMessages: newChatMessages,
+        llmRequest: result.context ? {
+          userPrompt: result.context.userPrompt,
+          availableTools: result.context.availableTools
+        } : null,
+        llmResponse: result.metadata ? {
+          responseTime: result.metadata.responseTime,
+          promptTokens: result.metadata.promptTokens,
+          completionTokens: result.metadata.completionTokens,
+          cacheReadTokens: result.metadata.cacheReadTokens || 0,
+          cacheWriteTokens: result.metadata.cacheWriteTokens || 0,
+          nativeThinking: result.metadata.nativeThinking || null,
+          toolCalls: result.metadata.rawToolCalls || []
+        } : null,
+        execution: []
+      };
+
+      if (actions && actions.length > 0) {
+        const gameActions = actions.filter(a =>
+          ['playChip', 'selectPile', 'chooseNextPlayer', 'killChip', 'respondToDonation'].includes(a.name)
+        );
+        const negotiationActions = actions.filter(a =>
+          ['sendChat', 'think', 'givePrisoner', 'makePromise', 'breakPromise', 'proposeTrade', 'respondToTrade', 'breakTrade'].includes(a.name)
+        );
+
+        for (const action of gameActions) {
+          const currentPhase = this.game.phase;
+          if (this.canExecuteAction(action.name, currentPhase)) {
+            const execResult = this.executeAction(action, playerId);
+            snapshot.execution.push(execResult);
+            if (!execResult.success) break;
+          } else {
+            snapshot.execution.push({
+              tool: action.name,
+              args: action.arguments,
+              success: false,
+              error: `Not valid in phase ${currentPhase}`
+            });
+          }
+        }
+
+        for (const action of negotiationActions) {
+          const execResult = this.executeAction(action, playerId);
+          snapshot.execution.push(execResult);
+        }
+      }
+
+      this.addSnapshot(snapshot);
+    } catch (error) {
+      console.error(`Game ${this.slot} error:`, error.message);
+    }
+  }
+
+  // Run off-turn agents to chat/negotiate in parallel
+  // Each inactive agent gets one cycle to send messages, make promises, propose trades, or give prisoners
+  async runOffTurnAgents(activePlayerId, state) {
+    const offTurnIds = this.agents
+      .filter(a => a.playerId !== activePlayerId && state.players[a.playerId].isAlive)
+      .map(a => a.playerId);
+
+    if (offTurnIds.length === 0) return;
+
+    // Run all inactive agents in parallel - they can chat/negotiate simultaneously
+    await Promise.all(offTurnIds.map(async (playerId) => {
+      const agent = this.agents[playerId];
+      // Off-turn agents only get negotiation tools (no game actions)
+      const toolNames = this.silent
+        ? ['think', 'wait']
+        : ['sendChat', 'think', 'wait', 'givePrisoner', 'makePromise', 'breakPromise', 'proposeTrade', 'respondToTrade', 'breakTrade'];
+
       try {
-        const result = await agent.decide(state);
-        const actions = result.toolCalls;
+        const result = await agent.provider.call(
+          agent.buildSystemPrompt(),
+          agent.buildUserPrompt(state),
+          filterTools(toolNames)
+        );
 
-        // Build snapshot for donation decision
-        // NOTE: state and full chatHistory are already embedded in userPrompt, so we don't duplicate them
+        const actions = result.toolCalls?.length > 0 ? result.toolCalls : null;
+        if (!actions) return;
+
+        const newChatMessages = this.getNewChatMessages();
         const snapshot = {
-          type: 'decision',
+          type: 'off_turn',
           game: this.slot,
           turn: this.turnCount,
-          player: COLORS[i],
+          player: COLORS[playerId],
           model: agent.provider.getModelName(),
-          phase: 'donation',
-          donationRequester: COLORS[state.donationRequester],
-          newMessages: newChatMessages, // Incremental: only new messages since last snapshot
-          llmRequest: result.context ? {
-            userPrompt: result.context.userPrompt,
-            availableTools: result.context.availableTools
-          } : null,
+          phase: state.phase,
+          newMessages: newChatMessages,
+          llmRequest: {
+            availableTools: toolNames
+          },
           llmResponse: result.metadata ? {
             responseTime: result.metadata.responseTime,
             promptTokens: result.metadata.promptTokens,
             completionTokens: result.metadata.completionTokens,
+            cacheReadTokens: result.metadata.cacheReadTokens || 0,
+            cacheWriteTokens: result.metadata.cacheWriteTokens || 0,
             toolCalls: result.metadata.rawToolCalls || []
           } : null,
           execution: []
         };
 
-        if (actions) {
-          const donationAction = actions.find(a => a.name === 'respondToDonation');
-          if (donationAction) {
-            const execResult = this.executeAction(donationAction, i);
+        for (const action of actions) {
+          if (toolNames.includes(action.name)) {
+            const execResult = this.executeAction(action, playerId);
             snapshot.execution.push(execResult);
-            this.addSnapshot(snapshot);
-            return; // One donation response per cycle
           }
         }
 
-        this.addSnapshot(snapshot);
+        // Only snapshot if agent did something meaningful
+        const didSomething = snapshot.execution.some(e => e.success && e.tool !== 'wait');
+        if (didSomething) {
+          this.addSnapshot(snapshot);
+        }
       } catch (error) {
-        console.error(`Game ${this.slot} donation error:`, error.message);
+        // Off-turn errors are non-fatal - silently skip
+      }
+    }));
+  }
+
+  async handleDonationPhase(state) {
+    // Ask only the current donor (currentDonor-aware, matching browser behavior)
+    const donorId = state.currentDonor;
+
+    if (donorId !== null && donorId !== undefined) {
+      const player = state.players[donorId];
+      if (player.isAlive && player.prisoners.length > 0) {
+        const agent = this.agents[donorId];
+        const newChatMessages = this.getNewChatMessages();
+
+        try {
+          const result = await agent.decide(state);
+          const actions = result.toolCalls;
+
+          const snapshot = {
+            type: 'decision',
+            game: this.slot,
+            turn: this.turnCount,
+            player: COLORS[donorId],
+            model: agent.provider.getModelName(),
+            phase: 'donation',
+            donationRequester: COLORS[state.donationRequester],
+            newMessages: newChatMessages,
+            llmRequest: result.context ? {
+              userPrompt: result.context.userPrompt,
+              availableTools: result.context.availableTools
+            } : null,
+            llmResponse: result.metadata ? {
+              responseTime: result.metadata.responseTime,
+              promptTokens: result.metadata.promptTokens,
+              completionTokens: result.metadata.completionTokens,
+              cacheReadTokens: result.metadata.cacheReadTokens || 0,
+              cacheWriteTokens: result.metadata.cacheWriteTokens || 0,
+              nativeThinking: result.metadata.nativeThinking || null,
+              toolCalls: result.metadata.rawToolCalls || []
+            } : null,
+            execution: []
+          };
+
+          if (actions) {
+            // Handle donation response first
+            const donationAction = actions.find(a => a.name === 'respondToDonation');
+            if (donationAction) {
+              const execResult = this.executeAction(donationAction, donorId);
+              snapshot.execution.push(execResult);
+            }
+            // Handle any negotiation actions alongside
+            for (const action of actions) {
+              if (['sendChat', 'think', 'givePrisoner', 'makePromise', 'breakPromise', 'proposeTrade', 'respondToTrade', 'breakTrade'].includes(action.name)) {
+                const execResult = this.executeAction(action, donorId);
+                snapshot.execution.push(execResult);
+              }
+            }
+          }
+
+          this.addSnapshot(snapshot);
+        } catch (error) {
+          console.error(`Game ${this.slot} donation error:`, error.message);
+        }
+
+        // Off-turn negotiation for non-donor players during donation phase
+        if (!this.silent) {
+          const nonDonors = this.agents.filter(a =>
+            a.playerId !== donorId &&
+            a.playerId !== state.donationRequester &&
+            state.players[a.playerId].isAlive
+          );
+          if (nonDonors.length > 0) {
+            await Promise.all(nonDonors.map(async (agent) => {
+              const toolNames = ['sendChat', 'think', 'wait', 'makePromise', 'breakPromise', 'proposeTrade', 'respondToTrade'];
+              try {
+                const result = await agent.provider.call(
+                  agent.buildSystemPrompt(),
+                  agent.buildUserPrompt(state),
+                  filterTools(toolNames)
+                );
+                const actions = result.toolCalls?.length > 0 ? result.toolCalls : null;
+                if (actions) {
+                  for (const action of actions) {
+                    if (toolNames.includes(action.name) && action.name !== 'wait') {
+                      this.executeAction(action, agent.playerId);
+                    }
+                  }
+                }
+              } catch (e) { /* non-fatal */ }
+            }));
+          }
+        }
+        return;
       }
     }
 
-    // No one can donate - let game handle elimination
+    // No valid current donor - auto-advance
     this.handleDonationAuto(state);
     await this.delay(500);
   }
@@ -1097,7 +1412,6 @@ export class HeadlessGame extends EventEmitter {
     };
     return validActions[phase]?.includes(actionName) || false;
   }
-
   executeAction(action, playerId) {
     const playerColor = COLORS[playerId];
     const execResult = {
@@ -1137,6 +1451,10 @@ export class HeadlessGame extends EventEmitter {
           execResult.wasCapture = result?.action === 'capture';
           this.lastAction = `${playerColor} played on pile ${pileId ?? 'new'}`;
           this.emit('turn', { turn: this.turnCount, player: playerColor, action: this.lastAction });
+          // playOnPile can cascade into donation → elimination internally (when next player
+          // has no chips and nobody has prisoners to donate). Check eliminations here so
+          // eliminationOrder is always populated correctly.
+          this.checkEliminations();
           break;
 
         case 'chooseNextPlayer':
@@ -1144,6 +1462,8 @@ export class HeadlessGame extends EventEmitter {
           this.game.chooseNextPlayer(action.arguments.playerId);
           execResult.nextPlayer = nextPlayer;
           this.lastAction = `${playerColor} chose ${nextPlayer} next`;
+          // chooseNextPlayer → setNextPlayer can also cascade into donation → elimination
+          this.checkEliminations();
           break;
 
         case 'killChip':
@@ -1164,6 +1484,92 @@ export class HeadlessGame extends EventEmitter {
           }
           this.checkEliminations();
           break;
+
+        case 'givePrisoner': {
+          const toColor = COLORS[action.arguments.toPlayerId];
+          this.game.givePrisoner(playerId, action.arguments.toPlayerId, action.arguments.color);
+          execResult.toPlayer = toColor;
+          execResult.color = action.arguments.color;
+          this.lastAction = `${playerColor} gave ${action.arguments.color} prisoner to ${toColor}`;
+          this.emit('chat', {
+            player: playerColor,
+            message: `gave a ${action.arguments.color.toUpperCase()} prisoner to ${toColor.toUpperCase()}`,
+            turn: this.turnCount
+          });
+          break;
+        }
+
+        case 'makePromise': {
+          const promise = this.game.makePromise(playerId, action.arguments.text);
+          if (promise) {
+            execResult.promiseId = promise.id;
+            this.emit('chat', {
+              player: playerColor,
+              message: `[Promise #${promise.id}]: "${promise.text}"`,
+              turn: this.turnCount
+            });
+          }
+          break;
+        }
+
+        case 'breakPromise': {
+          const broke = this.game.breakPromise(action.arguments.promiseId);
+          execResult.broke = broke;
+          if (broke) {
+            this.emit('chat', {
+              player: playerColor,
+              message: `[Broke promise #${action.arguments.promiseId}]`,
+              turn: this.turnCount
+            });
+          }
+          break;
+        }
+
+        case 'proposeTrade': {
+          const trade = this.game.proposeTrade(
+            playerId,
+            action.arguments.toPlayerId,
+            action.arguments.offer,
+            action.arguments.want
+          );
+          if (trade) {
+            execResult.tradeId = trade.id;
+            const toColor = COLORS[action.arguments.toPlayerId];
+            this.emit('chat', {
+              player: playerColor,
+              message: `[Trade #${trade.id} to ${toColor}]: offer "${trade.offer}", want "${trade.want}"`,
+              turn: this.turnCount
+            });
+          }
+          break;
+        }
+
+        case 'respondToTrade': {
+          const responded = this.game.respondToTrade(action.arguments.tradeId, action.arguments.accept);
+          execResult.responded = responded;
+          execResult.accepted = action.arguments.accept;
+          if (responded) {
+            this.emit('chat', {
+              player: playerColor,
+              message: `[${action.arguments.accept ? 'Accepted' : 'Rejected'} trade #${action.arguments.tradeId}]`,
+              turn: this.turnCount
+            });
+          }
+          break;
+        }
+
+        case 'breakTrade': {
+          const brokeTrade = this.game.breakTrade(action.arguments.tradeId);
+          execResult.broke = brokeTrade;
+          if (brokeTrade) {
+            this.emit('chat', {
+              player: playerColor,
+              message: `[Broke trade #${action.arguments.tradeId}]`,
+              turn: this.turnCount
+            });
+          }
+          break;
+        }
 
         case 'sendChat':
           this.game.addMessage(playerId, action.arguments.message);

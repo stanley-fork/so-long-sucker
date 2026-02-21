@@ -3245,7 +3245,8 @@ body {
   border-radius: var(--radius-md);
   padding: var(--space-md);
   margin-bottom: var(--space-md);
-  min-height: 300px;
+  min-height: 340px;
+  scroll-behavior: smooth;
 }
 
 .chat-message {
@@ -3255,6 +3256,8 @@ body {
   font-size: 0.85rem;
   background: var(--bg-surface);
   border-left: 3px solid;
+  line-height: 1.55;
+  word-break: break-word;
 }
 
 .chat-message .sender {
@@ -3284,12 +3287,32 @@ body {
 
 #chat-input-area {
   display: flex;
+  flex-direction: column;
   gap: var(--space-sm);
   margin-bottom: var(--space-md);
 }
 
+#chat-input-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+#chat-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+#chat-input-row {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-end;
+}
+
 #chat-player-select {
   width: 80px;
+  flex-shrink: 0;
   padding: var(--space-sm);
   background: var(--bg-elevated);
   border: 1px solid var(--border);
@@ -3306,6 +3329,13 @@ body {
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-size: 0.85rem;
+  font-family: inherit;
+  resize: none;
+  min-height: 56px;
+  max-height: 160px;
+  overflow-y: auto;
+  line-height: 1.5;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 #chat-input::placeholder {
@@ -3315,6 +3345,12 @@ body {
 #chat-input:focus {
   outline: none;
   border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.15);
+}
+
+#chat-send-btn {
+  flex-shrink: 0;
+  align-self: flex-end;
 }
 
 /* ============================================

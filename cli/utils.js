@@ -9,7 +9,7 @@ export function parseArgs(argv) {
     parallel: 4,
     provider: 'groq',
     chips: 3,
-    output: './data',
+    output: './data_v2',
     delay: 500,
     silent: false,
     headless: false,

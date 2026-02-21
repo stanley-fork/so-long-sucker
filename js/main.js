@@ -463,19 +463,36 @@ class SoLongSucker {
     const hasAI = aiPlayers.length > 0;
     document.getElementById('ai-config').style.display = hasAI ? 'block' : 'none';
     
-    const isOpenRouter = this.getSelectedProvider() === 'openrouter';
+    const provider = this.getSelectedProvider();
+    const isOpenRouter = provider === 'openrouter';
+    const isBedrock = provider === 'bedrock';
     
     for (let i = 0; i < 4; i++) {
       const isAI = aiPlayers.includes(i);
       
       const modelSelect = document.getElementById(`player-${i}-model`);
       if (modelSelect) {
-        modelSelect.classList.toggle('hidden', !isAI || isOpenRouter);
+        modelSelect.classList.toggle('hidden', !isAI || isOpenRouter || isBedrock);
       }
       
-      const openrouterRow = document.querySelector(`.openrouter-model-row[data-player="${i}"]`);
+      const openrouterRow = document.querySelector(`#panel-openrouter .openrouter-model-row[data-player="${i}"]`);
       if (openrouterRow) {
         openrouterRow.classList.toggle('disabled', !isAI);
+      }
+
+      const bedrockRow = document.querySelector(`#panel-bedrock .openrouter-model-row[data-player="${i}"]`);
+      if (bedrockRow) {
+        bedrockRow.classList.toggle('disabled', !isAI);
+      }
+    }
+
+    // Update bedrock status badge
+    if (isBedrock) {
+      const statusEl = document.getElementById('bedrock-status');
+      if (statusEl) {
+        const hasKey = !!(CONFIG.BEDROCK_API_KEY);
+        statusEl.textContent = hasKey ? '✓ Ready' : '⚠ VITE_BEDROCK_API_KEY not set';
+        statusEl.style.color = hasKey ? '' : 'orange';
       }
     }
   }
@@ -500,7 +517,9 @@ class SoLongSucker {
    */
   getPlayerModels() {
     const models = {};
-    const isOpenRouter = this.getSelectedProvider() === 'openrouter';
+    const provider = this.getSelectedProvider();
+    const isOpenRouter = provider === 'openrouter';
+    const isBedrock = provider === 'bedrock';
     const defaultOpenRouterModel = 'meta-llama/llama-3.1-8b-instruct:free';
     
     for (let i = 0; i < 4; i++) {
@@ -509,6 +528,10 @@ class SoLongSucker {
         if (isOpenRouter) {
           const openrouterInput = document.getElementById(`openrouter-model-${i}`);
           models[i] = openrouterInput?.value?.trim() || defaultOpenRouterModel;
+        } else if (isBedrock) {
+          const bedrockSelect = document.getElementById(`bedrock-model-${i}`);
+          const model = bedrockSelect?.value || 'us.anthropic.claude-sonnet-4-6';
+          models[i] = `bedrock:${model}`;
         } else {
           const modelSelect = document.getElementById(`player-${i}-model`);
           models[i] = modelSelect?.value;
@@ -682,10 +705,37 @@ class SoLongSucker {
     reader.onload = (e) => {
       try {
         const data = JSON.parse(e.target.result);
-        this.game.fromJSON(data);
-        this.saveGame(); // Save imported game to localStorage
-        this.render();
-        console.log('📥 Game imported successfully');
+        
+        if (data.session && data.snapshots) {
+          console.log('📥 Imported AI session data:');
+          console.log('   Session ID:', data.session.id);
+          console.log('   Status:', data.session.status);
+          console.log('   Total turns:', data.session.totalTurns);
+          console.log('   Winner:', data.session.winner);
+          console.log('   Snapshots:', data.snapshots.length);
+          console.log('   Player types:', data.session.playerTypes);
+          console.log('   Player models:', data.session.playerModels);
+          
+          const fallbackDecisions = data.snapshots.filter(s => 
+            s.type === 'decision' && s.llmResponse?.usedFallback
+          );
+          console.log('   Fallback decisions:', fallbackDecisions.length);
+          
+          if (fallbackDecisions.length > 0) {
+            console.log('   Fallback details:');
+            fallbackDecisions.forEach((d, i) => {
+              console.log(`     ${i + 1}. Turn ${d.turn}, ${d.player}: ${d.llmResponse.originalModel} → ${d.llmResponse.fallbackModel}`);
+            });
+          }
+          
+          console.log('📊 Full data:', data);
+          alert(`Imported AI session: ${data.snapshots.length} snapshots, ${fallbackDecisions.length} fallbacks. Check console for details.`);
+        } else {
+          this.game.fromJSON(data);
+          this.saveGame();
+          this.render();
+          console.log('📥 Game state imported successfully');
+        }
       } catch (err) {
         console.error('Failed to import game:', err);
         alert('Failed to import game: ' + err.message);
@@ -712,6 +762,13 @@ class SoLongSucker {
         alert('Please enter your OpenRouter API key');
         return;
       }
+    } else if (selectedProvider === 'bedrock') {
+      providerType = 'bedrock';
+      finalApiKey = CONFIG.BEDROCK_API_KEY;
+      if (aiPlayers.length > 0 && !finalApiKey) {
+        alert('AWS Bedrock API key not configured. Set VITE_BEDROCK_API_KEY in your .env file.');
+        return;
+      }
     } else {
       // Free play - provider determined by model selection (provider:model format)
       finalApiKey = 'proxy';
@@ -727,7 +784,8 @@ class SoLongSucker {
     this.saveConfig();
 
     // Initialize game
-    this.game = new Game();
+    const chips = this.getSelectedOption('play-chips-options') ?? 7;
+    this.game = new Game(chips);
     this.ui = new UI(this.game, this.handleAction.bind(this));
 
     // Reset tracking for Supabase

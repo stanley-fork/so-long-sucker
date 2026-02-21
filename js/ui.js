@@ -130,8 +130,18 @@ export class UI {
       this.sendChatMessage();
     });
 
-    this.elements.chatInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') this.sendChatMessage();
+    this.elements.chatInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        this.sendChatMessage();
+      }
+    });
+
+    // Auto-grow textarea as user types
+    this.elements.chatInput.addEventListener('input', () => {
+      const el = this.elements.chatInput;
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 160) + 'px';
     });
 
     // Give prisoner modal events
@@ -161,6 +171,8 @@ export class UI {
     const player = parseInt(this.elements.chatPlayerSelect.value);
     this.onAction('chat', { player, text });
     this.elements.chatInput.value = '';
+    this.elements.chatInput.style.height = 'auto';
+    this.elements.chatInput.focus();
   }
 
   /**
@@ -466,20 +478,28 @@ export class UI {
    */
   renderChat(state) {
     const container = this.elements.chatMessages;
+
+    // Detect if user is scrolled near the bottom before re-render
+    const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 80;
+
     container.innerHTML = '';
 
     state.messages.forEach(msg => {
       const msgEl = document.createElement('div');
       msgEl.className = `chat-message ${msg.color}`;
+      // Render newlines as <br> so multi-line messages display correctly
+      const safeText = this.escapeHtml(msg.text).replace(/\n/g, '<br>');
       msgEl.innerHTML = `
         <span class="sender">${msg.color.toUpperCase()}:</span>
-        <span class="text">${this.escapeHtml(msg.text)}</span>
+        <span class="text">${safeText}</span>
       `;
       container.appendChild(msgEl);
     });
 
-    // Auto-scroll to bottom
-    container.scrollTop = container.scrollHeight;
+    // Only auto-scroll if user was already near the bottom
+    if (isNearBottom) {
+      container.scrollTop = container.scrollHeight;
+    }
   }
 
   /**

@@ -7,6 +7,7 @@ import { AzureClaudeProvider } from './providers/azure-claude.js';
 import { GroqProvider } from './providers/groq.js';
 import { GeminiProvider } from './providers/gemini.js';
 import { OpenRouterProvider } from './providers/openrouter.js';
+import { BedrockProvider } from './providers/bedrock.js';
 import { GameDataCollector } from './data-collector.js';
 import { uploadGameToStorage } from '../api/supabase.js';
 import { CONFIG } from '../config.js';
@@ -68,6 +69,8 @@ export class AgentManager {
         return new GeminiProvider(this.apiKey, model);
       case 'openrouter':
         return new OpenRouterProvider(this.apiKey, model);
+      case 'bedrock':
+        return new BedrockProvider(this.apiKey, model, import.meta.env.VITE_BEDROCK_REGION || 'us-east-1');
       default:
         throw new Error(`Unknown provider: ${this.providerType}`);
     }
@@ -93,6 +96,8 @@ export class AgentManager {
         return new GeminiProvider(this.apiKey, model);
       case 'openrouter':
         return new OpenRouterProvider(this.apiKey, model);
+      case 'bedrock':
+        return new BedrockProvider(this.apiKey, model, import.meta.env.VITE_BEDROCK_REGION || 'us-east-1');
       default:
         throw new Error(`Unknown provider: ${providerType}`);
     }
@@ -132,10 +137,12 @@ export class AgentManager {
     for (const id of playerIds) {
       const modelConfig = playerModelConfig[id] || defaultModel;
       
-      // Parse provider:model format (e.g., "gemini:gemini-2.5-flash")
+      // Parse provider:model format (e.g., "gemini:gemini-2.5-flash" or "bedrock:us.anthropic.claude-sonnet-4-6")
       let providerType, model;
       if (modelConfig.includes(':')) {
-        [providerType, model] = modelConfig.split(':');
+        const colonIdx = modelConfig.indexOf(':');
+        providerType = modelConfig.slice(0, colonIdx);
+        model = modelConfig.slice(colonIdx + 1);
       } else {
         // Legacy format - use global providerType
         providerType = this.providerType;
@@ -351,6 +358,7 @@ export class AgentManager {
           responseTime: result.metadata.responseTime,
           promptTokens: result.metadata.promptTokens,
           completionTokens: result.metadata.completionTokens,
+          nativeThinking: result.metadata.nativeThinking || null,
           toolCalls: result.metadata.rawToolCalls || []
         } : null;
 
