@@ -48,9 +48,12 @@ npm run simulate -- --games 10 --chips 5 --silent
 # Headless mode (no TUI, good for background runs)
 npm run simulate -- --games 100 --parallel 4 --headless
 
-# Analyze session results
-node cli/analyze.js ./data/session-*.json
+# Analyze session results (data_v2 is the current output directory)
+node cli/analyze.js ./data_v2/session-*.json
 ```
+
+> **Output directory**: Sessions are saved to `./data_v2/` (changed from `./data/` in v2).
+> Old `./data/` files are v1 format — backward compatible with analyzers but lack negotiation mechanics.
 
 ## Testing
 
@@ -178,7 +181,7 @@ playOnPile(pileId) {
 
 ### Game State Model
 
-The canonical game state structure:
+The canonical game state structure (CLI `Game.getState()` and browser `game.js`):
 
 ```javascript
 {
@@ -186,14 +189,16 @@ The canonical game state structure:
     { id: 0, color: 'red', supply: 7, prisoners: [], isAlive: true },
     // ... 3 more players
   ],
-  piles: [{ id: 0, chips: ['red', 'blue'] }],
+  piles: [{ id: 0, chips: ['red', 'blue'], missingColors: ['green','yellow'], hasAllColors: false }],
   deadBox: [],
   currentPlayer: 0,
   phase: 'selectChip', // selectChip | selectPile | selectNextPlayer | capture | donation | gameOver
   winner: null,
+  donationRequester: null, // player index being asked for chips, or null
+  currentDonor: null,      // player index currently being asked to donate, or null
   messages: [],
-  promises: [],
-  trades: []
+  promises: [],  // { id, player, color, text, broken, timestamp, brokenAt? }
+  trades: []     // { id, from, fromColor, to, toColor, offer, want, status, timestamp, respondedAt?, brokenAt? }
 }
 ```
 
@@ -259,18 +264,26 @@ VITE_ prefix supported for browser use.
 4. **Donation**: No chips -> ask others; all refuse = elimination
 5. **Win**: Last player alive
 
-## Stuck State Recovery (Browser)
+## Stuck State Recovery
 
-The `AgentManager` includes automatic recovery when AI gets stuck:
+Both browser (`js/ai/manager.js`) and CLI (`cli/HeadlessGame.js`) implement automatic recovery when AI gets stuck.
 
-- **Threshold**: 10 cycles in same phase/player triggers recovery
+**Browser** (`AgentManager`):
+- Threshold: **10 cycles** in same phase/player triggers recovery
+- Human-aware: skips recovery for human players
+- Recovery logged with `🔧` prefix
+
+**CLI** (`HeadlessGame.gameLoop`):
+- Threshold: **15 cycles** in same phase + same turn count
+- Phases covered: `selectChip`, `selectPile`, `selectNextPlayer`, `capture`, `donation`
+- All phases now covered (capture was missing before v2)
+
+Recovery actions per phase (both versions):
 - **selectChip**: Auto-select first available chip, or trigger donation if no chips
 - **selectPile**: Auto-play on new pile
-- **selectNextPlayer**: Auto-choose first alive player
+- **selectNextPlayer**: Auto-choose first alive non-current player
 - **capture**: Auto-kill first chip in pile
-- **donation**: Auto-refuse from current donor
-
-Recovery logs warnings with 🔧 prefix for debugging.
+- **donation**: Auto-refuse from current donor until elimination
 
 ## Common Patterns
 
@@ -346,7 +359,65 @@ Browser and CLI use the same snapshot format for analysis consistency:
   execution: [{ tool: "playChip", args: { color: "red" }, success: true }],
   timestamp: 1234567890
 }
+
+// Off-turn snapshot (CLI v2+ only, non-silent mode)
+// Emitted when an inactive player takes a negotiation action between turns.
+// Only saved if the agent did something meaningful (not just wait).
+{
+  type: "off_turn",
+  turn: 5,             // same turn number as the active player's decision
+  player: "blue",      // the inactive player who acted
+  model: "...",
+  phase: "selectChip", // the active player's current phase
+  newMessages: [...],
+  llmRequest: {
+    availableTools: [...]  // NOTE: no userPrompt field (unlike decision snapshots)
+  },
+  llmResponse: {
+    responseTime: ...,
+    promptTokens: ...,
+    completionTokens: ...,
+    toolCalls: [...]       // NOTE: no nativeThinking field
+  },
+  execution: [...],        // only negotiation actions, never game actions
+  timestamp: ...
+}
 ```
+
+### Negotiation Tool Execution Results
+
+New tools added in CLI v2. These can appear in `execution[]` of both `decision` and `off_turn` snapshots:
+
+```javascript
+{ tool: "givePrisoner",    args: { toPlayerId, color },         success: true, toPlayer: "blue", color: "red" }
+{ tool: "makePromise",     args: { text },                      success: true, promiseId: 0 }
+{ tool: "breakPromise",    args: { promiseId },                 success: true, broke: true }
+{ tool: "proposeTrade",    args: { toPlayerId, offer, want },   success: true, tradeId: 0 }
+{ tool: "respondToTrade",  args: { tradeId, accept },           success: true, responded: true, accepted: true }
+{ tool: "breakTrade",      args: { tradeId },                   success: true, broke: true }
+```
+
+## Analyzer Caveats (CLI v2 data)
+
+The existing analyzer scripts (`analyze.js`, `analyze-models.js`, `aggregate.js`) do not crash on v2 data but produce **silently wrong numbers** for non-silent games. Be aware:
+
+| Issue | Impact |
+|---|---|
+| `off_turn` snapshots are ignored by all analyzers | Chat/negotiation counts undercount |
+| `aggregate.js` does not count `off_turn` LLM calls | Token cost can be **off by up to 3x** in non-silent games |
+| `analyze-models.js` has no handlers for the 6 new tools | Promise/trade/givePrisoner activity is invisible in model comparison reports |
+| Keyword-scanned alliance/betrayal/threat counts only cover on-turn `sendChat` | Off-turn diplomacy is not measured |
+
+**Safe / unchanged:**
+- Win detection and elimination order — fully correct
+- `--silent` mode games — no `off_turn` snapshots are produced; all analyzers are accurate
+- Old `./data/` session files — backward compatible; absence of new fields is handled gracefully
+- Mixed old + new files in `aggregate.js` — safe, just silently inconsistent between session generations
+
+When writing new analysis scripts for v2 data:
+- Treat `off_turn` as a first-class snapshot type alongside `decision`
+- Count `off_turn` LLM calls toward token totals and chat/negotiation metrics
+- Use `promises[]` and `trades[]` from `game_end` state (if captured) or reconstruct from `makePromise`/`proposeTrade` execution entries in snapshots
 
 ## Security Notes
 
@@ -356,4 +427,4 @@ Browser and CLI use the same snapshot format for analysis consistency:
 
 ## Available Providers
 
-`groq`, `kimi`, `qwen3`, `gpt-oss`, `groq-llama`, `gemini`, `gemini3`, `openai`, `claude`, `azure-claude`, `azure-kimi`, `azure-deepseek`, `openrouter`
+`groq`, `kimi`, `qwen3`, `gpt-oss`, `groq-llama`, `gemini`, `gemini3`, `openai`, `claude`, `azure-claude`, `azure-kimi`, `azure-deepseek`, `openrouter`, `bedrock-sonnet46`, `bedrock-opus46`, `llama4-maverick`, `glm5`

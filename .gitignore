@@ -12,6 +12,7 @@ dist/
 # IDE
 .idea/
 .vscode/
+.zed/
 *.swp
 *.swo
 
@@ -23,16 +24,24 @@ Thumbs.db
 *.log
 npm-debug.log*
 
-.claude
+# AI agent configs
+.claude/
 
-data
-marketing
+# Raw data (too large for git - available on request)
+data/
+data_v2/
+marketing/
+tmp/
 
+# Python
+venv/
+*.pyc
+__pycache__/
 
-venv
-
+# Analysis intermediates
 analysis/silent.json
 analysis/talking.json
+analysis/.ipynb_checkpoints/
 
-analysis/.ipynb_checkpoints
-.vercel
+# Vercel
+.vercel/
