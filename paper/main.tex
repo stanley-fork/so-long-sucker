@@ -35,7 +35,7 @@
 
 
 \begin{abstract}
-AI deception that dominates other AIs fails against humans. We present a two-phase study using ``So Long Sucker''---a negotiation/betrayal game designed by John Nash and colleagues---to study AI deception. In \textbf{Phase 1} (146 AI-vs-AI games), Gemini 3 Flash achieved 70\% win rates through ``institutional deception'': creating fictional organizations to legitimize resource extraction. In \textbf{Phase 2}, 605 humans played against AI opponents. \textbf{Humans won 88.4\%} (z=36.03). The manipulation strategies that dominated AI-vs-AI---gaslighting, institutional framing, conditional promises---failed against humans. AI players targeted each other 86\% of the time while ignoring the human. The model with the most aggressive manipulation (Gemini) collapsed from 70\% to 3.7\%; the simplest model (Qwen3) performed best at 9.4\%. Our central finding: AI deception is currently calibrated for AI victims, not humans.
+AI deception that dominates other AIs fails against humans. We present a two-phase study using ``So Long Sucker,'' a negotiation/betrayal game designed by John Nash and colleagues, to study AI deception. In \textbf{Phase 1} (146 AI-vs-AI games), Gemini 3 Flash achieved 70\% win rates through ``institutional deception'': creating fictional organizations to legitimize resource extraction. In \textbf{Phase 2}, 605 humans played against AI opponents. \textbf{Humans won 88.4\%} (z=36.03). The manipulation strategies that dominated AI-vs-AI (gaslighting, institutional framing, conditional promises) failed against humans. AI players targeted each other 86\% of the time while ignoring the human. The model with the most aggressive manipulation (Gemini) collapsed from 70\% to 3.7\%; the simplest model (Qwen3) performed best at 9.4\%. Our central finding: AI deception is currently calibrated for AI victims, not humans.
 \end{abstract}
 
 \noindent\textit{\textbf{Keywords:} AI deception, multi-agent alignment, emergent manipulation, LLM safety, complexity scaling, deception detection, human-AI interaction}
@@ -45,11 +45,11 @@ AI deception that dominates other AIs fails against humans. We present a two-pha
 
 Do AI deception strategies that work on other AIs transfer to humans? We found the opposite of what we expected: \textbf{AI deception that dominates other AIs fails catastrophically against humans.}
 
-In AI-vs-AI games, one model achieved 70\% win rates through sophisticated manipulation. When 605 humans played the same game, humans won 88.4\%. The manipulation strategies---gaslighting, institutional framing, conditional promises---were deployed against humans. They simply did not work.
+In AI-vs-AI games, one model achieved 70\% win rates through sophisticated manipulation. When 605 humans played the same game, humans won 88.4\%. The manipulation strategies (gaslighting, institutional framing, conditional promises) were deployed against humans. They simply did not work.
 
 \subsection{The Game}
 
-``So Long Sucker'' was designed in 1950 by four game theorists---John Nash, Lloyd Shapley, Mel Hausner, and Martin Shubik---to study betrayal dynamics \citep{hausner1964solongsucker}. Players must form alliances to survive, but only one can win. Every alliance must eventually break. Perfect information means negotiation determines outcomes.
+``So Long Sucker'' was designed in 1950 by four game theorists (John Nash, Lloyd Shapley, Mel Hausner, and Martin Shubik) to study betrayal dynamics \citep{hausner1964solongsucker}. Players must form alliances to survive, but only one can win. Every alliance must eventually break. Perfect information means negotiation determines outcomes.
 
 \subsection{The Frankfurt Framework}
 
@@ -130,7 +130,7 @@ Qwen & 19 & 16 & 0 & 0 \\
 
 \subsection{Institutional Deception}
 
-Gemini created \emph{fictional institutions} to legitimize exploitation---a four-phase pattern:
+Gemini created \emph{fictional institutions} to legitimize exploitation. A four-phase pattern:
 
 \begin{enumerate}
     \item \textbf{Trust Building}: ``I'll hold your chips for safekeeping.''
@@ -154,7 +154,7 @@ We identified \textbf{107 instances} where private reasoning contradicted public
 \textbf{Public}: ``Yellow, let's work together!''
 \end{quote}
 
-\textbf{GPT-OSS never used the private reasoning tool}---not once across 146 games. It produced plausible outputs without truth-tracking. This is Frankfurt's ``bullshitting'': harder to detect because there's no internal truth to contradict.
+\textbf{GPT-OSS never used the private reasoning tool.} Not once across 146 games. It produced plausible outputs without truth-tracking. This is Frankfurt's ``bullshitting'': harder to detect because there's no internal truth to contradict.
 
 \subsection{The Mirror Match}
 
@@ -194,7 +194,7 @@ Across 605 completed games, \textbf{humans won 88.4\%}.
 
 \subsection{The Model Collapse}
 
-Every model's win rate collapsed against humans---except Qwen3 32B.
+Every model's win rate collapsed against humans, except Qwen3 32B.
 
 \begin{figure}[H]
 \centering
@@ -233,11 +233,11 @@ We analyzed 2,284 AI kill decisions. \textbf{AI targets other AI 86\% of the tim
 \label{fig:targeting}
 \end{figure}
 
-The AIs fight each other while the human exploits their infighting through divide-and-conquer. Notably, the model that generated the most private strategic thoughts (Kimi K2: 21,040) won only 3.5\% against humans---thinking harder does not help.
+The AIs fight each other while the human exploits their infighting through divide-and-conquer. Notably, the model that generated the most private strategic thoughts (Kimi K2: 21,040) won only 3.5\% against humans. More thinking does not help.
 
 \subsection{Deception Fails on Humans}
 
-The manipulation tactics were deployed against humans---more heavily than against AI---but failed.
+The manipulation tactics were deployed against humans, more heavily than against AI, but failed.
 
 \begin{table}[H]
 \centering
